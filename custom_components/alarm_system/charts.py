@@ -5,7 +5,7 @@ import math
 from pathlib import Path
 import struct
 import zlib
-from uuid import uuid4
+from .chart_storage import write_chart, cleanup_charts
 
 # Small numeric font for axis labels.
 FONT = dict(zip('0123456789.-:', [
@@ -61,7 +61,7 @@ def png_chart(points, start, end, start_label=None, end_label=None):
     return b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b'')
 
 
-async def history_image(hass, entity_id, minutes):
+async def history_image(hass, entity_id, minutes, kind):
     from homeassistant.components.recorder import get_instance
     from homeassistant.components.recorder.history import get_significant_states
     from homeassistant.util import dt as dt_util
@@ -77,12 +77,15 @@ async def history_image(hass, entity_id, minutes):
         except (TypeError,ValueError):pass
     # Keep the most recent value to the end of the displayed interval.
     if points:points.append((end.timestamp(),points[-1][1]))
-    name = uuid4().hex+'.png'
-    folder = Path(hass.config.path('www','alarm_system_charts'))
+    folder = Path(hass.config.path('.storage', 'alarm_system_charts'))
     def write():
-        folder.mkdir(parents=True,exist_ok=True)
-        for old in folder.glob('*.png'):
-            if old.stat().st_mtime < end.timestamp()-86400:old.unlink(missing_ok=True)
-        (folder/name).write_bytes(png_chart(points,start.timestamp(),end.timestamp(),dt_util.as_local(start).strftime('%H:%M'),dt_util.as_local(end).strftime('%H:%M')))
-    await hass.async_add_executor_job(write)
-    return '/local/alarm_system_charts/'+name
+        return write_chart(folder, png_chart(points, start.timestamp(), end.timestamp(),
+            dt_util.as_local(start).strftime('%H:%M'), dt_util.as_local(end).strftime('%H:%M')), kind)
+    name = await hass.async_add_executor_job(write)
+    return '/api/alarm_system/charts/' + name
+
+
+async def cleanup_history_images(hass):
+    await hass.async_add_executor_job(partial(cleanup_charts,
+        hass.config.path('.storage', 'alarm_system_charts'),
+        hass.config.path('www', 'alarm_system_charts')))

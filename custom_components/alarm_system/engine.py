@@ -15,6 +15,7 @@ from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, CHANNELS, LABELS, EVENT, TYPES
 from .model import AlarmModel, stamp
+from .charts import cleanup_history_images
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,9 +44,11 @@ class AlarmEngine:
         self.transport_dirty = False
         self.transport_save_task = None
         self.completed_confirmations = {}
+        self.recovery_task = None
 
     async def start(self):
         self.recovering = True
+        await cleanup_history_images(self.hass)
         saved = await self.store.async_load()
         if saved:
             self.model = AlarmModel(saved)
@@ -123,9 +126,7 @@ class AlarmEngine:
         active = self.model.active()
         self.hass.states.async_set("sensor.alarm_system_active", len(active), {
             "friendly_name": "Aktive Alarme", "icon": "mdi:alarm-light",
-            "site_id": self.model.data["site_id"],
-            "incidents": [{"id": i["id"], "title": i["title"], "type": i["type"],
-                           "status": i["status"]} for i in active],
+            # Detailed incidents are exposed only through the account-filtered API.
         })
         self.hass.bus.async_fire(EVENT)
 
@@ -229,8 +230,13 @@ class AlarmEngine:
                 raise HomeAssistantError("Unbekannte Rückmeldung")
             self.model.log(action, incident=i, user_id=user.id, user_name=user.name,
                 source=i["sources"].get(source_id, {}), text=text)
+            if i["status"] != "open":
+                # Free devices can start the next open incident on the next tick.
+                for current in self.model.active():
+                    if current["status"] == "open":
+                        current["next_due"] = 0
             await self.save()
-        target_ids = [current['id'] for current in self.model.active()] if action == 'coming' and not i.get('test_device') else [i['id']]
+        target_ids = [i['id']]
         if background:
             self.spawn(self.finish_response(i, action, text, target_ids))
             return None
@@ -285,11 +291,15 @@ class AlarmEngine:
             async with self.lock:
                 self.model.purge()
                 await self.save()
+            await cleanup_history_images(self.hass)
         for i in self.model.active():
             if i["status"] == "open" and i["id"] not in self.running_cycles and time() >= i["next_due"]:
                 i["next_due"] = time()+30
                 self.spawn(self.cycle(i["id"]))
         self.schedule_category_setup()
+        if (self.model.data["leases"]
+                and (self.recovery_task is None or self.recovery_task.done())):
+            self.recovery_task = self.spawn(self.retry_restorations())
 
     def required_categories(self, d):
         if d.get("platform") == "browser" or not d.get("notify_action"):
@@ -351,7 +361,7 @@ class AlarmEngine:
 
     def ensure_test_ready(self, d):
         if (d["id"] in self.setup_running or self.missing_categories(d)
-                or self.model.data["leases"].get(d["id"], {}).get("incident_id") == "setup"):
+                or d["id"] in self.model.data["leases"]):
             raise HomeAssistantError("Kategorien werden noch eingerichtet. Handy geöffnet lassen und warten, bis die Einrichtung abgeschlossen ist.")
 
     async def prepare_category_batch(self, d):
@@ -473,6 +483,14 @@ class AlarmEngine:
     def primary(self):
         return sorted(self.model.active(), key=lambda i: (bool(i.get("test_device")), i["type"] != "INTRUSION", i["started_at"]))
 
+    def primary_for_device(self, device, *, open_only=False):
+        """Choose priority among incidents assigned to this particular device."""
+        candidates = [i for i in self.primary()
+                      if (not open_only or i["status"] == "open")
+                      and any(d["id"] == device["id"] for d in self.recipients(i))]
+        return next((i for i in candidates if i["status"] == "open"),
+                    candidates[0] if candidates else None)
+
     async def cycle(self, incident_id):
         if incident_id in self.running_cycles or self.stopping:
             return
@@ -483,25 +501,28 @@ class AlarmEngine:
                 i = self.model.data["incidents"].get(incident_id)
                 if not i or i["status"] != "open":
                     return
-                primary = next((x for x in self.primary() if x["status"] == "open"), None)
-                if not primary or primary["id"] != incident_id:
-                    i["next_due"] = time()+30
-                    return
                 i["next_due"] = time()+30
                 recipients = deepcopy(self.recipients(i))
-                for d in recipients:
-                    if d["id"] in baselines:
-                        d["_audio_baseline"] = baselines[d["id"]]
-                    if d.get("popup"):
-                        self.spawn(self.show_popup(d, i, launch=True))
+                playback_devices = []
                 async with self.transport:
                     if i["status"] != "open":
                         return
-                    completions = await asyncio.gather(*(self.play_device(d, i) for d in recipients))
+                    for d in recipients:
+                        if not self.device_active(d, i):
+                            continue
+                        primary = self.primary_for_device(d, open_only=True)
+                        if not primary or primary["id"] != incident_id:
+                            if d.get("push") or d.get("sound"):
+                                await self.notify(d, i, loud=False)
+                            continue
+                        if d["id"] in baselines:
+                            d["_audio_baseline"] = baselines[d["id"]]
+                        if d.get("popup"):
+                            self.spawn(self.show_popup(d, i, launch=True))
+                        playback_devices.append(d)
+                    completions = await asyncio.gather(*(self.play_device(d, i) for d in playback_devices))
                     await self.save()
-                for other in self.model.active():
-                    if other["id"] != i["id"] and other["status"] == "open":
-                        await self.status(other, "Zusätzlich aktiver Alarm", popup=False)
+                recipients = playback_devices
                 baselines.update({d["id"]: d["_audio_baseline"] for d in recipients if "_audio_baseline" in d})
                 playback = [task for task in completions if task is not None]
                 if playback:
@@ -528,11 +549,14 @@ class AlarmEngine:
                 return
             lease = self.model.data["leases"].get(d["id"])
             owner = self.model.data["incidents"].get(lease.get("incident_id")) if lease else None
-            keep_audio = bool(owner and owner["status"] == "open" and self.device_active(d, owner))
+            keep_audio = bool(owner and owner["status"] == "open" and self.device_active(d, owner)
+                              and not lease.get("restore_pending"))
             if not keep_audio:
                 await self.restore_device(d)
                 if d["id"] in self.model.data["leases"]:
-                    self.delivery(i, d, "audio_skipped", "Vorherige Wiederherstellung fehlgeschlagen")
+                    self.delivery(i, d, "audio_skipped", "Wiederherstellung ausstehend; Push bleibt aktiv")
+                    if d.get("push") or d.get("sound"):
+                        await self.notify(d, i, loud=False)
                     return
             d["_audio_baseline"] = {"ringer": ringer, "volume": int(volume)}
             self.model.data["leases"][d["id"]] = {"ringer": ringer, "volume": int(volume), "incident_id": i["id"], "playback_id": uuid4().hex}
@@ -594,7 +618,9 @@ class AlarmEngine:
             return d["id"] in self.model.data["devices"]
         latest = self.model.data["devices"].get(d["id"], {})
         user = self.model.data["users"].get(d["user_id"], {})
-        return latest.get("enabled") and latest.get("tested") and user.get("enabled", True)
+        return bool(latest.get("enabled") and latest.get("tested") and user
+                    and user.get("enabled", True)
+                    and (not incident or incident["type"] in user.get("types", [])))
 
     def sensor(self, entity_id):
         state = self.hass.states.get(entity_id) if entity_id else None
@@ -672,14 +698,24 @@ class AlarmEngine:
         return "\n".join(f'{s["name"]} · {s["area"]} · {s["detection"]}'
                           for s in i["sources"].values() if s["active"]) or "Alle Quellen beendet"
 
-    async def wait_for_restored_setup(self, d, lease):
+    async def wait_for_restored_state(self, d, lease, requested_at):
         # Commands being accepted by HA do not prove that the phone handled them.
         # Keep the original baseline durable until companion sensors report it.
         await self.command(d, "command_update_sensors")
         deadline = time() + 4
         while time() < deadline:
-            if (self.sensor(d.get("volume_sensor")) == str(lease["volume"])
-                    and self.sensor(d.get("ringer_sensor")) == lease["ringer"]):
+            expected = ((d.get("volume_sensor"), str(lease["volume"])),
+                        (d.get("ringer_sensor"), lease["ringer"]))
+            confirmed = True
+            for entity_id, value in expected:
+                state = self.hass.states.get(entity_id) if entity_id else None
+                reported = (getattr(state, "last_reported", None)
+                            or getattr(state, "last_updated", None))
+                if (not state or state.state != value or not reported
+                        or reported.timestamp() < requested_at):
+                    confirmed = False
+                    break
+            if confirmed:
                 return True
             await asyncio.sleep(0.25)
         return False
@@ -688,15 +724,35 @@ class AlarmEngine:
         lease = self.model.data["leases"].get(d["id"])
         if not lease:
             return
+        lease["restore_pending"] = True
+        requested_at = time()
         ok = await self.command(d, "command_stop_tts")
         ok = await self.command(d, "command_volume_level", command=lease["volume"], media_stream="notification_stream") and ok
         ok = await self.command(d, "command_ringer_mode", command=lease["ringer"]) and ok
-        if ok and lease.get("incident_id") == "setup":
-            ok = await self.wait_for_restored_setup(d, lease)
-        if ok and self.model.data["leases"].get(d["id"]) is lease:
+        if ok:
+            ok = await self.wait_for_restored_state(d, lease, requested_at)
+        if self.model.data["leases"].get(d["id"]) is not lease:
+            return
+        if ok:
             self.model.data["leases"].pop(d["id"], None)
-        # Alarm playback restoration remains a command request. Setup restoration
-        # additionally checks reported sensor values, without claiming instant delivery.
+        else:
+            lease["retry_at"] = time() + 30
+
+    async def retry_restorations(self):
+        """Retry pending alarm restorations without interrupting active playback."""
+        async with self.transport:
+            devices = []
+            for device_id, lease in list(self.model.data["leases"].items()):
+                if lease.get("incident_id") == "setup" or time() < lease.get("retry_at", 0):
+                    continue
+                owner = self.model.data["incidents"].get(lease.get("incident_id"))
+                device = self.model.data["devices"].get(device_id)
+                if device and (lease.get("restore_pending") or not owner
+                               or owner["status"] != "open" or not self.device_active(device, owner)):
+                    devices.append(device)
+            if devices:
+                await asyncio.gather(*(self.restore_device(d) for d in devices))
+                await self.save()
 
     async def stop_devices(self, incident_id=None):
         for d in list(self.model.data["devices"].values()):
@@ -721,9 +777,9 @@ class AlarmEngine:
                                             "push": {"sound": "none"}, "url": "/alarm-system", "clickAction": "/alarm-system",
                                             "actions": [{"action": f'AS_COMING:{i["id"]}', "title": "Ich komme"}, {"action": "URI", "title": "Fehlalarm / Details", "uri": "/alarm-system"}] if i["status"] in ("open", "claimed") else []}}, i)
             if popup and d.get("popup"):
-                visible = [x for x in self.primary() if self.model.authorized(d["user_id"], x)]
+                visible = self.primary_for_device(d)
                 if visible:
-                    self.spawn(self.show_popup(d, visible[0], launch=False))
+                    self.spawn(self.show_popup(d, visible, launch=False))
         await self.save()
 
     async def show_popup(self, d, i, launch):
@@ -818,10 +874,10 @@ class AlarmEngine:
                     await self.hass.services.async_call("browser_mod", "close_popup", {"browser_id": [b["id"]], "tag": "alarm_system"}, blocking=True)
                 except Exception:
                     pass
-        if self.primary():
-            for d in self.model.recipients(self.primary()[0]["type"]):
-                if d.get("popup"):
-                    self.spawn(self.show_popup(d, self.primary()[0], launch=False))
+        for d in list(self.model.data["devices"].values()):
+            visible = self.primary_for_device(d)
+            if visible and d.get("popup"):
+                self.spawn(self.show_popup(d, visible, launch=False))
 
     async def mobile_response(self, event):
         action = event.data.get("action", "")
@@ -886,9 +942,9 @@ class AlarmEngine:
         if state.state == "visible" and (not old_state or old_state.state != 'visible'):
             for d in self.model.data["devices"].values():
                 if any(b.get("visibility_sensor") == state.entity_id for b in d.get("browsers", [])) and self.device_active(d):
-                    visible = [i for i in self.primary() if i["type"] in self.model.data["users"][d["user_id"]]["types"]]
+                    visible = self.primary_for_device(d)
                     if visible and d.get("popup"):
-                        self.spawn(self.show_popup(d, visible[0], launch=False))
+                        self.spawn(self.show_popup(d, visible, launch=False))
 
     async def simple_message(self, data):
         data = dict(data)
@@ -897,7 +953,7 @@ class AlarmEngine:
         if data.get("graph_entity"):
             from .charts import history_image
             try:
-                data["image"] = await history_image(self.hass, data["graph_entity"], data.get("graph_minutes", 15))
+                data["image"] = await history_image(self.hass, data["graph_entity"], data.get("graph_minutes", 15), data["type"])
             except Exception as err:
                 _LOGGER.warning("Alarmdiagramm konnte nicht erzeugt werden: %s", err)
                 data["message"] = data.get("message", "") + "\nVerlaufsbild derzeit nicht verfügbar."

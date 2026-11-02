@@ -71,14 +71,17 @@ def user_view(data, user_id):
     """Keep only authorized messages and the current account's settings."""
     for field in ('available_users', 'notify_actions', 'phone_connections', 'browser_connections'):
         data.pop(field, None)
-    allowed = data['users'].get(user_id, {}).get('types', [])
+    account = data['users'].get(user_id, {})
+    enabled = bool(account and account.get('enabled', True))
+    allowed = account.get('types', []) if enabled else []
     hidden_tests = {k for k, i in data['incidents'].items() if i.get('test_device') and data['devices'].get(i['test_device'], {}).get('user_id') != user_id}
     data['incidents'] = {k: i for k, i in data['incidents'].items() if i['type'] in allowed and
                          (not i.get('test_device') or data['devices'].get(i['test_device'], {}).get('user_id') == user_id)}
     data['sources'] = {k: s for k, s in data['sources'].items() if s['type'] in allowed}
     data['signal_values'] = {k: v for k, v in data.get('signal_values', {}).items() if k in data['sources']}
     data['journal'] = [e for e in data['journal'] if e['type'] in allowed and e.get('incident_id') not in hidden_tests]
-    data['devices'] = {k: d for k, d in data['devices'].items() if d['user_id'] == user_id}
+    data['devices'] = {k: d for k, d in data['devices'].items() if enabled and d['user_id'] == user_id}
     data['users'] = {k: ({'id': u['id'], 'name': u['name'], 'types': list(u.get('types', [])), 'enabled': u.get('enabled', True)}
-                        if k == user_id else {'id': u['id'], 'name': u['name']}) for k, u in data['users'].items()}
+                        if k == user_id else {'id': u['id'], 'name': u['name']})
+                     for k, u in data['users'].items() if enabled or k == user_id}
     return data

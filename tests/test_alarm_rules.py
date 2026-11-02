@@ -57,12 +57,12 @@ class AlarmRulesTests(unittest.TestCase):
         self.assertEqual(status, "new")
         self.assertNotEqual(new_incident["id"], incident["id"])
 
-    def test_response_claims_all_active_regular_incidents(self):
+    def test_response_only_claims_selected_incident(self):
         fire, _ = self.model.raise_alarm(alarm())
         intrusion, _ = self.model.raise_alarm(alarm("intrusion_house", "door", "INTRUSION"))
         self.model.come(fire["id"], "user", "Test User")
         self.assertEqual(fire["status"], "claimed")
-        self.assertEqual(intrusion["status"], "claimed")
+        self.assertEqual(intrusion["status"], "open")
         self.assertEqual(len(self.model.active()), 2)
 
     def test_recipients_require_enabled_user_type_and_tested_device(self):
@@ -102,6 +102,34 @@ class AlarmRulesTests(unittest.TestCase):
         self.assertNotIn("available_users", view)
         self.assertNotIn("phone_connections", view)
         self.assertNotIn("browser_connections", view)
+
+
+    def test_disabled_user_cannot_read_incidents_sources_or_other_accounts(self):
+        self.model.data["users"] = {
+            "a": {"id": "a", "name": "Alice", "enabled": False, "types": ["FIRE"]},
+            "b": {"id": "b", "name": "Bob", "enabled": True, "types": ["FIRE"]}}
+        self.model.data["devices"] = {"phone": {"id": "phone", "user_id": "a"}}
+        self.model.data["sources"] = {"smoke": {"type": "FIRE"}}
+        self.model.raise_alarm(alarm())
+        self.model.log("alarm_raised", kind="FIRE")
+        view = configuration.user_view(self.model.snapshot(), "a")
+        for key in ("incidents", "sources", "devices", "signal_values"):
+            self.assertEqual(view[key], {})
+        self.assertEqual(view["journal"], [])
+        self.assertEqual(set(view["users"]), {"a"})
+
+    def test_unknown_user_cannot_read_account_directory(self):
+        self.model.data["users"] = {"a": {"id": "a", "name": "Alice", "types": ["FIRE"]}}
+        self.assertEqual(configuration.user_view(self.model.snapshot(), "unknown")["users"], {})
+
+    def test_device_test_completion_requires_current_session(self):
+        device = {"id": "phone", "test_session": "current"}
+        self.model.data["incidents"] = {
+            "old": {"type": "FIRE", "test_device": "phone", "test_session": "old", "status": "ended"},
+            "open": {"type": "FIRE", "test_device": "phone", "test_session": "current", "status": "open"},
+            "done": {"type": "INTRUSION", "test_device": "phone", "test_session": "current", "status": "ended"}}
+        self.assertEqual(configuration.completed_device_tests(self.model.data, device), {"INTRUSION"})
+        self.assertEqual(configuration.completed_device_tests(self.model.data, {"id": "phone"}), set())
 
     def test_display_name_never_falls_back_to_uuid(self):
         uid = "0123456789abcdef0123456789abcdef"

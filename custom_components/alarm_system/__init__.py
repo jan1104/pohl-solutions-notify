@@ -12,6 +12,7 @@ from .model import stamp
 from .discovery import connections, complete_device
 from .configuration import prepare_import, completed_device_tests, user_view
 from .identity import resolve_name
+from .chart_view import AlarmChartView
 
 JS_URL = f"/alarm-system-static/panel.js?v={VERSION}"
 
@@ -25,6 +26,9 @@ async def async_setup_entry(hass, entry):
         await hass.http.async_register_static_paths([StaticPathConfig(
             "/alarm-system-static", str(Path(__file__).parent / "frontend"), False)])
         hass.data[f"{DOMAIN}_static"] = True
+    if not hass.data.get(f"{DOMAIN}_chart_view"):
+        hass.http.register_view(AlarmChartView(hass))
+        hass.data[f"{DOMAIN}_chart_view"] = True
     frontend.add_extra_js_url(hass, JS_URL)
     await panel_custom.async_register_panel(
         hass, "alarm-system", "alarm-system-panel", sidebar_title="Alarme",
@@ -122,7 +126,9 @@ async def ws_get(hass, connection, msg):
     for d in data["devices"].values():
         d["setup_pending"] = engine.missing_categories(d)
         d["setup_running"] = d["id"] in engine.setup_running
-        d["setup_restore_pending"] = engine.model.data["leases"].get(d["id"], {}).get("incident_id") == "setup"
+        lease = engine.model.data["leases"].get(d["id"], {})
+        d["setup_restore_pending"] = lease.get("incident_id") == "setup"
+        d["restore_pending"] = bool(lease.get("restore_pending"))
         d["setup_categories"] = engine.required_categories(d)
     if connection.user.is_admin:
         data["available_users"] = [{"id": u.id, "name": u.name or u.id} for u in users if u.is_active and not u.system_generated]
@@ -265,7 +271,7 @@ async def ws_manage(hass, connection, msg):
         elif action == "device_confirm":
             d = engine.model.data["devices"][payload["id"]]
             engine.ensure_test_ready(d)
-            if d.get("test_session") and not {"FIRE", "INTRUSION"} <= completed_device_tests(engine.model.data, d):
+            if not d.get("test_session") or not {"FIRE", "INTRUSION"} <= completed_device_tests(engine.model.data, d):
                 raise HomeAssistantError("Feuer und Einbruch in dieser Prüfung testen und beenden")
             d["tested"] = True
             d["tested_at"] = stamp()

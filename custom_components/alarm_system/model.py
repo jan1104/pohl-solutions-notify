@@ -191,8 +191,8 @@ class AlarmModel:
         if incident not in self.active():
             raise ValueError("Incident already ended")
         name = user_name or self.data["users"].get(user_id, {}).get("name")
-        # Explicitly confirmed rule: one response silences ALL currently active incidents.
-        targets = [incident] if incident.get("test_device") else self.active()
+        # A response only claims the selected incident, including device tests.
+        targets = [incident]
         for current in targets:
             if current["status"] == "open":
                 current["status"] = "claimed"
