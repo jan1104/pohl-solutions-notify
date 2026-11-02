@@ -307,8 +307,9 @@ class AlarmEngine:
             self.recovery_task = self.spawn(self.retry_restorations())
 
     def required_categories(self, d):
-        if d.get("platform") == "browser" or not d.get("notify_action"):
-            return []
+        if (d.get("platform") == "browser" or not d.get("notify_action")
+                or (d.get("platform") == "android" and not d.get("sound"))):
+            return []  # No phone-wide muting/sensor prerequisites without alarm tones.
         user = self.model.data["users"].get(d.get("user_id"), {})
         categories = [CHANNELS[t] for t in TYPES if t in user.get("types", [])]
         if any(t in user.get("types", []) for t in ("FIRE", "INTRUSION")):
@@ -573,10 +574,23 @@ class AlarmEngine:
         if i["status"] != "open" or not self.device_active(d, i):
             await self.restore_device(d)
             return
+        speech = d["platform"] == "android" and d.get("speech")
+        if speech and not d.get("sound"):
+            previous = self.model.data["leases"].get(d["id"])
+            if previous and (previous.get("restore_pending") or not previous.get("speech_only")):
+                await self.restore_device(d)
+                if d["id"] in self.model.data["leases"]:
+                    if d.get("push"):
+                        await self.notify(d, i, loud=False)
+                    return
+            # Speech uses Companion's temporary alarm stream, not ringer/notification volume.
+            self.model.data["leases"][d["id"]] = {"incident_id": i["id"],
+                "playback_id": uuid4().hex, "speech_only": True}
+            await self.save()
         receipt = None
         if d.get("push") or d.get("sound"):
             receipt = await self.notify(d, i, loud=bool(d.get("sound")))
-        if d["platform"] == "android" and d.get("sound"):
+        if d["platform"] == "android" and (d.get("sound") or speech):
             return self.spawn(self.finish_android_cycle(d, i, self.model.data["leases"][d["id"]]["playback_id"], receipt))
 
     async def finish_android_cycle(self, d, i, playback_id, receipt=None):
@@ -592,7 +606,8 @@ class AlarmEngine:
                     self.model.log("receipt_timeout", incident=i, device=d, details={"playback_id": playback_id})
             if i["status"] != "open" or self.model.data["leases"].get(d["id"], {}).get("playback_id") != playback_id:
                 return
-            await asyncio.sleep(float(d.get("fire_seconds", 5) if i["type"] == "FIRE" else d.get("intrusion_seconds", 5)))
+            if d.get("sound"):
+                await asyncio.sleep(float(d.get("fire_seconds", 5) if i["type"] == "FIRE" else d.get("intrusion_seconds", 5)))
             async with self.transport:
                 if i["status"] != "open" or not self.device_active(d, i) or self.model.data["leases"].get(d["id"], {}).get("playback_id") != playback_id:
                     return
@@ -677,7 +692,7 @@ class AlarmEngine:
                             {"action": "URI", "title": "Fehlalarm / Details", "uri": f"/alarm-system?alarm={i['id']}"}]}
         if d["platform"] == "android":
             data.update(channel=CHANNELS[i["type"]] if loud else "Alarmstatus",
-                        importance="high", visibility="public", sticky=True,
+                        importance="high" if loud else "low", visibility="public", sticky=True,
                         alert_once=not loud, clickAction=f"/alarm-system?alarm={i['id']}")
             lease = self.model.data["leases"].get(d["id"])
             if loud and lease:
@@ -732,6 +747,14 @@ class AlarmEngine:
         lease["restore_pending"] = True
         requested_at = time()
         ok = await self.command(d, "command_stop_tts")
+        if lease.get("speech_only"):
+            # No phone-wide settings were changed; retain only a failed stop request.
+            if self.model.data["leases"].get(d["id"]) is lease:
+                if ok:
+                    self.model.data["leases"].pop(d["id"], None)
+                else:
+                    lease["retry_at"] = time() + 30
+            return
         ok = await self.command(d, "command_volume_level", command=lease["volume"], media_stream="notification_stream") and ok
         ok = await self.command(d, "command_ringer_mode", command=lease["ringer"]) and ok
         if ok:
@@ -777,7 +800,7 @@ class AlarmEngine:
             if d.get("push"):
                 await self.send(d, {"title": f'{i["site_id"]} · ' + ("Gerätetest beendet" if i.get("test_device") and i["status"] in ("false_alarm", "ended") else "FEHLALARM bestätigt" if i["status"] == "false_alarm" else f'{LABELS[i["type"]]} · Status'),
                                    "message": f'{text}\n{self.summary(i)}\n' + (responses or "Noch keine Zusage") + f'\n{dt_util.as_local(dt_util.utcnow()).strftime("%d.%m.%Y %H:%M:%S")}',
-                                   "data": {"channel": "Alarmstatus", "tag": self.notification_tag(d, i),
+                                   "data": {"channel": "Alarmstatus", "importance": "low", "tag": self.notification_tag(d, i),
                                             "priority": "high", "ttl": 0, "alert_once": True,
                                             "push": {"sound": "none"}, "url": "/alarm-system", "clickAction": "/alarm-system",
                                             "actions": [{"action": f'AS_COMING:{i["id"]}', "title": "Ich komme"}, {"action": "URI", "title": "Fehlalarm / Details", "uri": "/alarm-system"}] if i["status"] in ("open", "claimed") else []}}, i)
@@ -975,4 +998,5 @@ class AlarmEngine:
                 payload["data"]["push"] = {"sound": "none"}
                 if d["platform"] == "android":
                     payload["data"]["channel"] = "Alarmstatus"
+                    payload["data"]["importance"] = "low"
             await self.send(d, payload, source={"id": data.get("source_id", ""), "name": data.get("source_name", ""), **data}, kind=data["type"])

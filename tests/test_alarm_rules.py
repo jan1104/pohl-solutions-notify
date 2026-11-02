@@ -131,6 +131,22 @@ class AlarmRulesTests(unittest.TestCase):
         self.assertEqual(configuration.completed_device_tests(self.model.data, device), {"INTRUSION"})
         self.assertEqual(configuration.completed_device_tests(self.model.data, {"id": "phone"}), set())
 
+    def test_output_switches_preserve_independent_android_choices(self):
+        self.assertEqual(configuration.device_outputs(
+            {"push": False, "popup": True, "sound": False, "speech": True}, "android"),
+            {"push": False, "popup": True, "sound": False, "speech": True})
+
+    def test_unsupported_outputs_are_disabled_per_platform(self):
+        enabled = {key: True for key in ("push", "popup", "sound", "speech")}
+        self.assertEqual(configuration.device_outputs(enabled, "browser"),
+                         {"push": False, "popup": True, "sound": False, "speech": False})
+        self.assertFalse(configuration.device_outputs(enabled, "ios")["speech"])
+
+    def test_string_boolean_is_rejected_instead_of_turning_output_on(self):
+        for key in ("push", "popup", "sound", "speech"):
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                configuration.device_outputs({key: "false"}, "android")
+
     def test_display_name_never_falls_back_to_uuid(self):
         uid = "0123456789abcdef0123456789abcdef"
         self.assertIsNone(identity.human_name(uid))

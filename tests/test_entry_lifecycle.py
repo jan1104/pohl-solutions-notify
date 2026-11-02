@@ -211,3 +211,33 @@ class ManageValidationTests(unittest.IsolatedAsyncioTestCase):
                 {"id": 1, "action": "configuration_import", "data": {"backup": backup}})
         self.assertEqual(self.engine.model.snapshot(), before)
         self.engine.save.assert_not_awaited()
+
+    async def save_output_device(self, platform="android", **overrides):
+        self.engine.model.data["users"]["user"] = {"id": "user", "name": "User", "types": ["FIRE"]}
+        self.hass.services = types.SimpleNamespace(has_service=lambda *args: True)
+        payload = {"user_id": "user", "platform": platform, "name": "Phone",
+                   "notify_action": "notify.mobile_app_phone" if platform != "browser" else "",
+                   "browsers": [], "push": True, "popup": False, "sound": False, "speech": True,
+                   **overrides}
+        with patch.object(entry_module, "connections", return_value=({}, [])):
+            await entry_module.ws_manage(self.hass, self.connection,
+                {"id": 1, "action": "device_upsert", "data": payload})
+        return self.engine.model.data["devices"][self.connection.send_result.call_args.args[1]["device_id"]]
+
+    async def test_speech_change_requires_new_device_verification(self):
+        device = await self.save_output_device()
+        device.update(tested=True, test_session="verified")
+        updated = await self.save_output_device(**{**device, "speech": False})
+        self.assertFalse(updated["speech"])
+        self.assertFalse(updated["tested"])
+        self.assertNotIn("test_session", updated)
+
+    async def test_ios_cannot_persist_unsupported_speech_switch(self):
+        device = await self.save_output_device(platform="ios", speech=True)
+        self.assertFalse(device["speech"])
+
+    async def test_browser_cannot_persist_phone_outputs(self):
+        device = await self.save_output_device(platform="browser", push=True, sound=True, speech=True)
+        self.assertFalse(device["push"])
+        self.assertFalse(device["sound"])
+        self.assertFalse(device["speech"])

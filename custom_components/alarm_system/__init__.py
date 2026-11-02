@@ -12,7 +12,7 @@ from .const import DOMAIN, VERSION, TYPES
 from .engine import AlarmEngine
 from .model import stamp
 from .discovery import connections, complete_device
-from .configuration import prepare_import, completed_device_tests, user_view
+from .configuration import prepare_import, completed_device_tests, user_view, device_outputs
 from .identity import resolve_name
 from .chart_view import AlarmChartView
 
@@ -297,12 +297,18 @@ async def ws_manage(hass, connection, msg):
                 raise HomeAssistantError("Browserliste enthält einen ungültigen Eintrag")
             if len({b["id"] for b in browsers}) != len(browsers) or any(b["id"] == existing["id"] for b in browsers for other in engine.model.data["devices"].values() if other["id"] != device_id for existing in other.get("browsers", [])):
                 raise HomeAssistantError("Ein Browser darf nur einem Gerät zugeordnet werden")
-            critical_keys = ("user_id", "platform", "notify_action", "browsers", "ringer_sensor", "volume_sensor", "sound")
-            changed = any(old.get(k) != payload.get(k) for k in critical_keys)
+            try:
+                outputs = device_outputs(payload, platform)
+            except ValueError as err:
+                raise HomeAssistantError(str(err)) from err
+            critical_keys = ("user_id", "platform", "notify_action", "browsers", "ringer_sensor", "volume_sensor",
+                             "push", "popup", "sound", "speech", "fire_seconds", "intrusion_seconds",
+                             "speech_seconds", "fire_sound", "intrusion_sound")
+            compared = {**payload, **outputs}
+            changed = any(old.get(k) != compared.get(k) for k in critical_keys)
             device = {"id": device_id, "user_id": uid, "name": payload.get("name", "Gerät"), "platform": platform,
                       "notify_action": notify, "browsers": browsers,
-                      "push": bool(payload.get("push", True)), "popup": bool(payload.get("popup", True)),
-                      "sound": bool(payload.get("sound", platform != "browser")), "speech": bool(payload.get("speech", platform == "android")),
+                      **outputs,
                       "ringer_sensor": payload.get("ringer_sensor", ""), "volume_sensor": payload.get("volume_sensor", ""),
                       "fire_seconds": max(1, min(15, float(payload.get("fire_seconds", 5)))),
                       "intrusion_seconds": max(1, min(15, float(payload.get("intrusion_seconds", 5)))),

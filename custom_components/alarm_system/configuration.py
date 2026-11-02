@@ -4,6 +4,23 @@ from math import isfinite
 from .model import AlarmModel
 from .const import TYPES
 
+def device_outputs(payload, platform):
+    """Normalize supported output switches, rejecting ambiguous string booleans."""
+    defaults = {"push": True, "popup": True,
+                "sound": platform != "browser", "speech": platform == "android"}
+    result = {}
+    for key, default in defaults.items():
+        value = payload.get(key, default)
+        if not isinstance(value, bool):
+            raise ValueError("Schalter muss ein/aus sein: " + key)
+        result[key] = value
+    if platform == "browser":
+        result.update(push=False, sound=False, speech=False)
+    elif platform == "ios":
+        result["speech"] = False
+    return result
+
+
 def prepare_import(current, document, accounts, states, notify_actions):
     if not isinstance(document, dict) or document.get('format') != 'alarm_system_configuration' or document.get('schema_version') != 1:
         raise ValueError('Keine unterstützte Alarm-Einrichtungssicherung (Schema 1)')
@@ -33,6 +50,7 @@ def prepare_import(current, document, accounts, states, notify_actions):
         device = deepcopy(record)
         if device.get('platform') not in ('android', 'ios', 'browser'):
             raise ValueError('Ungültige Geräteplattform')
+        device.update(device_outputs(device, device['platform']))
         action = device.get('notify_action', '')
         if device['platform'] != 'browser' and action not in notify_actions:
             raise ValueError('Companion-Notify-Dienst fehlt: ' + str(action))

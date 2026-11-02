@@ -198,3 +198,115 @@ class EngineRegressions(unittest.IsolatedAsyncioTestCase):
         self.engine.save.assert_not_awaited()
         await self.engine.cancel_workers()
         unsubscribe.assert_called_once()
+
+    async def test_speech_without_tone_or_push_runs_without_changing_phone_volume(self):
+        self.fire_phone.update(sound=False, speech=True, push=False, speech_seconds=1)
+        self.engine.command = AsyncMock(return_value=True)
+        self.engine.spawn = Mock(side_effect=asyncio.create_task)
+        with patch.object(runtime.asyncio, "sleep", new_callable=AsyncMock):
+            task = await self.engine.play_device(self.fire_phone, self.fire)
+            self.assertIsNotNone(task)
+            await task
+        self.engine.notify.assert_not_awaited()
+        calls = self.engine.command.await_args_list
+        self.assertEqual([call.args[1] for call in calls], ["TTS"])
+        self.assertEqual(calls[0].kwargs["media_stream"], "alarm_stream_max")
+        self.assertTrue(self.engine.model.data["leases"]["fire-phone"]["speech_only"])
+
+    async def test_speech_off_never_sends_tts_during_tone_cycle(self):
+        self.fire_phone.update(sound=True, speech=False)
+        self.engine.model.data["leases"]["fire-phone"] = {
+            "incident_id": self.fire["id"], "playback_id": "tone", "ringer": "normal", "volume": 2}
+        self.engine.command = AsyncMock(return_value=True)
+        with patch.object(runtime.asyncio, "sleep", new_callable=AsyncMock):
+            await self.engine.finish_android_cycle(self.fire_phone, self.fire, "tone")
+        self.engine.command.assert_not_awaited()
+
+    async def test_all_outputs_off_does_not_send_or_start_audio(self):
+        self.fire_phone.update(sound=False, speech=False, push=False, popup=False)
+        self.engine.command = AsyncMock(return_value=True)
+        self.assertIsNone(await self.engine.play_device(self.fire_phone, self.fire))
+        self.engine.notify.assert_not_awaited()
+        self.engine.command.assert_not_awaited()
+        self.assertEqual(self.engine.model.data["leases"], {})
+
+    async def test_push_only_sends_quiet_notification_without_audio_worker(self):
+        self.fire_phone.update(sound=False, speech=False, push=True)
+        self.assertIsNone(await self.engine.play_device(self.fire_phone, self.fire))
+        self.engine.notify.assert_awaited_once_with(self.fire_phone, self.fire, loud=False)
+        self.assertEqual(self.engine.model.data["leases"], {})
+
+    async def test_stopping_speech_only_never_needs_ringer_or_volume_values(self):
+        self.engine.model.data["leases"]["fire-phone"] = {
+            "incident_id": self.fire["id"], "playback_id": "voice", "speech_only": True}
+        self.engine.command = AsyncMock(return_value=True)
+        await self.engine.restore_device(self.fire_phone)
+        self.engine.command.assert_awaited_once_with(self.fire_phone, "command_stop_tts")
+        self.assertNotIn("fire-phone", self.engine.model.data["leases"])
+
+    async def test_failed_speech_stop_is_retained_for_retry(self):
+        self.engine.model.data["leases"]["fire-phone"] = {
+            "incident_id": self.fire["id"], "playback_id": "voice", "speech_only": True}
+        self.engine.command = AsyncMock(return_value=False)
+        await self.engine.restore_device(self.fire_phone)
+        lease = self.engine.model.data["leases"]["fire-phone"]
+        self.assertTrue(lease["restore_pending"])
+        self.assertGreater(lease["retry_at"], runtime.time())
+
+    def test_no_tone_requires_no_muting_or_sensor_setup(self):
+        self.fire_phone.update(sound=False, speech=True, notify_action="notify.mobile_app_phone")
+        self.assertEqual(self.engine.required_categories(self.fire_phone), [])
+        self.engine.ensure_test_ready(self.fire_phone)
+
+    async def test_quiet_android_alarm_requests_low_importance_channel(self):
+        del self.engine.notify  # Exercise the real payload builder.
+        self.engine.send = AsyncMock(return_value=True)
+        await self.engine.notify(self.fire_phone, self.fire, loud=False)
+        payload = self.engine.send.await_args.args[1]
+        self.assertEqual(payload["data"]["channel"], "Alarmstatus")
+        self.assertEqual(payload["data"]["importance"], "low")
+
+    async def test_speech_only_worker_cancellation_stops_tts(self):
+        self.fire_phone.update(sound=False, speech=True, push=False)
+        self.engine.command = AsyncMock(return_value=True)
+        waiting = asyncio.Event()
+        started = asyncio.Event()
+        async def wait_for_voice(seconds):
+            started.set()
+            await waiting.wait()
+        with patch.object(runtime.asyncio, "sleep", side_effect=wait_for_voice):
+            task = await self.engine.play_device(self.fire_phone, self.fire)
+            await started.wait()
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+        self.assertTrue(task.cancelled())
+        self.assertEqual([call.args[1] for call in self.engine.command.await_args_list], ["TTS", "command_stop_tts"])
+        self.assertNotIn("fire-phone", self.engine.model.data["leases"])
+
+    async def test_tone_and_speech_keep_configured_sequence(self):
+        self.fire_phone.update(sound=True, speech=True, fire_seconds=3, speech_seconds=4)
+        self.engine.model.data["leases"]["fire-phone"] = {
+            "incident_id": self.fire["id"], "playback_id": "both", "ringer": "normal", "volume": 2}
+        self.engine.command = AsyncMock(return_value=True)
+        with patch.object(runtime.asyncio, "sleep", new_callable=AsyncMock) as sleep:
+            await self.engine.finish_android_cycle(self.fire_phone, self.fire, "both")
+        self.assertEqual([call.args[0] for call in sleep.await_args_list], [3.0, 4.0])
+        self.engine.command.assert_awaited_once()
+        self.assertEqual(self.engine.command.await_args.args[1], "TTS")
+
+    async def test_disabled_push_skips_info_and_warning_delivery(self):
+        self.fire_phone.update(push=False, sound=False, speech=False)
+        self.engine.model.data["users"]["fire"]["types"].extend(["INFO", "WARNING"])
+        self.engine.send = AsyncMock()
+        await self.engine.simple_message({"type": "INFO", "message": "Info"})
+        await self.engine.simple_message({"type": "WARNING", "message": "Warning"})
+        self.engine.send.assert_not_awaited()
+
+    async def test_speech_only_does_not_replace_unconfirmed_volume_recovery(self):
+        self.fire_phone.update(sound=False, speech=True, push=False)
+        lease = {"ringer": "silent", "volume": 2, "incident_id": "old", "restore_pending": True}
+        self.engine.model.data["leases"]["fire-phone"] = lease
+        self.engine.restore_device = AsyncMock()
+        self.assertIsNone(await self.engine.play_device(self.fire_phone, self.fire))
+        self.assertIs(self.engine.model.data["leases"]["fire-phone"], lease)
+        self.engine.notify.assert_not_awaited()
