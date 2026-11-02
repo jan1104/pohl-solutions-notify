@@ -176,3 +176,25 @@ class EngineRegressions(unittest.IsolatedAsyncioTestCase):
         self.engine.retry_restorations.assert_awaited_once()
         gate.set()
         await first_worker
+
+    async def test_cancel_workers_cleans_listeners_and_tasks_without_saving(self):
+        unsubscribe = Mock()
+        self.engine.unsub = [unsubscribe]
+        entered = asyncio.Event()
+        cancelled = asyncio.Event()
+        async def worker():
+            entered.set()
+            try:
+                await asyncio.Event().wait()
+            finally:
+                cancelled.set()
+        task = self.engine.spawn(worker())
+        await entered.wait()
+        await self.engine.cancel_workers()
+        self.assertTrue(task.cancelled())
+        self.assertTrue(cancelled.is_set())
+        self.assertTrue(self.engine.stopping)
+        self.assertEqual(self.engine.unsub, [])
+        self.engine.save.assert_not_awaited()
+        await self.engine.cancel_workers()
+        unsubscribe.assert_called_once()

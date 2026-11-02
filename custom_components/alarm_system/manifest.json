@@ -1,7 +1,7 @@
 {
   "domain": "alarm_system",
   "name": "Pohl Solutions Alarm Notify",
-  "version": "0.3.25",
+  "version": "0.3.26",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/docs/",
   "codeowners": [],

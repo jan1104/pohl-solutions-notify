@@ -49,7 +49,10 @@ def prepare_import(current, document, accounts, states, notify_actions):
             device[field] = value
         device.update(tested=False, category_setup={})
         device.pop('tested_at', None)
-        for key in ('setup_pending', 'setup_categories', 'setup_error', 'setup_running', 'setup_restore_pending', '_sensor_phone'): device.pop(key, None)
+        for key in ('setup_pending', 'setup_categories', 'setup_error', 'setup_running',
+                    'setup_restore_pending', 'restore_pending', 'setup_retry_at',
+                    'test_session', '_sensor_phone', '_audio_baseline'):
+            device.pop(key, None)
         staged.data['devices'][did] = device
     for sid, record in document['sources'].items():
         if not isinstance(record, dict) or record.get('id') != sid or record.get('entity_id') not in states:

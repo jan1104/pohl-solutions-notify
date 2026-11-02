@@ -86,13 +86,18 @@ class AlarmEngine:
         finally:
             self.recovering = False
 
-    async def stop(self):
+    async def cancel_workers(self):
+        """Cancel listeners/workers without writing a potentially incomplete model."""
         self.stopping = True
-        for unsub in self.unsub:
-            unsub()
-        for task in list(self.tasks):
+        while self.unsub:
+            self.unsub.pop()()
+        tasks = list(self.tasks)
+        for task in tasks:
             task.cancel()
-        await asyncio.gather(*self.tasks, return_exceptions=True)
+        await asyncio.gather(*tasks, return_exceptions=True)
+
+    async def stop(self):
+        await self.cancel_workers()
         async with self.transport:
             await self.stop_devices()
         await self.save()

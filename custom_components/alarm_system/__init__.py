@@ -1,4 +1,6 @@
 """Local, per-instance alarm management."""
+import asyncio
+import logging
 from pathlib import Path
 from uuid import uuid4
 import probatio as vol
@@ -14,80 +16,110 @@ from .configuration import prepare_import, completed_device_tests, user_view
 from .identity import resolve_name
 from .chart_view import AlarmChartView
 
+_LOGGER = logging.getLogger(__name__)
+
 JS_URL = f"/alarm-system-static/panel.js?v={VERSION}"
 
 
 async def async_setup_entry(hass, entry):
+    if DOMAIN in hass.data:
+        raise HomeAssistantError("Integration ist bereits geladen")
     if entry.title == "Alarm System":
         hass.config_entries.async_update_entry(entry, title="Pohl Solutions Alarm Notify")
     engine = AlarmEngine(hass, entry)
     hass.data[DOMAIN] = engine
-    if not hass.data.get(f"{DOMAIN}_static"):
-        await hass.http.async_register_static_paths([StaticPathConfig(
-            "/alarm-system-static", str(Path(__file__).parent / "frontend"), False)])
-        hass.data[f"{DOMAIN}_static"] = True
-    if not hass.data.get(f"{DOMAIN}_chart_view"):
-        hass.http.register_view(AlarmChartView(hass))
-        hass.data[f"{DOMAIN}_chart_view"] = True
-    frontend.add_extra_js_url(hass, JS_URL)
-    await panel_custom.async_register_panel(
-        hass, "alarm-system", "alarm-system-panel", sidebar_title="Alarme",
-        sidebar_icon="mdi:alarm-light", module_url=JS_URL, require_admin=False,
-    )
-    await engine.start()
+    js_added = False
+    panel_attempted = False
+    try:
+        if not hass.data.get(f"{DOMAIN}_static"):
+            await hass.http.async_register_static_paths([StaticPathConfig(
+                "/alarm-system-static", str(Path(__file__).parent / "frontend"), False)])
+            hass.data[f"{DOMAIN}_static"] = True
+        if not hass.data.get(f"{DOMAIN}_chart_view"):
+            hass.http.register_view(AlarmChartView(hass))
+            hass.data[f"{DOMAIN}_chart_view"] = True
+        frontend.add_extra_js_url(hass, JS_URL)
+        js_added = True
+        panel_attempted = True
+        await panel_custom.async_register_panel(
+            hass, "alarm-system", "alarm-system-panel", sidebar_title="Alarme",
+            sidebar_icon="mdi:alarm-light", module_url=JS_URL, require_admin=False,
+        )
+        await engine.start()
 
-    async def dispatch(call):
-        await engine.dispatch(dict(call.data), call.context.user_id)
+        async def dispatch(call):
+            await engine.dispatch(dict(call.data), call.context.user_id)
 
-    async def normal(call):
-        if call.context.user_id:
-            await engine.actor(call.context.user_id, admin=True)
-        async with engine.lock:
-            engine.model.normal(call.data["alarm_key"], call.data["source_id"])
-            engine.model.log("signal_normal", user_id=call.context.user_id,
-                source={"id": call.data["source_id"]}, details=dict(call.data))
-            await engine.save()
+        async def normal(call):
+            if call.context.user_id:
+                await engine.actor(call.context.user_id, admin=True)
+            async with engine.lock:
+                engine.model.normal(call.data["alarm_key"], call.data["source_id"])
+                engine.model.log("signal_normal", user_id=call.context.user_id,
+                    source={"id": call.data["source_id"]}, details=dict(call.data))
+                await engine.save()
 
-    async def response(call):
-        actor_id = call.context.user_id
-        # THIS is supplemental; never accept a different or missing authenticated actor.
-        if call.data.get("user_id") not in (None, actor_id):
-            raise HomeAssistantError("Benutzer-ID stimmt nicht mit dem angemeldeten Account überein")
-        await engine.respond(call.data["incident_id"], call.data["action"], actor_id,
-                             call.data.get("source_id"), call.data.get("confirmation_token"))
+        async def response(call):
+            actor_id = call.context.user_id
+            # THIS is supplemental; never accept a different or missing authenticated actor.
+            if call.data.get("user_id") not in (None, actor_id):
+                raise HomeAssistantError("Benutzer-ID stimmt nicht mit dem angemeldeten Account überein")
+            await engine.respond(call.data["incident_id"], call.data["action"], actor_id,
+                                 call.data.get("source_id"), call.data.get("confirmation_token"))
 
-    async def confirm(call):
-        if call.data.get("user_id") not in (None, call.context.user_id):
-            raise HomeAssistantError("Benutzer-ID stimmt nicht mit dem Account überein")
-        await engine.confirm_popup(call.data["incident_id"], call.context.user_id, call.data["browser_id"])
+        async def confirm(call):
+            if call.data.get("user_id") not in (None, call.context.user_id):
+                raise HomeAssistantError("Benutzer-ID stimmt nicht mit dem Account überein")
+            await engine.confirm_popup(call.data["incident_id"], call.context.user_id, call.data["browser_id"])
 
-    hass.services.async_register(DOMAIN, "raise_alarm", dispatch, schema=vol.Schema({
-        vol.Required("type"): vol.In(TYPES),
-        vol.Optional("alarm_key", default="message"): str,
-        vol.Optional("source_id", default="manual"): str,
-        vol.Optional("source_name"): str, vol.Optional("entity_id"): str,
-        vol.Optional("title"): str, vol.Optional("message"): str,
-        vol.Optional("area"): str, vol.Optional("detection"): str,
-        vol.Optional("camera"): str, vol.Optional("image"): str,
-        vol.Optional("graph_entity"): str, vol.Optional("graph_minutes", default=15): vol.All(vol.Coerce(int), vol.Range(min=1, max=1440)),
-        vol.Optional("url"): str, vol.Optional("silent", default=False): bool,
-    }))
-    hass.services.async_register(DOMAIN, "source_normal", normal, schema=vol.Schema({
-        vol.Required("alarm_key"): str, vol.Required("source_id"): str}))
-    hass.services.async_register(DOMAIN, "respond", response, schema=vol.Schema({
-        vol.Required("incident_id"): str, vol.Required("action"): vol.In(["coming", "seen", "false_alarm", "cancel_false", "end_source"]),
-        vol.Optional("source_id"): str, vol.Optional("confirmation_token"): str, vol.Optional("user_id"): str}))
-    hass.services.async_register(DOMAIN, "confirm_false_alarm", confirm, schema=vol.Schema({
-        vol.Required("incident_id"): str, vol.Required("browser_id"): str, vol.Optional("user_id"): str}))
-    websocket_api.async_register_command(hass, ws_get)
-    websocket_api.async_register_command(hass, ws_manage)
-    websocket_api.async_register_command(hass, ws_respond)
-    return True
+        hass.services.async_register(DOMAIN, "raise_alarm", dispatch, schema=vol.Schema({
+            vol.Required("type"): vol.In(TYPES),
+            vol.Optional("alarm_key", default="message"): str,
+            vol.Optional("source_id", default="manual"): str,
+            vol.Optional("source_name"): str, vol.Optional("entity_id"): str,
+            vol.Optional("title"): str, vol.Optional("message"): str,
+            vol.Optional("area"): str, vol.Optional("detection"): str,
+            vol.Optional("camera"): str, vol.Optional("image"): str,
+            vol.Optional("graph_entity"): str, vol.Optional("graph_minutes", default=15): vol.All(vol.Coerce(int), vol.Range(min=1, max=1440)),
+            vol.Optional("url"): str, vol.Optional("silent", default=False): bool,
+        }))
+        hass.services.async_register(DOMAIN, "source_normal", normal, schema=vol.Schema({
+            vol.Required("alarm_key"): str, vol.Required("source_id"): str}))
+        hass.services.async_register(DOMAIN, "respond", response, schema=vol.Schema({
+            vol.Required("incident_id"): str, vol.Required("action"): vol.In(["coming", "seen", "false_alarm", "cancel_false", "end_source"]),
+            vol.Optional("source_id"): str, vol.Optional("confirmation_token"): str, vol.Optional("user_id"): str}))
+        hass.services.async_register(DOMAIN, "confirm_false_alarm", confirm, schema=vol.Schema({
+            vol.Required("incident_id"): str, vol.Required("browser_id"): str, vol.Optional("user_id"): str}))
+        websocket_api.async_register_command(hass, ws_get)
+        websocket_api.async_register_command(hass, ws_manage)
+        websocket_api.async_register_command(hass, ws_respond)
+        return True
+
+    except (Exception, asyncio.CancelledError):
+        # Never persist a partially loaded/default model after a failed startup.
+        # Existing durable playback leases must remain available to the next load.
+        try:
+            await engine.cancel_workers()
+        except Exception:
+            _LOGGER.exception("Hintergrundaufgaben nach fehlgeschlagenem Start nicht vollständig beendet")
+        finally:
+            hass.data.pop(DOMAIN, None)
+            for name in ("raise_alarm", "source_normal", "respond", "confirm_false_alarm"):
+                hass.services.async_remove(DOMAIN, name)
+            if panel_attempted:
+                frontend.async_remove_panel(hass, "alarm-system")
+            if js_added:
+                frontend.remove_extra_js_url(hass, JS_URL)
+            hass.states.async_remove("sensor.alarm_system_active")
+        raise
 
 
 async def async_unload_entry(hass, entry):
-    engine = hass.data.pop(DOMAIN)
+    engine = hass.data.get(DOMAIN)
+    if engine is None:
+        return True
     await engine.stop()
+    hass.data.pop(DOMAIN, None)
     for name in ("raise_alarm", "source_normal", "respond", "confirm_false_alarm"):
         hass.services.async_remove(DOMAIN, name)
     frontend.async_remove_panel(hass, "alarm-system")
@@ -96,12 +128,40 @@ async def async_unload_entry(hass, entry):
     return True
 
 
+def get_engine(hass):
+    """Reject requests during/after unload instead of leaking an internal KeyError."""
+    engine = hass.data.get(DOMAIN)
+    if engine is None or getattr(engine, "stopping", False):
+        raise HomeAssistantError("Integration ist nicht geladen")
+    return engine
+
+
+def validate_manage_payload(engine, action, payload):
+    """Validate nested identifiers before logging, saving or indexing configuration."""
+    required = {
+        "source_upsert": ("entity_id", "name"), "source_remove": ("id",),
+        "user_upsert": ("id",), "user_remove": ("id",),
+        "device_upsert": ("user_id",), "device_remove": ("id",),
+        "device_test_begin": ("id",), "device_test_stop": ("id",),
+        "device_confirm": ("id",), "device_setup": ("id",), "device_test": ("id",),
+    }
+    if not isinstance(payload, dict):
+        raise HomeAssistantError("Verwaltungsdaten müssen ein Objekt sein")
+    keys = set(required.get(action, ()))
+    if "id" in payload:
+        keys.add("id")
+    for key in keys:
+        if not isinstance(payload.get(key), str) or not payload[key].strip():
+            raise HomeAssistantError("Fehlende oder ungültige Angabe: " + key)
+    if action in ("device_test_begin", "device_test_stop", "device_confirm", "device_setup", "device_test"):
+        if payload["id"] not in engine.model.data["devices"]:
+            raise HomeAssistantError("Gerät nicht gefunden")
+
+
 @websocket_api.websocket_command({vol.Required("type"): "alarm_system/get"})
 @websocket_api.async_response
 async def ws_get(hass, connection, msg):
-    engine = hass.data.get(DOMAIN)
-    if not engine:
-        raise HomeAssistantError("Integration ist nicht geladen")
+    engine = get_engine(hass)
     data = engine.model.snapshot()
     data.pop("leases", None)
     data.pop("suppressed", None)
@@ -144,7 +204,7 @@ async def ws_get(hass, connection, msg):
                                  vol.Optional("confirmation_token"): str})
 @websocket_api.async_response
 async def ws_respond(hass, connection, msg):
-    result = await hass.data[DOMAIN].respond(msg["incident_id"], msg["action"], connection.user.id,
+    result = await get_engine(hass).respond(msg["incident_id"], msg["action"], connection.user.id,
                                             msg.get("source_id"), msg.get("confirmation_token"), background=True)
     connection.send_result(msg["id"], {"confirmation_token": result})
 
@@ -153,9 +213,10 @@ async def ws_respond(hass, connection, msg):
                                  vol.Optional("data", default={}): dict})
 @websocket_api.async_response
 async def ws_manage(hass, connection, msg):
-    engine = hass.data[DOMAIN]
+    engine = get_engine(hass)
     await engine.actor(connection.user.id, admin=True)
     action, payload = msg["action"], msg["data"]
+    validate_manage_payload(engine, action, payload)
     if action == 'device_test_stop':
         await engine.abort_test(payload['id'], connection.user.id)
         connection.send_result(msg['id'], {'ok': True})
