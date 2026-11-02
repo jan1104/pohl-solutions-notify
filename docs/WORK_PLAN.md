@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 02.11.2026 · lokaler Entwicklungsstand 0.3.26 · kein Push / kein Deployment.
+Stand: 02.11.2026 · lokaler Entwicklungsstand 0.3.27 · kein Push / kein Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`.
 
 ## Auftrag und Arbeitsweise
@@ -26,6 +26,11 @@ ohne gesonderten Auftrag. Keine Änderung nur zur Erzeugung vermeintlichen Forts
   behalten Verwaltungsrechte. Der öffentliche HA-Sensor enthält nur die Alarmanzahl.
 - Ursprüngliche Android-Einstellungen erst nach frisch gemeldeter Bestätigung löschen.
 - Generierte Bilder sind privat, alarmartenbezogen zugriffsgeschützt und laufen ab.
+- Android-Sprachansage ist unabhängig vom Alarmton ein-/ausschaltbar. Ohne Alarmton
+  keine erzwungene Rufton-/Benachrichtigungslautstärkeänderung und keine dafür nötigen
+  Sensoren. iOS/Browser bieten keinen nicht implementierten Sprachschalter an.
+- Push aus unterbindet Info/Warnung und reguläre stumme Meldungen; Alarmtöne dürfen
+  weiterhin ihre erforderlichen technischen Benachrichtigungen verwenden.
 
 ## Abgeschlossen: erste Fehlerkorrektur
 
@@ -60,6 +65,22 @@ Automatischer Lauf am 02.11.2026, abends (Europe/Berlin).
 Die Schema-/Decorator-Adapter validieren keine HA- oder probatio-Schnittstellen.
 Die Tests ersetzen deshalb weiterhin keine echte HA-Installation.
 
+## Abgeschlossen: Ausgabeoptionen in 0.3.27
+
+Fortsetzung auf Benutzerauftrag: Sprache und weitere Schalter prüfen und verbessern.
+
+- [x] Ursache nachgestellt: Sprache war an den Alarmton gekoppelt; separate Auswahl umgesetzt.
+- [x] Sprache-only besitzt stoppbaren, persistenten Auftrag ohne Rufton-/Lautstärkebaseline.
+- [x] Sensor-/Kategorienvorbereitung nur für Android-Alarmton verlangen; Assistent lässt
+  Nutzer erst die Ausgabeoptionen wählen, bevor er diese Sensoren voraussetzt.
+- [x] Plattformgrenzen und echte boolesche Schalter auch beim Speichern/Import anwenden.
+- [x] Änderungen von Sprache, Push, Popup und Audiozeiten verlangen erneut Geräteprüfung.
+- [x] Stumme Android-Statuskanäle mit niedriger Wichtigkeit anfordern; bestehende
+  Android-Kanaleinstellungen nicht als überschrieben darstellen.
+- [x] 75 Python- und sieben Node.js-Tests erfolgreich; lokale Version 0.3.27.
+
+Bedienung und wichtiger Hinweis beim Update von 0.3.26: [OUTPUT_SETTINGS.md](OUTPUT_SETTINGS.md).
+
 ## Nächste unabhängig ausführbare Schritte
 
 1. Wiederherstellung nach simuliertem Neustart, Abbruch von Hintergrundaufgaben und
@@ -70,7 +91,8 @@ Die Tests ersetzen deshalb weiterhin keine echte HA-Installation.
    lokale Beispielkonfiguration und wiederholbares Installationspaket vorbereiten.
 3. Lastverhalten bei vielen abgeschlossenen Ereignissen und Transporteinträgen messen.
    Erst anhand der Ergebnisse begrenzte Datenabfragen oder Speichermaßnahmen umsetzen.
-4. Frontend zunächst lesbar formatieren und Logik-/Exporttests ergänzen; danach nur
+4. Die bereits ergänzten Schalter-/Assistententests um Export-/Verlaufstests erweitern.
+   Frontend zunächst lesbar formatieren; danach nur
    bei abgesicherter Gleichheit in überschaubare Bausteine zerlegen. Kein Designwechsel.
 
 ## Externe Validierung: derzeit nicht ausgeführt
@@ -95,6 +117,7 @@ Der normale Windows-`python`-Aufruf verweist hier auf den Store-Alias. Verwendet
 & 'C:\Users\jpohl\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' scripts/validate.py
 & 'C:\Users\jpohl\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m unittest discover -s tests -v
 node --check custom_components/alarm_system/frontend/panel.js
+node --test tests/frontend_outputs.test.cjs
 git diff --check
 ```
 

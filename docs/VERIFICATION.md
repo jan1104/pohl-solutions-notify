@@ -1,5 +1,17 @@
 # Prüfprotokoll
 
+## Lokaler Entwicklungsstand 0.3.27 – 02.11.2026
+
+- Ausgabeoptionen erneut geprüft: unabhängige Android-Sprache, nur Ton, nur Push,
+  alle Ausgaben aus, abbrechbare Sprache, Stop-Wiederholung und Freigabe nach Änderung.
+- Sensorlose Auswahl von nur Sprache/Push im tatsächlichen Frontend-Assistenten geprüft.
+- 75 Python-Tests sowie sieben Node.js-Tests der unveränderten Frontendmethoden bestanden.
+- 17 Python-Dateien und drei JSON-Dateien samt Version geprüft; JavaScript-Syntax gültig.
+- HA/aiohttp-Grenzen und Browser-Grundobjekte bleiben ersetzt. Keine echte Tonwiedergabe,
+  visueller Browserprüfung oder tatsächlicher Companion-/HA-Start behauptet.
+- Kein Push, kein Deployment. Update-Hinweis und Schaltertabelle: [OUTPUT_SETTINGS.md](OUTPUT_SETTINGS.md).
+
+
 ## Lokaler Entwicklungsstand 0.3.26 – 02.11.2026, automatischer Abendlauf
 
 - Ausgangsstand war sauber: keine fremden/uncommitteten Änderungen, HEAD `c76c70f`.

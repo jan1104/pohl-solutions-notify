@@ -1,5 +1,20 @@
 # Änderungen
 
+## 0.3.27 – lokal vorbereitet, nicht veröffentlicht
+
+- Android-Sprachansage funktioniert unabhängig vom Alarmton; eigene stoppbare
+  Sprachaufträge ohne Änderungen an Rufton- oder Benachrichtigungslautstärke.
+- Android-Geräte ohne Alarmton benötigen keine dafür vorgesehenen Sensoren oder
+  stumme Kategorienvorbereitung. Sensorauswahl erst nach Wahl der Ausgabeoptionen verlangen.
+- Ausgabeoptionen serverseitig typisieren und an Plattformen anpassen; Änderungen
+  an Sprache, Push, Popup und Audiozeiten erfordern neue Geräteprüfung.
+- Wirkung von Push und Sprachschalter verständlicher erklären. Android-Statusmeldungen
+  mit niedriger Wichtigkeit anfordern, ohne bestehende Kanaleinstellungen zu überschreiben.
+- 75 Python-Tests und sieben zusätzliche Frontend-Logiktests in der GitHub-Prüfung.
+- Wichtig beim Update: Sprachansage ein bei Alarmton aus bedeutet jetzt tatsächlich
+  nur Sprache. Für ein stilles Gerät beide ausschalten.
+
+
 ## 0.3.26 – lokal vorbereitet, nicht veröffentlicht
 
 - Fehlgeschlagene/abgebrochene Einrichtung räumt eigene Laufzeitressourcen auf,

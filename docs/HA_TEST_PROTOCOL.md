@@ -1,4 +1,4 @@
-# Praktische Home-Assistant- und Geräteprüfung für 0.3.26
+# Praktische Home-Assistant- und Geräteprüfung für 0.3.27
 
 Status: noch nicht durchgeführt. Nicht als Produktionsfreigabe verwenden.
 Eine getrennte Testinstanz mit Sicherung, Testkonten und kontrollierten Sensoren
@@ -57,6 +57,15 @@ Nur bereinigte Protokolle speichern; keine Zugangsdaten oder personenbezogenen E
    UUID-PNGs dürfen nach Start nicht mehr im alten öffentlichen Bildordner liegen.
 6. Keine geschützten Bildpfade durch öffentliche Ersatzpfade umgehen, falls eine
    Companion-Version den authentifizierten Abruf nicht unterstützt; Ursache prüfen.
+
+## Ausgabeoptionen ab 0.3.27
+
+Auf Android die Kombinationen nur Sprache, nur Ton, beide ein sowie beide aus prüfen.
+Nur Sprache ohne Rufton-/Benachrichtigungslautstärkesensoren vollständig einrichten.
+Bei nur Sprache die unveränderten Rufton-/Benachrichtigungseinstellungen sowie Stop,
+Abbruch, Offline-Wiederholung und HA-Neustart prüfen. Für INFO/WARNING Push aus testen.
+Android-Kanal `Alarmstatus` mit vorhandenen persönlichen Einstellungen auf tatsächlich
+stummes Verhalten prüfen. iPhone und Browser dürfen keinen Sprachschalter anzeigen.
 
 ## Abschluss
 

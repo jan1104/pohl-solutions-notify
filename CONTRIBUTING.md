@@ -12,6 +12,7 @@ zusätzlichen Python-Pakete und installieren kein Home Assistant:
 python scripts/validate.py
 python -m unittest discover -s tests -v
 node --check custom_components/alarm_system/frontend/panel.js
+node --test tests/frontend_outputs.test.cjs
 ```
 
 `validate.py` prüft Python-Syntax, JSON, Domain und Versionskonsistenz.
@@ -39,3 +40,7 @@ Der reine Repository-Import behielt 0.3.24; die erste funktionale Korrektur trä
 
 Keine HA-Sicherungen, persönlichen Exporte, Zugangsdaten oder Laufzeitdateien committen.
 Vor Veröffentlichung zusätzlich die Prüfungen in [GITHUB.md](docs/GITHUB.md) abschließen.
+
+Die Frontend-Tests laden `panel.js` unverändert in einer Node.js-VM mit minimalen
+Browser-Grundobjekten und prüfen die echten Schalter-/Assistentenmethoden.
+Sie prüfen weder HTML-Layout noch Browser-Mod- oder Companion-Funktion.

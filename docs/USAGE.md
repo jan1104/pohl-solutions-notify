@@ -98,3 +98,8 @@ Ein Gerät kann während ausstehender Wiederherstellung nicht erneut freigegeben
 Verlaufsbilder benötigen die HA-Anmeldung und die Berechtigung für die zugehörige
 Alarmart. Sie sind höchstens 24 Stunden abrufbar und werden regelmäßig bereinigt.
 Der Abruf über die Companion-App muss auf den Zielgeräten noch praktisch getestet werden.
+
+## Ausgabeoptionen ab 0.3.27
+
+Sprachansage und Alarmton sind auf Android unabhängig schaltbar. Die genaue
+Schalterwirkung, Plattformgrenzen und Update-Hinweise stehen in [OUTPUT_SETTINGS.md](OUTPUT_SETTINGS.md).
