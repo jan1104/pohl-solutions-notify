@@ -1,0 +1,1 @@
+{"title":"Pohl Solutions Alarm Notify","config":{"step":{"user":{"title":"Pohl Solutions Alarm Notify","description":"Standortkennung eingeben. Benutzer und Geräte anschließend in der Seitenleiste unter Alarme einrichten.","data":{"site_id":"Standortkennung"}}},"abort":{"already_configured":"Das Alarmsystem ist bereits eingerichtet."}}}

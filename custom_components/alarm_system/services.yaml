@@ -1,0 +1,120 @@
+raise_alarm:
+  name: Meldung auslösen
+  description: INFO/WARNING versenden oder FIRE/INTRUSION als gespeichertes Ereignis auslösen.
+  fields:
+    type:
+      name: Alarmart
+      required: true
+      selector:
+        select:
+          options: [INFO, WARNING, FIRE, INTRUSION]
+    alarm_key:
+      name: Ereignisgruppe
+      example: fire_house
+      selector:
+        text:
+    source_id:
+      name: Eindeutige Quellen-ID
+      example: smoke_kitchen
+      selector:
+        text:
+    source_name:
+      name: Meldername
+      selector:
+        text:
+    entity_id:
+      name: Zugehöriger Melder
+      selector:
+        entity:
+          domain: binary_sensor
+    title:
+      name: Titel
+      selector:
+        text:
+    message:
+      name: Nachricht für Info/Warnung
+      selector:
+        text:
+          multiline: true
+    area:
+      name: Bereich einschließlich Etage
+      selector:
+        text:
+    detection:
+      name: Erkennungsart
+      example: Rauch
+      selector:
+        text:
+    camera:
+      name: Livebild-Kamera
+      selector:
+        entity:
+          domain: camera
+    image:
+      name: Bild-URL für Info/Warnung
+      selector:
+        text:
+    graph_entity:
+      name: Sensor für Verlaufsbild
+      selector:
+        entity:
+          domain: sensor
+    graph_minutes:
+      name: Verlauf in Minuten
+      default: 15
+      selector:
+        number:
+          min: 1
+          max: 1440
+          mode: box
+    silent:
+      name: Info/Warnung stumm senden
+      default: false
+      selector:
+        boolean:
+    url:
+      name: Ziel beim Antippen
+      selector:
+        text:
+source_normal:
+  name: Quelle wieder normal
+  description: Ermöglicht erneute Auslösung nach Beenden/Fehlalarm. Beendet kein Ereignis.
+  fields:
+    alarm_key:
+      required: true
+      selector:
+        text:
+    source_id:
+      required: true
+      selector:
+        text:
+respond:
+  name: Alarmrückmeldung
+  description: Verwendet den angemeldeten HA-Account. Fehlalarm erfordert Bestätigungstoken.
+  fields:
+    incident_id:
+      required: true
+      selector:
+        text:
+    action:
+      required: true
+      selector:
+        select:
+          options: [coming, false_alarm, end_source]
+    source_id:
+      selector:
+        text:
+    confirmation_token:
+      selector:
+        text:
+confirm_false_alarm:
+  name: Fehlalarm-Bestätigung im Browser
+  fields:
+    incident_id:
+      required: true
+      selector:
+        text:
+    browser_id:
+      required: true
+      selector:
+        text:
