@@ -49,6 +49,19 @@ HACS-Validierung sind in diesem Projekt noch nicht eingerichtet.
    die Alarmart zugewiesen und das Gerät als getestet markiert sind.
 6. Vorhandene `binary_sensor`-Entitäten als Melder zuordnen.
 
+## Hinweise für das Update auf 0.3.25
+
+Die Rückmeldung „Ich komme“ wirkt jetzt nur auf das ausgewählte Ereignis. Falls eigene
+Automationen bisher die Attribute `site_id` oder `incidents` von
+`sensor.alarm_system_active` verwenden, müssen sie angepasst werden: Diese Attribute
+werden zur Begrenzung ungewollter Datenweitergabe nicht mehr bereitgestellt.
+Der Sensorzustand (Anzahl aktiver Alarme) bleibt bestehen.
+
+Verlaufsbilder liegen nicht mehr öffentlich unter `/local/`. Prüfe nach dem Update
+den authentifizierten Bildabruf auf Android und iOS. Bei der ersten Einrichtung und
+stündlich entfernt die Integration alte generierte UUID-PNGs aus ihrem bisherigen
+öffentlichen Bildordner. Bereits extern gespeicherte Kopien lassen sich dadurch nicht zurückrufen.
+
 ## Aktualisieren und Entfernen
 
 Vor einem Update eine vollständige HA-Sicherung erstellen. Danach den Integrationsordner

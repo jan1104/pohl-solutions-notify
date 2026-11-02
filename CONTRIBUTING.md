@@ -15,8 +15,11 @@ node --check custom_components/alarm_system/frontend/panel.js
 ```
 
 `validate.py` prüft Python-Syntax, JSON, Domain und Versionskonsistenz.
-Die Verhaltenstests laden gezielt HA-unabhängige Module und prüfen unter anderem
-Melder-Normalisierung, Auslösesperren, Empfängerberechtigung und Importgrenzen.
+Die Verhaltenstests prüfen HA-unabhängige Module und die vollständigen Engine-/Chart-
+Module mit schmalen Importadaptern für HA und aiohttp. Ersetzt werden externe Grenzen,
+nicht die zu prüfenden Projektmethoden. Geprüft werden unter anderem Melder-Normalisierung,
+Auslösesperren, Empfängerberechtigung, Alarmparallelität, Wiederherstellung und Bildzugriffe.
+Das ersetzt weder einen echten HTTP-Server noch HA-Laufzeit- und Mobilgerätetests.
 Die GitHub-Actions-Konfiguration führt dieselben Prüfungen nach einem späteren Push aus.
 Sie enthält weder Deployment noch Veröffentlichung.
 
@@ -30,7 +33,7 @@ Sie enthält weder Deployment noch Veröffentlichung.
 
 Bei einer Softwareversionserhöhung Manifest, `const.py` und Versionsangaben im
 Frontend einschließlich Konfigurationsexport sowie README konsistent ändern.
-Version 0.3.24 bleibt beim reinen Repository-Import erhalten.
+Der reine Repository-Import behielt 0.3.24; die erste funktionale Korrektur trägt 0.3.25.
 
 Keine HA-Sicherungen, persönlichen Exporte, Zugangsdaten oder Laufzeitdateien committen.
 Vor Veröffentlichung zusätzlich die Prüfungen in [GITHUB.md](docs/GITHUB.md) abschließen.

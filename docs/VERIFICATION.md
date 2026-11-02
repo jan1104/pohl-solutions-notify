@@ -1,8 +1,33 @@
 # Prüfprotokoll
 
+## Lokaler Entwicklungsstand 0.3.25 – 02.11.2026
+
+- 16 Python-Dateien auf Syntax geprüft; drei JSON-Dateien und Versionskonsistenz gültig.
+- 39 Verhaltenstests erfolgreich: 12 Modell-/Kontofiltertests, 16 Engine-Regressionen
+  und 11 Bildspeicher-/Zugriffstests.
+- JavaScript-Syntax erfolgreich geprüft; Änderungen ohne Git-Whitespacefehler.
+- Getestet werden der reale Projektcode und explizit ersetzte HA-/aiohttp-Grenzen.
+  Keine Behauptung einer echten HA-Laufzeit, tatsächlicher HTTP-Middleware-Anmeldung
+  oder Ton-/Bildzustellung auf echten Geräten.
+- Aktive chatgebundene Automation für Weiterarbeit alle sechs Stunden eingerichtet
+  und Status sowie gespeicherte Wiederholungsregel geprüft.
+
+Die sechs Hauptbefunde aus der historischen Projektanalyse wurden im Anwendungscode
+bearbeitet. Gerätefreigabe und Informationsumfang der allgemeinen Alarm-Entität wurden
+zusätzlich eingeschränkt. Offene externe Validierung und nächste unabhängige Arbeiten
+stehen in [WORK_PLAN.md](WORK_PLAN.md), der praktische Ablauf in
+[HA_TEST_PROTOCOL.md](HA_TEST_PROTOCOL.md).
+
+Nicht durchgeführt: Deployment, GitHub-Push, GitHub-Actions-Lauf, vollständiger
+HA-Start auf Linux, echte Browseransicht und Companion-/Browser-Mod-Gerätetests.
+Die private Bild-API muss insbesondere mit den tatsächlichen Companion-Versionen
+geprüft werden. Der öffentliche Bildpfad wird dafür nicht wieder aktiviert.
+
+## Historisches Import-Prüfprotokoll für 0.3.24
+
 Datum: 02.11.2026 · Softwarestand: 0.3.24
 
-## Lokal erfolgreich
+### Beim Import lokal erfolgreich
 
 - Python-Syntax aller Integrations-, Test- und Prüfskriptdateien geprüft (Python 3.12).
 - Drei JSON-Dateien gelesen; Domain, Config-Flow und Versionskonsistenz geprüft.
@@ -17,7 +42,7 @@ Datum: 02.11.2026 · Softwarestand: 0.3.24
   Dies ist kein vollständiges Sicherheitsgutachten.
 - GitHub-Remote lesend erreichbar, beim Einrichten ohne Branches und Tags.
 
-## Noch offen
+### Damals offene Prüfungen
 
 - Vollständiger Laufzeittest in Home Assistant und Bestätigung unterstützter Versionen.
 - Geräte-, Benachrichtigungs-, Neustart- und Wiederherstellungsprüfungen auf Zielhardware.

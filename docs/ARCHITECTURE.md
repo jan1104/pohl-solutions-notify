@@ -12,6 +12,8 @@
 | `discovery.py` | Zuordnung tatsächlicher Companion- und Browser-Mod-Geräte |
 | `identity.py` | Anzeigenamen statt interner Konto-UUIDs |
 | `charts.py` | PNG-Verlaufsbilder aus Recorder-Daten |
+| `chart_storage.py` | Private Bilddateien, Ablaufzeit und Bereinigung ohne HA-Abhängigkeit |
+| `chart_view.py` | Angemeldeter Bildabruf mit Alarmartenprüfung |
 | `frontend/panel.js` | Oberfläche und Einrichtung ohne zusätzliche Frontend-Bibliothek |
 
 Die technischen Namen `alarm_system`, `alarm-system` und bestehende Aktionsnamen bleiben
@@ -31,10 +33,21 @@ unter `.storage`. Er enthält Konfiguration, Benutzer-/Gerätezuordnungen, Ereig
 Journal und Wiederherstellungszustände für Geräte. Bestätigungstoken werden nur im
 Arbeitsspeicher gehalten. Konfigurations-JSON ersetzt keine vollständige HA-Sicherung.
 
-Generierte Verlaufsbilder liegen unter `www/alarm_system_charts` und sind über
-`/local/alarm_system_charts/<datei>.png` erreichbar. Diese URLs unterliegen nicht derselben
-Kontofilterung wie die WebSocket-Ansicht. Beim Erzeugen neuer Bilder werden PNG-Dateien
-älter als 24 Stunden aufgeräumt; dies ist kein regelmäßiger Löschdienst.
+Seit 0.3.25 liegen Verlaufsbilder privat unter `.storage/alarm_system_charts`.
+Eine Metadatendatei speichert Alarmart und Ablaufzeit. Der API-Endpunkt
+`/api/alarm_system/charts/<datei>.png` verlangt eine HA-Anmeldung sowie einen aktiven
+Administrator oder ein aktives zugeordnetes Konto mit passender Alarmart.
+Antworten verwenden `Cache-Control: no-store`. Abgelaufene Bilder werden sofort
+abgewiesen; die Dateibereinigung läuft beim Start und stündlich. Frühere öffentliche
+Bilder mit dem vom Projekt erzeugten UUID-Dateinamensmuster werden aus dem alten
+`www/alarm_system_charts`-Verzeichnis entfernt. Fremde Dateinamen bleiben erhalten.
+
+Die Alarmpriorität gilt pro Gerät. Bereits vorhandene Priorität auf einem gemeinsamen
+Gerät (Einbruch vor Feuer) bleibt erhalten. Andere Geräte bleiben davon unabhängig.
+Rückmeldungen verändern nur das ausgewählte Ereignis. Für Android behalten Leases
+ursprüngliche Werte und einen Wiederholungszeitpunkt, bis frisch gemeldete Sensorwerte
+die Wiederherstellung bestätigen. Laufende Tonwiedergaben werden vom Wiederholungsdienst
+nicht eigenständig beendet.
 
 ## Prüfgrenzen
 

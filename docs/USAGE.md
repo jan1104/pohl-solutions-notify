@@ -8,9 +8,16 @@ Feuer und Einbruch müssen verschiedene Ereignisgruppen verwenden.
 
 Im Panel **Alarme** verwalten Administratoren Benutzer, Geräte, Melder und Einstellungen.
 Andere Benutzer erhalten eine nach Konto und Alarmart gefilterte Ansicht.
-Die Rückmeldung **Ich komme** stoppt im übernommenen Modell die Tonwiederholung
-aller derzeit aktiven regulären Ereignisse. Sie beendet die Ereignisse nicht.
-Gerätetests werden dabei getrennt behandelt.
+Seit Version 0.3.25 stoppt **Ich komme** nur die Tonwiederholung des ausgewählten
+Ereignisses. Andere Ereignisse laufen weiter. Die Rückmeldung beendet das Ereignis nicht.
+Die Priorität wird pro Gerät bestimmt: Auf einem gemeinsam verwendeten Gerät bleibt
+Einbruch vor Feuer priorisiert; weitere Ereignisse erhalten eine stumme Nachricht.
+Geräte mit anderen Empfängerzuordnungen führen ihren eigenen Alarmzyklus aus.
+Nach einer Rückmeldung wird die Bearbeitung weiterer offener Ereignisse wieder angestoßen.
+
+Deaktivierte Benutzer erhalten außerhalb administrativer HA-Konten keine Alarmansicht,
+Melderlisten, Geräte oder Verlaufseinträge mehr. HA-Administratoren behalten ihren
+Verwaltungszugriff. Die allgemeine HA-Entität zeigt nur noch die Anzahl aktiver Alarme.
 
 Ein wieder normales Sensorsignal beendet keinen Alarm automatisch. Nach Beenden eines
 noch aktiven Melders wird die erneute Auslösung bis zum Normalsignal unterdrückt.
@@ -77,3 +84,16 @@ oder ausstehender Wiederherstellung ist ein Import gesperrt.
 Der CSV-Export enthält Verlaufsdaten. Beide Exporte können personenbezogene Namen,
 Gerätekennungen oder Standortdaten enthalten und gehören nicht ins Git-Repository.
 Die Aufbewahrung ist anfangs unbegrenzt und kann im Panel geändert werden.
+
+## Wiederherstellung und Verlaufsbilder ab 0.3.25
+
+Ursprüngliche Android-Einstellungen bleiben gespeichert, bis die Sensoren sowohl
+Ruftonmodus als auch Lautstärke nach der Anforderung aktuell zurückmelden.
+Bei fehlender Bestätigung folgt nach frühestens 30 Sekunden ein neuer Versuch.
+Der Geräteeintrag zeigt eine ausstehende Wiederherstellung an. Eine stumme
+Alarmnachricht bleibt möglich, während die erneute laute Ausgabe ausgesetzt wird.
+Ein Gerät kann während ausstehender Wiederherstellung nicht erneut freigegeben werden.
+
+Verlaufsbilder benötigen die HA-Anmeldung und die Berechtigung für die zugehörige
+Alarmart. Sie sind höchstens 24 Stunden abrufbar und werden regelmäßig bereinigt.
+Der Abruf über die Companion-App muss auf den Zielgeräten noch praktisch getestet werden.

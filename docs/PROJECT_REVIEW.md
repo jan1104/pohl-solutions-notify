@@ -1,5 +1,10 @@
 # Projektanalyse: Pohl Solutions Alarm Notify
 
+> Historische Analyse des Ausgangsstands 0.3.24. Die sechs wesentlichen Befunde
+> wurden im lokalen Entwicklungsstand 0.3.25 bearbeitet. Aktueller Status und
+> verbleibende praktische Prüfungen: [WORK_PLAN.md](WORK_PLAN.md).
+> Nachfolgende Fundstellen und Verhaltensbeschreibungen beziehen sich auf 0.3.24.
+
 Stand: 02.11.2026 · Softwareversion 0.3.24 · geprüfter Ausgangscommit `68f227a`
 
 ## Einschätzung
