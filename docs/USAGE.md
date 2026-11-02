@@ -78,7 +78,8 @@ Eine frei angegebene Benutzer-ID ersetzt keine Anmeldung.
 
 Die JSON-Sicherung enthält Einstellungen und Zuordnungen, keine Ereignisse und keinen
 Alarmverlauf. Ein Import muss zum Standort passen, setzt vorhandene HA-Konten, Sensoren
-und Notify-Dienste voraus und verlangt erneute Geräteprüfung. Während aktiver Ereignisse
+und Notify-Dienste voraus und verlangt erneute Geräteprüfung. Seit 0.3.26 werden dafür auch importierte
+alte Testsitzungen und flüchtige Warte-/Wiederherstellungsfelder verworfen. Während aktiver Ereignisse
 oder ausstehender Wiederherstellung ist ein Import gesperrt.
 
 Der CSV-Export enthält Verlaufsdaten. Beide Exporte können personenbezogene Namen,

@@ -1,4 +1,4 @@
-# Praktische Home-Assistant- und Geräteprüfung für 0.3.25
+# Praktische Home-Assistant- und Geräteprüfung für 0.3.26
 
 Status: noch nicht durchgeführt. Nicht als Produktionsfreigabe verwenden.
 Eine getrennte Testinstanz mit Sicherung, Testkonten und kontrollierten Sensoren

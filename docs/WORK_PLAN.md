@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 02.11.2026 · lokaler Entwicklungsstand 0.3.25 · kein Push / kein Deployment.
+Stand: 02.11.2026 · lokaler Entwicklungsstand 0.3.26 · kein Push / kein Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`.
 
 ## Auftrag und Arbeitsweise
@@ -40,19 +40,37 @@ ohne gesonderten Auftrag. Keine Änderung nur zur Erzeugung vermeintlichen Forts
 - [x] Version auf 0.3.25 erhöht; Anleitung und historische Analyse eingeordnet.
 - [x] 39 lokale Verhaltenstests, Syntax- und Metadatenprüfungen erfolgreich.
 
+## Abgeschlossen: Einstieg und Verwaltung in 0.3.26
+
+Automatischer Lauf am 02.11.2026, abends (Europe/Berlin).
+
+- [x] Reale Einstiegshandler über schmale Importadapter prüfbar gemacht.
+- [x] Fehler bei erneutem / abgebrochenem Start nachgestellt und bereinigt:
+  Engine, Listener, Hintergrundaufgaben und bereits angelegte Oberfläche entfernen;
+  kein regulärer Stop-/Speicherpfad mit nur teilweise geladenem Modell.
+- [x] Doppelte Einrichtung ersetzt keine bereits laufende Engine mehr.
+- [x] WebSocket-Zugriffe auf entladene / stoppende Integration geben kontrollierte Fehler.
+- [x] Fehlende, falsch typisierte oder unbekannte Gerätekennungen vor Journal-/Speicheränderungen abweisen.
+- [x] Importvorschau, ungültigen Import und Gerätefreigabe mit/ohne Testsitzung über
+  die tatsächlichen Verwaltungshandler prüfen.
+- [x] Importierte alte Testsitzung und flüchtige Wiederherstellungs-/Wartezustände
+  entfernen, damit die verlangte erneute Geräteprüfung nicht auf alte Sitzungen zurückgreift.
+- [x] 57 Tests erfolgreich; Python-/JSON-/Versions- und JavaScript-Prüfung bestanden.
+
+Die Schema-/Decorator-Adapter validieren keine HA- oder probatio-Schnittstellen.
+Die Tests ersetzen deshalb weiterhin keine echte HA-Installation.
+
 ## Nächste unabhängig ausführbare Schritte
 
-1. Lade-/Entladepfade und WebSocket-Verwaltung mit einem gezielten Testgerüst prüfen:
-   doppelte Registrierung, Integration nicht geladen, fehlende Nutzdaten, Import
-   und Gerätefreigabe ohne Testsitzung. Keine echte HA-Kompatibilität daraus ableiten.
-2. Wiederherstellung nach simuliertem Neustart, Abbruch von Hintergrundaufgaben und
+1. Wiederherstellung nach simuliertem Neustart, Abbruch von Hintergrundaufgaben und
    parallele Rückmeldungen / Prioritätswechsel gezielt prüfen. Fehler nur bei
-   reproduzierbarem Fehlverhalten ändern.
-3. Benachrichtigungs-/Browser-Mod-Anfragen gegen dokumentierte Schnittstellen prüfen;
+   reproduzierbarem Fehlverhalten ändern. Fehler in Aufräumfunktionen selbst und
+   fehlgeschlagenes reguläres Entladen gezielt mitprüfen.
+2. Benachrichtigungs-/Browser-Mod-Anfragen gegen dokumentierte Schnittstellen prüfen;
    lokale Beispielkonfiguration und wiederholbares Installationspaket vorbereiten.
-4. Lastverhalten bei vielen abgeschlossenen Ereignissen und Transporteinträgen messen.
+3. Lastverhalten bei vielen abgeschlossenen Ereignissen und Transporteinträgen messen.
    Erst anhand der Ergebnisse begrenzte Datenabfragen oder Speichermaßnahmen umsetzen.
-5. Frontend zunächst lesbar formatieren und Logik-/Exporttests ergänzen; danach nur
+4. Frontend zunächst lesbar formatieren und Logik-/Exporttests ergänzen; danach nur
    bei abgesicherter Gleichheit in überschaubare Bausteine zerlegen. Kein Designwechsel.
 
 ## Externe Validierung: derzeit nicht ausgeführt

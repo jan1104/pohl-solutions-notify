@@ -1,5 +1,19 @@
 # Änderungen
 
+## 0.3.26 – lokal vorbereitet, nicht veröffentlicht
+
+- Fehlgeschlagene/abgebrochene Einrichtung räumt eigene Laufzeitressourcen auf,
+  ohne einen regulären Stop-/Speicherpfad mit teilweise geladenem Modell auszuführen.
+- Doppelte Einrichtung ersetzt keine bestehende Engine; Neuladen verwendet statische
+  Ressourcen und Bildroute weiter. Wiederholtes Entladen einer fehlenden Instanz ist unschädlich.
+- WebSocket-Zugriffe bei entladener/stoppender Integration melden einen kontrollierten Fehler.
+- Verschachtelte Verwaltungskennungen werden vor Journal- oder Speicheränderungen geprüft;
+  fehlende/ungültige IDs und nicht vorhandene Testgeräte erzeugen keine internen KeyErrors mehr.
+- Import entfernt alte Testsitzungen und flüchtige Wiederherstellungs-/Wartefelder zusätzlich
+  zum bisherigen Zurücksetzen des Gerätestatus.
+- 18 Regressionstests ergänzt, insgesamt 57 lokale Verhaltenstests erfolgreich.
+
+
 ## 0.3.25 – lokal vorbereitet, nicht veröffentlicht
 
 - Alarmpriorität pro Gerät statt globaler Blockierung anderer Empfänger.

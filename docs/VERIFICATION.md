@@ -1,5 +1,23 @@
 # Prüfprotokoll
 
+## Lokaler Entwicklungsstand 0.3.26 – 02.11.2026, automatischer Abendlauf
+
+- Ausgangsstand war sauber: keine fremden/uncommitteten Änderungen, HEAD `c76c70f`.
+- Vor den Korrekturen zeigten die neuen Einstiegstests doppelte Engine-Ersetzung,
+  zurückbleibende Engine bei Startfehlern sowie interne KeyErrors bei entladener
+  Integration und fehlenden Kennungen. Zusätzliche Importprüfung zeigte die Übernahme
+  alter Testsitzungen und flüchtiger Warte-/Wiederherstellungsfelder.
+- Nach Korrektur: 57 Tests bestanden (12 Modell-/Kontofilter-, 17 Engine-, 11 Bild-
+  und 17 Einstieg-/Verwaltungstests). Insbesondere Startfehler, Startabbruch,
+  Registrierung beim Neuladen, fehlende Kennungen, Importvorschau und Gerätefreigabe geprüft.
+- 17 Python-Dateien, drei JSON-Dateien und Versionskonsistenz erfolgreich geprüft;
+  JavaScript-Syntax und Git-Whitespaceprüfung erfolgreich.
+- Die Einstiegstests führen den Projektcode aus, ersetzen aber HA, aiohttp und
+  probatio-Dekoratoren/Schemaobjekte. Sie beweisen keine echte HA-Kompatibilität
+  oder tatsächliche Schema-/Transport-/Gerätefunktion.
+- Kein Push, keine Veröffentlichung, kein Deployment und kein Gerätezugriff.
+
+
 ## Lokaler Entwicklungsstand 0.3.25 – 02.11.2026
 
 - 16 Python-Dateien auf Syntax geprüft; drei JSON-Dateien und Versionskonsistenz gültig.

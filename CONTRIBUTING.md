@@ -19,7 +19,9 @@ Die Verhaltenstests prüfen HA-unabhängige Module und die vollständigen Engine
 Module mit schmalen Importadaptern für HA und aiohttp. Ersetzt werden externe Grenzen,
 nicht die zu prüfenden Projektmethoden. Geprüft werden unter anderem Melder-Normalisierung,
 Auslösesperren, Empfängerberechtigung, Alarmparallelität, Wiederherstellung und Bildzugriffe.
-Das ersetzt weder einen echten HTTP-Server noch HA-Laufzeit- und Mobilgerätetests.
+Einstiegshandler werden zusätzlich mit ersetzten HA-/probatio-Dekoratoren und
+Schemaobjekten geprüft; diese Adapter validieren keine echten HA-Schemas. Das
+ersetzt weder einen echten HTTP-Server noch HA-Laufzeit- und Mobilgerätetests.
 Die GitHub-Actions-Konfiguration führt dieselben Prüfungen nach einem späteren Push aus.
 Sie enthält weder Deployment noch Veröffentlichung.
 
