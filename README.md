@@ -36,6 +36,7 @@ Details, Voraussetzungen und Aktualisierung: [Installationsanleitung](docs/INSTA
 - [Vorbereitung für GitHub](docs/GITHUB.md)
 - [Import und Herkunft](docs/IMPORT.md)
 - [Prüfprotokoll](docs/VERIFICATION.md)
+- [Projektanalyse und offene Befunde](docs/PROJECT_REVIEW.md)
 - [Änderungen](CHANGELOG.md)
 - [Rechtehinweis](LICENSE)
 

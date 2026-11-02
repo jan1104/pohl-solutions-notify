@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Vollständige Projektanalyse mit isoliert nachgestellten Befunden und priorisierten nächsten Schritten dokumentiert.
+
 - Projekt als lokales Git-Repository für Pohl Solutions vorbereitet.
 - Home-Assistant-Verzeichnisstruktur `custom_components/alarm_system` angelegt.
 - Installations-, Bedienungs-, Architektur- und Entwicklungsdokumentation ergänzt.
