@@ -38,3 +38,7 @@ und Deployments sind noch nicht eingerichtet.
 ## HACS-Vorbereitung 0.4.1
 
 HACS-Metadaten sind jetzt lokal ergänzt; Anleitung in [HACS.md](HACS.md). 0.4.1 einschließlich der eigenen Alarmarten ist noch nicht übertragen oder als Release veröffentlicht. Frühere Hinweise auf nicht eingerichtetes HACS beschreiben den Zustand vor diesem Fix.
+
+## Veröffentlichung am 03.11.2026
+
+Nach erneuter ausdrücklicher Benutzerfreigabe develop sowie die Tags v0.4.0/v0.4.1 gepusht und [Release v0.4.1](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.4.1) veröffentlicht. HACS-Metadaten am Release-Tag remote geprüft. Repository ist öffentlich; Sichtbarkeit und Defaultbranch main wurden nicht geändert. Die API lieferte unmittelbar danach keine Workflow-Läufe für develop; deshalb keine erfolgreiche GitHub-CI behauptet. Lokale Prüfungen bestanden, echte HACS-/HA-/Android-Installation offen. Frühere Angaben zum rein lokalen Stand sind historisch.

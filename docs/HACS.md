@@ -6,11 +6,9 @@ Der vom Nutzer gewählte Commit `47f170b` enthält keine `hacs.json` im Reposito
 
 0.4.1 ergänzt die Datei und die Metadaten `documentation`, `issue_tracker`, `codeowners`. HACS verwendet die Quellen unter `custom_components/alarm_system`, keine Release-ZIP-Anlage. Die vorhandenen Installations-ZIPs behalten ihren bisherigen Aufbau.
 
-## Was noch nötig ist
+## Veröffentlichung und Auswahl
 
-Die Korrektur ist zunächst lokal. HACS lädt weiterhin den alten Commit, solange keine korrigierte Revision auf GitHub angeboten und ausgewählt wird. Ein Push ausschließlich auf `develop` ändert den unveränderten Defaultbranch `main` nicht.
-
-Vorgesehene Veröffentlichung nach ausdrücklichem Auftrag: `develop` und den neuen Tag `v0.4.1` übertragen und ein GitHub-Release zu diesem Tag erstellen. Dabei `main` und bisherige Tags erhalten. Der Release-Text muss auf neue Alarmarten und die noch offene echte HA-/Android-Prüfung hinweisen. Ein bloßer Git-Tag ist keine GitHub-Release-Auswahl in HACS.
+Am 03.11.2026 hat der Benutzer Push und Veröffentlichung freigegeben. `develop`, `v0.4.0` und `v0.4.1` wurden übertragen. Das [GitHub-Release v0.4.1](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.4.1) ist veröffentlicht; `hacs.json` ist unter diesem Tag über die GitHub-API abrufbar. `main` und die alten Tags bleiben erhalten. Der Defaultbranch bleibt `main`; in HACS ausdrücklich das neue Release auswählen.
 
 Nach Veröffentlichung: Repository in HACS aktualisieren, im Downloaddialog die neue Version auswählen, herunterladen und Home Assistant neu starten. Wenn dort weiterhin `47f170b` erscheint, ist die Auswahl noch alt. Bleibt der Fehler trotz neuer Auswahl, HA-/HACS-Version und den zugehörigen HACS-Logauszug prüfen; darin keine Tokens oder privaten Daten weitergeben.
 

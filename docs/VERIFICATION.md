@@ -152,3 +152,9 @@ Datum: 02.11.2026 · Softwarestand: 0.3.24
   wurde unverändert übernommen, Workflow und Vorlagen wurden manuell geprüft.
 
 Es wurde keine Softwareversion veröffentlicht und nichts zu GitHub gepusht.
+
+## Veröffentlichungsprüfung 0.4.1 – 03.11.2026
+
+- Nach Nutzerfreigabe develop und neue Tags erfolgreich gepusht, GitHub-Release v0.4.1 erstellt.
+- Über GitHub-API veröffentlichten Release-Status und hacs.json am Tag geprüft. Defaultbranch main unverändert.
+- API lieferte unmittelbar danach keine Workflow-Läufe für develop; keine GitHub-CI-Bestätigung. Kein HA-Deployment oder echter HACS-/Android-Test.
