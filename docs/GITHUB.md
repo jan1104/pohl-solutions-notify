@@ -34,3 +34,7 @@ Issue-Vorlagen erfassen Fehler und Funktionswünsche ohne private HA-Daten.
 Die Pull-Request-Vorlage hält Änderungen und Prüfungen fest. Die Actions-Datei
 prüft Syntax, Metadaten und Modellregeln. HACS, Paketverteilung, automatische Releases
 und Deployments sind noch nicht eingerichtet.
+
+## HACS-Vorbereitung 0.4.1
+
+HACS-Metadaten sind jetzt lokal ergänzt; Anleitung in [HACS.md](HACS.md). 0.4.1 einschließlich der eigenen Alarmarten ist noch nicht übertragen oder als Release veröffentlicht. Frühere Hinweise auf nicht eingerichtetes HACS beschreiben den Zustand vor diesem Fix.

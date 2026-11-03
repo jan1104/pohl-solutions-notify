@@ -1,10 +1,11 @@
 # Gesicherte Versionen und Rückkehr
 
-Stand: 03.11.2026. Neuer Stand 0.4.0 lokal vorbereitet; kein Deployment.
+Stand: 03.11.2026. Neuer Stand 0.4.1 lokal vorbereitet; kein Deployment.
 Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerauftrag zu GitHub gepusht; 0.4.0 noch nicht.
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.4.1 | `v0.4.1` | über Tag auflösbar | HACS-Metadaten korrigiert; lokal geprüft, GitHub-Release offen |
 | 0.4.0 | `v0.4.0` | über Tag auflösbar | Eigene Alarmarten, lokal geprüft; echte HA-/Android-Prüfung offen |
 | 0.3.27 | `v0.3.27` | `47f170b` | Aktueller eingefrorener Quellstand; 75 Python- und sieben Frontendtests bestanden |
 | 0.3.25 | `v0.3.25` | `c76c70f` | Lokaler Stand zur vom Benutzer als bereits gelaufen gemeldeten Versionsnummer |

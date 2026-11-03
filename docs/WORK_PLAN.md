@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.0 · neuer Stand noch nicht gepusht / kein Deployment.
+Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.1 · neuer Stand noch nicht gepusht / kein Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -207,3 +207,11 @@ Sie prüfen unseren Anwendungscode, nicht die tatsächliche HA- oder HTTP-Laufze
 Die Automation arbeitet lokal; der Rechner muss mit verfügbaren Projektdateien laufen
 und die Desktop-App muss geöffnet sein. Zeitplanung ist keine Garantie für
 ununterbrochene Arbeit bei ausgeschaltetem Rechner.
+
+## HACS-Downloadfehler am 03.11.2026
+
+- Nutzer meldet Ablehnung von Commit `47f170b`; dort fehlt Root-`hacs.json`.
+- In 0.4.1 HACS-Quelldownload konfiguriert, Manifest vervollständigt und CI-Regressionsprüfung ergänzt.
+- Noch offen: neue Revision nach ausdrücklichem Auftrag zu GitHub übertragen und als Release anbieten; ein Push nur auf develop ändert den bisherigen HACS-Defaultstand main nicht.
+- Alten Commit/Tags nicht umschreiben. Kein weiterer lokaler Codeumbau behebt die Auswahl des alten Commits.
+- Anleitung und Quellen: [HACS.md](HACS.md). Echte Installation weiterhin offen.

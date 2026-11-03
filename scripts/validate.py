@@ -7,7 +7,25 @@ ROOT = Path(__file__).resolve().parents[1]
 COMPONENT = ROOT / "custom_components" / "alarm_system"
 
 
+def validate_hacs(root):
+    """Check the source-download layout HACS needs at the selected Git ref."""
+    hacs = json.loads((root / "hacs.json").read_text(encoding="utf-8"))
+    if not isinstance(hacs.get("name"), str) or not hacs["name"].strip():
+        raise ValueError("HACS display name is required")
+    if hacs.get("content_in_root", False) is not False or hacs.get("zip_release", False) is not False:
+        raise ValueError("HACS must use the custom_components source layout")
+    components = [p for p in (root / "custom_components").iterdir()
+                  if p.is_dir() and p.name != "__pycache__"]
+    if len(components) != 1 or components[0].name != "alarm_system":
+        raise ValueError("HACS requires one integration in custom_components")
+    manifest = json.loads((components[0] / "manifest.json").read_text(encoding="utf-8"))
+    for key in ("domain", "documentation", "issue_tracker", "codeowners", "name", "version"):
+        if not manifest.get(key):
+            raise ValueError(f"HACS integration metadata missing: {key}")
+
+
 def main():
+    validate_hacs(ROOT)
     python_files = (sorted(COMPONENT.rglob("*.py"))
                     + sorted((ROOT / "tests").glob("*.py"))
                     + sorted((ROOT / "scripts").glob("*.py")))

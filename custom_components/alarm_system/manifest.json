@@ -1,10 +1,12 @@
 {
   "domain": "alarm_system",
   "name": "Pohl Solutions Alarm Notify",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "config_flow": true,
-  "documentation": "https://www.home-assistant.io/docs/",
-  "codeowners": [],
+  "documentation": "https://github.com/jan1104/pohl-solutions-notify",
+  "codeowners": [
+    "@jan1104"
+  ],
   "requirements": [],
   "dependencies": [
     "frontend",
@@ -12,5 +14,6 @@
     "websocket_api",
     "panel_custom"
   ],
-  "iot_class": "local_push"
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/jan1104/pohl-solutions-notify/issues"
 }

@@ -1,5 +1,12 @@
 # Änderungen
 
+## 0.4.1 – HACS-Downloadmetadaten, lokal vorbereitet
+
+- Fehlende `hacs.json` im Repository-Hauptverzeichnis ergänzt; Ursache der Meldung beim Download von `47f170b`.
+- Projektlinks, Fehleradresse und Codeowner im Integrationsmanifest vervollständigt.
+- HACS-Quelllayout in der bestehenden CI prüfen; Regressionen für fehlende/ungültige Metadaten und falsche Downloadlayouts.
+- Alte Tags und `main` bleiben unverändert. GitHub-Übertragung und Release stehen aus.
+
 ## 0.4.0 – eigene Alarmarten, lokal vorbereitet
 
 - Bis zu 32 frei benannte eigene Alarmarten; dynamische Auswahl bei Benutzern,

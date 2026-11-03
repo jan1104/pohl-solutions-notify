@@ -1,5 +1,12 @@
 # Prüfprotokoll
 
+## HACS-Korrektur 0.4.1 – 03.11.2026
+
+- Fehlende Root-hacs.json im unveränderten Commit 47f170b als konkrete Ursache identifiziert, mit offiziellem HACS-Downloadcode abgeglichen.
+- 134 Python- und 21 Frontendtests bestanden; Syntax-, Metadaten- und Whitespaceprüfung erfolgreich.
+- Regressionen prüfen fehlendes/ungültiges HACS-Manifest, falsches Root-/ZIP-Layout, fehlenden Issue-Tracker und mehrere Integrationen.
+- Kein echter HACS-/HA-/Android-Test. Kein Push, Release oder Deployment.
+
 ## Lokaler Entwicklungsstand 0.4.0 – 03.11.2026
 
 - Ausgangsstand sauber auf `develop`, HEAD `037b832`.
