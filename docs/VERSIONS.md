@@ -1,10 +1,11 @@
 # Gesicherte Versionen und Rückkehr
 
-Stand: 03.11.2026. Neuer Stand 0.4.4 veröffentlicht; kein Deployment.
+Stand: 03.11.2026. Neuer Stand 0.4.5 veröffentlicht; kein Deployment.
 Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerauftrag zu GitHub gepusht; 0.4.0 noch nicht.
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.4.5 | `v0.4.5` | über Tag auflösbar | Kompakter zugeklappter Alarmverlauf; HACS-Release veröffentlicht |
 | 0.4.4 | `v0.4.4` | über Tag auflösbar | Eine Meldungsart pro Melder, automatische Gruppen; HACS-Release veröffentlicht |
 | 0.4.3 | `v0.4.3` | über Tag auflösbar | Standard-Sprachtext immer sichtbar, HACS-Release veröffentlicht |
 | 0.4.2 | `v0.4.2` | über Tag auflösbar | Sprachtext mit Vorschau; unabhängige Ausgaben auch für Information/Warnung |
