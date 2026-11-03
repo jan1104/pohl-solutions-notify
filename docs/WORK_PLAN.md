@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 03.11.2026 · lokaler Entwicklungsstand 0.3.28 · kein Push / kein Deployment.
+Stand: 03.11.2026 · lokaler Entwicklungsstand 0.3.29 · kein Push / kein Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -124,10 +124,28 @@ Aufräumkorrektur und Integration. Keine reale Prozessabschaltung, HA-Store-Atom
 oder Gerätezustellung nachgewiesen. B1/B3 bleiben für weitere Unterbrechungs- und
 Speichergrenzen teilweise offen; vorhandene Tags und `main` wurden nicht verändert.
 
+## Abgeschlossen: Teil von B2/B3 in 0.3.29
+
+Automatischer Lauf am 03.11.2026, nachmittags (Europe/Berlin), Ausgangscommit `b9e4527`.
+
+- [x] Prioritätswechsel während einer Tonwartezeit nachgestellt: Feuer-TTS wurde bisher
+  trotz zwischenzeitlich priorisiertem Einbruch auf demselben Gerät gesendet.
+  Aktuelle Gerätepriorität wird vor der Sprachstufe jetzt erneut geprüft.
+- [x] Kontrolle: Einbruch auf anderem Gerät unterdrückt Feueransage nicht;
+  ein alter Worker entfernt keine neuere Playback-Lease.
+- [x] Fehler einzelner Service-/Panel-Aufräumschritte nach Startfehler nachgestellt.
+  Alle übrigen Aufräumversuche laufen weiter, der ursprüngliche Fehler bleibt erhalten.
+- [x] Fünf neue Regressionstests; 92 Python- und sieben Frontendtests erfolgreich.
+
+Subagent erstellte isolierte Prioritätswechseltests; Hauptagent prüfte die Reproduktion,
+implementierte die kleine Prioritätskorrektur und die Start-Aufräumkorrektur.
+Keine HA-/Handytests oder neue Produktregel; Einbruch-Vorrang pro Gerät bleibt bestehen.
+Weitere Speicher-/Transportgrenzen und echte Zeit-/Wiedergabewirkung bleiben offen.
+
 ## Nächste unabhängig ausführbare Schritte
 
-1. Wiederherstellung nach simuliertem Neustart, Abbruch von Hintergrundaufgaben und
-   parallele Rückmeldungen / Prioritätswechsel gezielt prüfen. Fehler nur bei
+1. Weitere Speicher-/Transportfehler, fehlgeschlagenes reguläres Entladen sowie
+   parallele Rückmeldungen und laufende/abgebrochene Aufträge gezielt prüfen. Fehler nur bei
    reproduzierbarem Fehlverhalten ändern. Fehler in Aufräumfunktionen selbst und
    fehlgeschlagenes reguläres Entladen gezielt mitprüfen. Der einzelne Listenerfehler
    und erst nach Stopbeginn eintreffende Ereignisse sind bereits in 0.3.28 abgesichert.

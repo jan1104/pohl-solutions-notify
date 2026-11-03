@@ -11,7 +11,7 @@ Mehr Funktionen allein sind kein Qualitätsnachweis. Vor neuer Oberfläche zuers
 Unterbrechungen, Datenhaltung und reale Gerätegrenzen absichern.
 
 Planungsbasis: 79 Python-Tests und sieben Tests der Frontendlogik.
-Aktueller Fortschritt: 0.3.28 mit 87 Python- und sieben Frontendtests; siehe WORK_PLAN.md. Diese arbeiten
+Aktueller Fortschritt: 0.3.29 mit 92 Python- und sieben Frontendtests; siehe WORK_PLAN.md. Diese arbeiten
 mit ersetzten HA-/HTTP-/Browsergrenzen und sind keine Prüfung echter Geräte.
 0.3.25 wurde vom Benutzer als bereits gelaufen gemeldet; 0.3.27 ist als lokaler Code
 fest gesichert. Eine vollständige Hardware-/HA-Freigabe für 0.3.27 liegt nicht vor.
@@ -113,6 +113,11 @@ zurückbleiben und ein Test nicht unbemerkt als regulärer Alarm fortgesetzt wir
 
 ### B2 [P0, M] Parallelität und Prioritätswechsel prüfen
 
+**Teilfortschritt 0.3.29:** Wechsel von Feuer zu Einbruch während der Tonwartezeit
+nachgestellt und erneute Prioritätsprüfung vor TTS ergänzt. Getrennte Geräte sowie
+Schutz neuerer Playback-Leases durch Regressionstests geprüft. Weitere parallele
+Rückmeldungen und reale Audio-/Transportzeiten bleiben offen.
+
 - [ ] Feuer → Einbruch und Einbruch → Feuer auf gemeinsamem sowie getrennten Geräten testen.
 - [ ] Prioritätswechsel während TTS und während einer noch laufenden Tonwartezeit prüfen.
 - [ ] Rückmeldung gleichzeitig mit neuem Melder, weiterer Rückmeldung oder Geräteänderung testen.
@@ -128,7 +133,9 @@ werden und die gewollte ereignisbezogene Rückmeldung erhalten bleibt.
 
 **Teilfortschritt 0.3.28:** Einzelner Listener-Abmeldefehler verhindert übriges
 Aufräumen/Gerätewiederherstellung nicht mehr; nach Stopbeginn eintreffende Ereignisse
-werden abgefangen. Weitere Speicher-/Abbruchgrenzen bleiben offen.
+werden abgefangen. In 0.3.29 wurden zusätzlich einzelne Fehler beim Aufräumen nach
+Startfehler abgefangen, ohne den ursprünglichen Startfehler zu verdecken. Weitere
+Speicher-/Abbruchgrenzen bleiben offen.
 
 - [ ] Fehler einzelner Abmeldefunktionen, Speicherung und Transport an definierten Punkten injizieren.
 - [ ] Prüfen, ob weitere Aufräumschritte auch nach dem ersten Fehler durchgeführt werden.

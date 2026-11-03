@@ -1,4 +1,4 @@
-# Praktische Home-Assistant- und Geräteprüfung für 0.3.27
+# Praktische Home-Assistant- und Geräteprüfung für 0.3.29
 
 Status: noch nicht durchgeführt. Nicht als Produktionsfreigabe verwenden.
 Eine getrennte Testinstanz mit Sicherung, Testkonten und kontrollierten Sensoren
@@ -27,8 +27,11 @@ Nur bereinigte Protokolle speichern; keine Zugangsdaten oder personenbezogenen E
 2. Bei Feuer „Ich komme“ drücken: Nur Feuer wird `claimed`; Einbruch bleibt offen.
 3. Priorisierten Alarm bestätigen/beenden: Der nächste offene Alarm muss am gemeinsamen
    Gerät wieder verarbeitet werden. Auch umgekehrte Auslösereihenfolge prüfen.
-4. Alarm ohne passende Empfänger anlegen: Andere Empfänger dürfen nicht blockiert werden.
-5. Fehlalarm bestätigen/abbrechen, Token ablaufen lassen und doppelte Klicks prüfen.
+4. Feuer mit Ton und Sprache auslösen; während der Tonwartezeit Einbruch an dasselbe
+   Gerät auslösen. Die folgende Sprachstufe darf nicht mehr den nachrangigen Feueralarm ansagen.
+   Mit Einbruch an einem anderen Gerät wiederholen: Feueransage bleibt dort unabhängig.
+5. Alarm ohne passende Empfänger anlegen: Andere Empfänger dürfen nicht blockiert werden.
+6. Fehlalarm bestätigen/abbrechen, Token ablaufen lassen und doppelte Klicks prüfen.
 
 ## Android-Wiederherstellung
 

@@ -1,5 +1,20 @@
 # Prüfprotokoll
 
+## Lokaler Entwicklungsstand 0.3.29 – 03.11.2026, automatischer Nachmittagslauf
+
+- Sauberer Ausgangsstand auf `develop`, HEAD `b9e4527`.
+- Ein neuer Prioritätswechseltest schlug vor der Korrektur fehl: Nach Feuer-Tonwartezeit
+  wurde TTS trotz neuem Einbruch auf demselben Gerät angefordert. Zwei Kontrolltests
+  sichern unabhängige Geräte und die Erhaltung einer neueren Lease ab.
+- Zwei neue Einstiegstests schlugen vor der Korrektur fehl: Ein Fehler beim Aufräumen
+  verdeckte die eigentliche Startursache und übersprang weitere Aufräumschritte.
+- Nach den gezielten Korrekturen: 92 Python- und sieben Node.js-Tests erfolgreich;
+  22 Python-Dateien, drei JSON-Dateien und Version 0.3.29 geprüft.
+- Frontend-Syntax und Git-Whitespaceprüfung bestanden. Externe Grenzen bleiben
+  ersetzt; kein echter HA-Start, Transportzeitnachweis oder physischer Audiotest.
+- `main` und gespeicherte Versionstags unverändert; kein Push, Deployment oder Release.
+
+
 ## Lokaler Entwicklungsstand 0.3.28 – 03.11.2026, automatischer Morgenlauf
 
 - Sauberer Ausgangsstand auf `develop`, HEAD `b439db1`.

@@ -1,5 +1,16 @@
 # Änderungen
 
+## 0.3.29 – lokal vorbereitet, nicht veröffentlicht
+
+- Vor dem Übergang vom Android-Alarmton zur Sprachansage wird die aktuelle Priorität
+  für dieses Gerät erneut geprüft. Ein inzwischen eingegangener Einbruchalarm
+  verhindert damit die nachträgliche Feueransage auf demselben Gerät.
+- Getrennte Empfänger behalten ihre Ansage; alte Aufträge entfernen keine neueren Playback-Leases.
+- Fehler bei einem Aufräumschritt nach fehlgeschlagenem Start verhindern die übrigen
+  Aufräumversuche nicht mehr und verdecken nicht den ursprünglichen Startfehler.
+- Fünf Regressionstests ergänzt; 92 Python- und sieben Frontendtests bestanden.
+
+
 ## 0.3.28 – lokal vorbereitet, nicht veröffentlicht
 
 - Fehler beim Abmelden eines einzelnen Ereignislisteners werden protokolliert;
