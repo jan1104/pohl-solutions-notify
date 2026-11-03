@@ -1,10 +1,11 @@
 # Gesicherte Versionen und Rückkehr
 
-Stand: 03.11.2026. Neuer Stand 0.4.2 vorbereitet; kein Deployment.
+Stand: 03.11.2026. Neuer Stand 0.4.3 veröffentlicht; kein Deployment.
 Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerauftrag zu GitHub gepusht; 0.4.0 noch nicht.
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.4.3 | `v0.4.3` | über Tag auflösbar | Standard-Sprachtext immer sichtbar, HACS-Release veröffentlicht |
 | 0.4.2 | `v0.4.2` | über Tag auflösbar | Sprachtext mit Vorschau; unabhängige Ausgaben auch für Information/Warnung |
 | 0.4.1 | `v0.4.1` | über Tag auflösbar | HACS-Metadaten korrigiert; lokal geprüft, GitHub-Release offen |
 | 0.4.0 | `v0.4.0` | über Tag auflösbar | Eigene Alarmarten, lokal geprüft; echte HA-/Android-Prüfung offen |
