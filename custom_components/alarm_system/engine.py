@@ -618,6 +618,9 @@ class AlarmEngine:
             async with self.transport:
                 if i["status"] != "open" or not self.device_active(d, i) or self.model.data["leases"].get(d["id"], {}).get("playback_id") != playback_id:
                     return
+                primary = self.primary_for_device(d, open_only=True)
+                if not primary or primary["id"] != i["id"]:
+                    return  # A higher-priority alarm may have arrived during the tone/receipt wait.
                 if d.get("speech"):
                     areas = list(dict.fromkeys(s["area"] for s in i["sources"].values() if s["active"] and s["area"]))
                     text = f'Achtung. {LABELS[i["type"]]}. Standort {i["site_id"]}. {". ".join(areas)}.'

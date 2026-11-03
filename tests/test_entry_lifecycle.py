@@ -113,6 +113,28 @@ class EntryLifecycleTests(unittest.IsolatedAsyncioTestCase):
             await entry_module.ws_get(self.hass, types.SimpleNamespace(), {"id": 1})
 
 
+    async def test_setup_cleanup_error_preserves_original_failure_and_attempts_rest(self):
+        self.engine.start.side_effect = RuntimeError("original startup error")
+        self.hass.services.async_remove.side_effect = [RuntimeError("service cleanup failed"), None, None, None]
+        with self.assertLogs(entry_module._LOGGER.name, level="ERROR"):
+            with self.assertRaisesRegex(RuntimeError, "original startup error"):
+                await entry_module.async_setup_entry(self.hass, self.entry)
+        self.assertNotIn("alarm_system", self.hass.data)
+        self.assertEqual(self.hass.services.async_remove.call_count, 4)
+        entry_module.frontend.async_remove_panel.assert_called_once()
+        entry_module.frontend.remove_extra_js_url.assert_called_once()
+        self.hass.states.async_remove.assert_called_once()
+
+    async def test_panel_cleanup_error_does_not_skip_script_and_sensor_cleanup(self):
+        self.engine.start.side_effect = RuntimeError("original startup error")
+        entry_module.frontend.async_remove_panel.side_effect = RuntimeError("panel cleanup failed")
+        with self.assertLogs(entry_module._LOGGER.name, level="ERROR"):
+            with self.assertRaisesRegex(RuntimeError, "original startup error"):
+                await entry_module.async_setup_entry(self.hass, self.entry)
+        entry_module.frontend.remove_extra_js_url.assert_called_once()
+        self.hass.states.async_remove.assert_called_once()
+
+
 class ManageValidationTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         # Real model and handler; external persistence/identity boundaries are explicit.
