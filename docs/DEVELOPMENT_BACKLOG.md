@@ -10,7 +10,8 @@ bedienbar, verständliche Zustände und kontrolliertes Verhalten auch bei Ausfä
 Mehr Funktionen allein sind kein Qualitätsnachweis. Vor neuer Oberfläche zuerst
 Unterbrechungen, Datenhaltung und reale Gerätegrenzen absichern.
 
-Aktuell bestanden: 79 Python-Tests und sieben Tests der Frontendlogik. Diese arbeiten
+Planungsbasis: 79 Python-Tests und sieben Tests der Frontendlogik.
+Aktueller Fortschritt: 0.3.28 mit 87 Python- und sieben Frontendtests; siehe WORK_PLAN.md. Diese arbeiten
 mit ersetzten HA-/HTTP-/Browsergrenzen und sind keine Prüfung echter Geräte.
 0.3.25 wurde vom Benutzer als bereits gelaufen gemeldet; 0.3.27 ist als lokaler Code
 fest gesichert. Eine vollständige Hardware-/HA-Freigabe für 0.3.27 liegt nicht vor.
@@ -124,6 +125,10 @@ zurückbleiben und ein Test nicht unbemerkt als regulärer Alarm fortgesetzt wir
 werden und die gewollte ereignisbezogene Rückmeldung erhalten bleibt.
 
 ### B3 [P0, M] Fehler beim Stoppen und Speichern behandeln
+
+**Teilfortschritt 0.3.28:** Einzelner Listener-Abmeldefehler verhindert übriges
+Aufräumen/Gerätewiederherstellung nicht mehr; nach Stopbeginn eintreffende Ereignisse
+werden abgefangen. Weitere Speicher-/Abbruchgrenzen bleiben offen.
 
 - [ ] Fehler einzelner Abmeldefunktionen, Speicherung und Transport an definierten Punkten injizieren.
 - [ ] Prüfen, ob weitere Aufräumschritte auch nach dem ersten Fehler durchgeführt werden.

@@ -1,5 +1,16 @@
 # Änderungen
 
+## 0.3.28 – lokal vorbereitet, nicht veröffentlicht
+
+- Fehler beim Abmelden eines einzelnen Ereignislisteners werden protokolliert;
+  übrige Listener, Hintergrundaufgaben und anschließende Gerätewiederherstellung
+  werden trotzdem bearbeitet.
+- Nach Beginn des Stopps eingehende Sensorereignisse, Empfangsbestätigungen und
+  mobile Rückmeldungen werden ignoriert, damit verbliebene Listener keine neue Verarbeitung anstoßen.
+- Acht Regressionstests für Aufräumfehler, späte Ereignisse und Wiederanlauf ergänzt.
+- 87 Python- und sieben Frontendtests erfolgreich; bestehende Versionstags unverändert.
+
+
 ## Entwicklungsplanung – 03.11.2026
 
 - Detaillierte Arbeitsliste mit 36 Paketen, Prioritäten, Abhängigkeiten und Fertig-Kriterien erstellt.

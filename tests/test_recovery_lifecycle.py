@@ -71,4 +71,3 @@ class RecoveryLifecycle(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(OSError):
             await self.engine.recover()
         self.assertFalse(self.engine.recovering)
-

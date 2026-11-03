@@ -1,5 +1,21 @@
 # Prüfprotokoll
 
+## Lokaler Entwicklungsstand 0.3.28 – 03.11.2026, automatischer Morgenlauf
+
+- Sauberer Ausgangsstand auf `develop`, HEAD `b439db1`.
+- Fünf neue Shutdown-Tests schlugen vor der Korrektur fehl: zwei durch abgebrochene
+  Aufräumarbeiten bei Listenerfehler, drei durch weitere Verarbeitung später Ereignisse.
+- Nach minimaler Korrektur bestehen diese Tests und drei zusätzliche Recovery-Tests
+  eines Subagenten; insgesamt 87 Python- sowie sieben Node.js-Tests erfolgreich.
+- 21 Python-Dateien und drei JSON-Dateien auf Syntax/Metadaten geprüft,
+  Version 0.3.28 konsistent, Frontend-Syntax und Git-Whitespaceprüfung bestanden.
+- Geprüft: weitere Bereinigung trotz fehlgeschlagener Abmeldung, Beginn der
+  Gerätewiederherstellung, späte Events nach Stop, Testabbruch beim Wiederanlauf,
+  Originalwerte bei fehlgeschlagener Wiederherstellung und Recovery-Flag bei Fehlern.
+- Keine echte HA-/Handyprüfung, keine reale Prozessabschaltung und kein Beweis
+  für HA-Speicheratomicität. Keine Veröffentlichung, kein Push, kein Deployment.
+
+
 ## Versionssicherung – 03.11.2026
 
 - Vor Beginn sauberer Arbeitsstand auf `main`, HEAD `47f170b`; keine fremden Änderungen.

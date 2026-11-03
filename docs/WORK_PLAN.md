@@ -1,8 +1,8 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 03.11.2026 · lokaler Entwicklungsstand 0.3.27 · kein Push / kein Deployment.
+Stand: 03.11.2026 · lokaler Entwicklungsstand 0.3.28 · kein Push / kein Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
-Feste Rücksprungpunkte: **v0.3.27** (aktueller Stand) und **v0.3.25** (vom Benutzer
+Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
 Siehe [VERSIONS.md](VERSIONS.md); Tags nicht verschieben oder überschreiben.
 
@@ -105,12 +105,32 @@ Fortsetzung auf Benutzerauftrag: Sprache und weitere Schalter prüfen und verbes
 
 Bedienung und wichtiger Hinweis beim Update von 0.3.26: [OUTPUT_SETTINGS.md](OUTPUT_SETTINGS.md).
 
+## Abgeschlossen: Teil von B1/B3 in 0.3.28
+
+Automatischer Lauf am 03.11.2026, morgens (Europe/Berlin), Ausgangscommit `b439db1`.
+
+- [x] Fehler eines einzelnen Abmelde-Callbacks reproduziert: bisher blieben weitere
+  Aufräumarbeiten und Gerätewiederherstellung aus. Fehler wird jetzt protokolliert,
+  die übrige Bereinigung läuft weiter.
+- [x] Nach Stopbeginn eintreffende Sensorereignisse, Empfangsbestätigungen und
+  Handyantworten dürfen keine weitere Verarbeitung anstoßen; entsprechend abgesichert.
+- [x] Neustartverhalten regulärer Alarme und Abbruch von Gerätetests lokal geprüft.
+- [x] Originale Lease-Werte bei fehlgeschlagenen Wiederherstellungsbefehlen bleiben erhalten;
+  Recovery-Flag wird auch bei Transport-/Speicherfehlern zurückgesetzt.
+- [x] Acht neue Tests; insgesamt 87 Python- und sieben Frontendtests bestanden.
+
+Kleinerer Subagent bearbeitete die isolierten Recovery-Tests, Hauptagent die
+Aufräumkorrektur und Integration. Keine reale Prozessabschaltung, HA-Store-Atomicity
+oder Gerätezustellung nachgewiesen. B1/B3 bleiben für weitere Unterbrechungs- und
+Speichergrenzen teilweise offen; vorhandene Tags und `main` wurden nicht verändert.
+
 ## Nächste unabhängig ausführbare Schritte
 
 1. Wiederherstellung nach simuliertem Neustart, Abbruch von Hintergrundaufgaben und
    parallele Rückmeldungen / Prioritätswechsel gezielt prüfen. Fehler nur bei
    reproduzierbarem Fehlverhalten ändern. Fehler in Aufräumfunktionen selbst und
-   fehlgeschlagenes reguläres Entladen gezielt mitprüfen.
+   fehlgeschlagenes reguläres Entladen gezielt mitprüfen. Der einzelne Listenerfehler
+   und erst nach Stopbeginn eintreffende Ereignisse sind bereits in 0.3.28 abgesichert.
 2. Benachrichtigungs-/Browser-Mod-Anfragen gegen dokumentierte Schnittstellen prüfen;
    lokale Beispielkonfiguration ergänzen. Das Installationspaket aus Tags ist bereits umgesetzt.
 3. Lastverhalten bei vielen abgeschlossenen Ereignissen und Transporteinträgen messen.
