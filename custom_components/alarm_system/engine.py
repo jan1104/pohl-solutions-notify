@@ -36,6 +36,7 @@ class AlarmEngine:
         self.unsub = []
         self._last_purge = 0
         self.setup_running = set()
+        self.output_tests = {}
         self.setup_receipts = {}
         self.playback_receipts = {}
         self.recovering = False
@@ -105,6 +106,8 @@ class AlarmEngine:
 
     async def stop(self):
         await self.cancel_workers()
+        from .output_tests import cleanup_output_tests
+        await cleanup_output_tests(self)
         async with self.transport:
             await self.stop_devices()
         await self.save()
@@ -341,7 +344,7 @@ class AlarmEngine:
             return
         for d in list(self.model.data["devices"].values()):
             recovery_pending = self.model.data["leases"].get(d["id"], {}).get("incident_id") == "setup"
-            if ((self.missing_categories(d) or recovery_pending) and d["id"] not in self.setup_running
+            if ((self.missing_categories(d) or recovery_pending) and d["id"] not in self.setup_running and d["id"] not in self.output_tests
                     and time() >= d.get("setup_retry_at", 0)):
                 self.setup_running.add(d["id"])
                 self.spawn(self.prepare_categories(d["id"], scheduled=True))
@@ -379,11 +382,11 @@ class AlarmEngine:
         raise asyncio.TimeoutError
 
     def ensure_device_idle(self, device_id):
-        if device_id in self.setup_running or device_id in self.model.data["leases"] or any(i.get("test_device") == device_id for i in self.model.active()):
+        if device_id in self.setup_running or device_id in self.output_tests or device_id in self.model.data["leases"] or any(i.get("test_device") == device_id for i in self.model.active()):
             raise HomeAssistantError("Gerät wird gerade eingerichtet oder alarmiert. Zuerst den Test beenden bzw. die Alarmierung stoppen und die Wiederherstellung abwarten.")
 
     def ensure_test_ready(self, d):
-        if (d["id"] in self.setup_running or self.missing_categories(d)
+        if (d["id"] in self.setup_running or d["id"] in self.output_tests or self.missing_categories(d)
                 or d["id"] in self.model.data["leases"]):
             raise HomeAssistantError("Kategorien werden noch eingerichtet. Handy geöffnet lassen und warten, bis die Einrichtung abgeschlossen ist.")
 
@@ -434,6 +437,8 @@ class AlarmEngine:
                 await asyncio.gather(*(self.command(d, "clear_notification", tag=tag) for _, tag, _ in requests))
 
     async def prepare_categories(self, device_id, scheduled=False):
+        if device_id in self.output_tests:
+            raise HomeAssistantError("Zuerst die Ausgabeprobe beenden")
         if not scheduled:
             if device_id in self.setup_running:
                 return
@@ -1046,7 +1051,7 @@ class AlarmEngine:
             if not self.device_active(d, {'type': kind}):
                 continue
             # Ordinary messages never take over ongoing alarm audio or its popup.
-            interrupted = bool(self.primary_for_device(d) or self.model.data['leases'].get(d['id']))
+            interrupted = bool(self.primary_for_device(d) or self.model.data['leases'].get(d['id']) or d['id'] in self.output_tests)
             quiet = bool(data.get('silent') or interrupted)
             tone = bool(d.get('sound') and not quiet)
             if (d.get('push') or tone) and d.get('platform') != 'browser':
@@ -1072,7 +1077,7 @@ class AlarmEngine:
                 await self.message_popup(d, data)
 
     def message_outputs_available(self, d, kind):
-        return (self.device_active(d, {'type': kind})
+        return (d['id'] not in self.output_tests and self.device_active(d, {'type': kind})
                 and not self.primary_for_device(d)
                 and not self.model.data['leases'].get(d['id']))
 

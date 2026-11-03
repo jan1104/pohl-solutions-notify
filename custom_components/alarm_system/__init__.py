@@ -16,6 +16,7 @@ from .discovery import connections, complete_device
 from .configuration import prepare_import, completed_device_tests, user_view, device_outputs
 from .identity import resolve_name
 from .chart_view import AlarmChartView
+from .output_tests import run_output_test, stop_output_test
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -155,7 +156,8 @@ def validate_manage_payload(engine, action, payload):
         "device_upsert": ("user_id",), "device_remove": ("id",),
         "device_test_begin": ("id",), "device_test_stop": ("id",),
         "device_confirm": ("id",), "device_setup": ("id",), "device_test": ("id",),
-        "alarm_type_remove": ("id",),
+        "alarm_type_remove": ("id",), "output_test": ("id", "alarm_type", "output"),
+        "output_test_stop": ("id", "test_id"),
     }
     if not isinstance(payload, dict):
         raise HomeAssistantError("Verwaltungsdaten müssen ein Objekt sein")
@@ -165,7 +167,7 @@ def validate_manage_payload(engine, action, payload):
     for key in keys:
         if not isinstance(payload.get(key), str) or not payload[key].strip():
             raise HomeAssistantError("Fehlende oder ungültige Angabe: " + key)
-    if action in ("device_test_begin", "device_test_stop", "device_confirm", "device_setup", "device_test"):
+    if action in ("device_test_begin", "device_test_stop", "device_confirm", "device_setup", "device_test", "output_test", "output_test_stop"):
         if payload["id"] not in engine.model.data["devices"]:
             raise HomeAssistantError("Gerät nicht gefunden")
 
@@ -203,6 +205,13 @@ async def ws_get(hass, connection, msg):
         d["restore_pending"] = bool(lease.get("restore_pending"))
         d["setup_categories"] = engine.required_categories(d)
     if connection.user.is_admin:
+        data["output_tests_blocked"] = ('Start-Wiederherstellung läuft' if engine.recovering else
+            'Vorher alle aktiven Alarme beenden' if engine.model.active() else
+            'Wiederherstellung läuft' if engine.model.data['leases'] else
+            'Kategorien-Einrichtung läuft' if engine.setup_running else '')
+        data["output_test_running"] = list(getattr(engine, "output_tests", {}))
+        data["output_test_sessions"] = {did: {key: session.get(key) for key in ('test_id', 'alarm_type', 'output', 'state')}
+                                        for did, session in getattr(engine, 'output_tests', {}).items()}
         data["available_users"] = [{"id": u.id, "name": u.name or u.id} for u in users if u.is_active and not u.system_generated]
         data["phone_connections"], data["browser_connections"] = connections(hass)
         data["notify_actions"] = [f"notify.{s}" for s in hass.services.async_services().get("notify", {}) if s.startswith("mobile_app_")]
@@ -229,9 +238,20 @@ async def ws_manage(hass, connection, msg):
     await engine.actor(connection.user.id, admin=True)
     action, payload = msg["action"], msg["data"]
     validate_manage_payload(engine, action, payload)
+    if action in ('output_test', 'output_test_stop'):
+        try:
+            result = await (run_output_test(engine, payload) if action == 'output_test' else stop_output_test(engine, payload))
+        except (ValueError, TypeError, KeyError) as err:
+            raise HomeAssistantError(str(err)) from err
+        engine.model.log(action, kind=payload.get('alarm_type'), device=engine.model.data['devices'].get(payload['id']),
+                         user_id=connection.user.id, user_name=connection.user.name,
+                         details={'output': payload.get('output'), 'test_id': result.get('test_id'), 'state': result.get('state')})
+        await engine.save()
+        connection.send_result(msg['id'], result)
+        return
     if action in ('alarm_type_upsert', 'alarm_type_remove'):
         async with engine.lock:
-            if engine.model.active() or engine.model.data['leases'] or engine.setup_running:
+            if engine.model.active() or engine.model.data['leases'] or engine.setup_running or getattr(engine, 'output_tests', {}):
                 raise HomeAssistantError('Alarmarten erst nach Ende aller Alarme und Wiederherstellungen ändern')
             try:
                 if action == 'alarm_type_upsert':
@@ -260,8 +280,8 @@ async def ws_manage(hass, connection, msg):
         return
     async with engine.lock:
         if action in ("configuration_preview", "configuration_import"):
-            if engine.setup_running:
-                raise HomeAssistantError("Die Kategorien-Einrichtung läuft noch. Danach erneut importieren.")
+            if engine.setup_running or getattr(engine, "output_tests", {}):
+                raise HomeAssistantError("Eine Einrichtung oder Ausgabeprobe läuft noch. Danach erneut importieren.")
             accounts = {u.id: u.name or "Unbenanntes HA-Konto" for u in await hass.auth.async_get_users() if u.is_active and not u.system_generated}
             try:
                 staged = prepare_import(engine.model.snapshot(), payload.get("backup"), accounts,
@@ -367,6 +387,7 @@ async def ws_manage(hass, connection, msg):
                 await engine.restore_device(d)
                 engine.model.data["devices"].pop(d["id"])
         elif action == "device_test_begin":
+            engine.ensure_device_idle(payload["id"])
             d = engine.model.data["devices"][payload["id"]]
             if any(i.get("test_device") == d["id"] for i in engine.model.active()):
                 raise HomeAssistantError("Den laufenden Gerätetest zuerst beenden")

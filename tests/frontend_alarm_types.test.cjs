@@ -365,3 +365,185 @@ test('information history is collapsed and distinguishes triggered from received
   assert.match(html, /&lt;script&gt;Text&lt;\/script&gt;/);
   assert.match(html, /keine Bestätigung von Empfang/);
 });
+
+
+function deliveryPanel(extra = {}) {
+  return panel({site_id: 'Werkstatt', users: {u: {id: 'u', name: 'Ada <Team>', enabled: true, types: [custom.id]}},
+    devices: {phone: {id: 'phone', user_id: 'u', name: 'Handy', enabled: true, tested: true,
+      platform: 'android', notify_action: 'notify.mobile_app_phone', push: true, sound: true, speech: true, popup: true,
+      browsers: [{id: 'browser'}]}}, ...extra});
+}
+
+test('delivery preview intersects profile and device switches and reports readiness honestly', () => {
+  const p = deliveryPanel();
+  const source = {type: custom.id, name: 'Tür <Ost>', area: 'Eingang', enabled: true};
+  let rows = plain(p.deliveryPlan(source));
+  assert.deepEqual(rows[0].outputs, ['Ton', 'Fenster']);
+  assert.equal(rows[0].reason, '');
+  p.data.devices.phone.sound = false;
+  p.data.devices.phone.tested = false;
+  rows = plain(p.deliveryPlan(source));
+  assert.deepEqual(rows[0].outputs, ['Fenster']);
+  assert.equal(rows[0].reason, 'Geräteprüfung offen');
+  const html = p.renderDeliveryPreview(source);
+  assert.match(html, /Wer bekommt was/);
+  assert.match(html, /Ada &lt;Team&gt;/);
+  assert.match(html, /Tür &lt;Ost&gt;/);
+  assert.match(html, /derzeit keine reguläre Ausgabe/);
+  assert.match(html, /keine Zustell- oder Erreichbarkeitsbestätigung/);
+  p.data.devices.phone.restore_pending = true;
+  assert.match(p.renderDeliveryPreview(source), /Wiederherstellung oder Einrichtung läuft/);
+  assert.match(p.renderDeliveryPreview({type: custom.id}), /Bereiche werden beim Auslösen ergänzt/);
+  assert.match(html, /Achtung. Wasser &lt;Keller&gt;. Standort Werkstatt. Eingang./);
+});
+
+test('delivery preview explains disabled and missing recipients and unsupported speech', () => {
+  const p = deliveryPanel();
+  const source = {type: custom.id, enabled: true};
+  p.data.devices.phone.platform = 'ios';
+  p.data.alarm_types[custom.id].speech = true;
+  assert.deepEqual(plain(p.deliveryPlan(source)[0].outputs), ['Ton', 'Fenster']);
+  p.data.users.u.enabled = false;
+  assert.equal(p.deliveryPlan(source)[0].reason, 'Benutzer deaktiviert');
+  p.data.users.u.enabled = true;
+  p.data.devices = {};
+  assert.equal(p.deliveryPlan(source)[0].reason, 'Kein Gerät zugeordnet');
+  p.data.users.u.types = [];
+  assert.match(p.renderDeliveryPreview(source), /Keine Benutzer/);
+});
+
+test('message preview uses the actual source text and silent mode removes audio', () => {
+  const p = deliveryPanel();
+  p.data.alarm_types.INFO = {...p.typeChoices().find(t => t.id === 'INFO'), push: true, sound: true, speech: true, popup: true};
+  p.data.users.u.types = ['INFO'];
+  const source = {type: 'INFO', name: 'Tor', area: 'Hof', message: 'Bitte das Garagentor schließen.', silent: true, enabled: true};
+  assert.deepEqual(plain(p.deliveryPlan(source)[0].outputs), ['Push-Nachricht', 'Fenster']);
+  assert.equal(p.sourceSpeechPreview(source), source.message);
+  assert.match(p.renderDeliveryPreview(source), /Stumm senden: Ton und Sprache entfallen/);
+  p.data.alarm_types.INFO.speech_template = '{name}: {areas} bei {site}';
+  assert.equal(p.sourceSpeechPreview(source), 'Info: Hof bei Werkstatt');
+});
+
+test('single-output dialog permits unconfirmed devices but limits buttons to enabled outputs', () => {
+  const p = deliveryPanel();
+  p.data.devices.phone.tested = false;
+  const {root} = mount(p);
+  p.openOutputTest(custom.id);
+  assert.match(root.innerHTML, /Ausgaben testen/);
+  assert.match(root.innerHTML, /Geräteprüfung offen/);
+  assert.match(root.innerHTML, /keine vollständige Gerätefreigabe/);
+  assert.match(root.innerHTML, /normalen Benachrichtigungston ohne erzwungene Lautstärke/);
+  assert.match(root.innerHTML, /data-output-test="push" disabled/);
+  assert.match(root.innerHTML, /data-output-test="sound" >Ton testen/);
+  assert.match(root.innerHTML, /data-output-test="speech" disabled/);
+  assert.match(root.innerHTML, /data-output-test="popup" >Fenster testen/);
+  p.data.incidents = {active: {type: 'FIRE', status: 'open', started_at: '2026-11-03'}};
+  p.renderOutputTest();
+  assert.match(root.innerHTML, /data-output-test="sound" disabled/);
+});
+
+test('single-output requests use selected device type and source without changing test confirmation', async () => {
+  const p = deliveryPanel();
+  p.data.sources = {door: {id: 'door', type: custom.id, name: 'Tür', area: 'EG', enabled: true}};
+  mount(p);
+  p.openOutputTest(custom.id);
+  p.outputTestDialog.sourceId = 'door';
+  const calls = [];
+  p.manage = async (action, data) => {calls.push({action, data: plain(data)});return {test_id: 'token', state: 'requested'};};
+  await p.requestOutputTest(p.outputTestDialog, 'sound');
+  assert.deepEqual(calls, [{action: 'output_test', data: {id: 'phone', alarm_type: custom.id, output: 'sound', source_id: 'door'}}]);
+  assert.equal(p.data.devices.phone.tested, true);
+  assert.match(p.outputTestDialog.status, /keinen Empfang/);
+  assert.equal(p.outputTestDialog.session.test_id, 'token');
+  await p.stopOutputTest(p.outputTestDialog);
+  assert.deepEqual(calls[1], {action: 'output_test_stop', data: {id: 'phone', test_id: 'token'}});
+});
+
+test('closing while a test request completes cleans only its returned session', async () => {
+  const p = deliveryPanel();
+  mount(p);p.openOutputTest(custom.id);
+  const dialog = p.outputTestDialog;
+  let complete;
+  const pending = new Promise(resolve => {complete = resolve;});
+  const calls = [];
+  p.manage = async (action, data) => {calls.push({action, data: plain(data)});if (action === 'output_test')return pending;return {ok: true};};
+  const run = p.requestOutputTest(dialog, 'sound');
+  await Promise.resolve();
+  await p.closeOutputTest(dialog);
+  complete({test_id: 'ours'});
+  await run;
+  assert.equal(p.outputTestDialog, null);
+  assert.deepEqual(calls[1], {action: 'output_test_stop', data: {id: 'phone', test_id: 'ours'}});
+});
+
+test('single-output requests reject inactive or silent sources before transport', async () => {
+  const p = deliveryPanel();
+  p.data.alarm_types.INFO = {...p.typeChoices().find(t => t.id === 'INFO'), sound: true, speech: true};
+  p.data.users.u.types = ['INFO'];
+  p.data.sources = {door: {id: 'door', type: 'INFO', name: 'Tor', silent: true, enabled: true}};
+  mount(p);p.openOutputTest('INFO');p.outputTestDialog.sourceId = 'door';
+  p.manage = async () => {throw new Error('must not send');};
+  await p.requestOutputTest(p.outputTestDialog, 'speech');
+  assert.match(p.outputTestDialog.status, /erlaubt die gewählte Testausgabe nicht/);
+  p.data.sources.door.silent = false;p.data.sources.door.enabled = false;
+  await p.requestOutputTest(p.outputTestDialog, 'push');
+  assert.match(p.outputTestDialog.status, /erlaubt die gewählte Testausgabe nicht/);
+});
+
+
+test('test preview matches backend example text and prefixes selected-source text as a test', () => {
+  const p = deliveryPanel();
+  assert.equal(p.testSpeechPreview(custom.id), 'Test. Achtung. Wasser <Keller>. Standort Werkstatt. Beispielbereich.');
+  assert.equal(p.testSpeechPreview('INFO'), 'Test. Dies ist eine Beispielmeldung.');
+  assert.equal(p.testSpeechPreview('INFO', {type: 'INFO', name: 'Tor', area: 'Hof', message: 'Tor offen'}), 'Test. Tor offen');
+});
+
+test('recovered sessions can be stopped deliberately but closing never stops another tabs test', async () => {
+  const p = deliveryPanel({output_test_sessions: {phone: {test_id: 'existing', alarm_type: custom.id, output: 'sound', state: 'requested'}}});
+  const {root} = mount(p);p.openOutputTest(custom.id);
+  assert.equal(p.outputTestDialog.session.owned, false);
+  assert.match(root.innerHTML, /data-output-test="sound" disabled/);
+  const calls = [];
+  p.manage = async (action, data) => {calls.push({action, data: plain(data)});return {ok: true};};
+  const dialog = p.outputTestDialog;
+  await p.closeOutputTest(dialog);
+  assert.equal(calls.length, 0);
+  p.openOutputTest(custom.id);
+  await p.stopOutputTest(p.outputTestDialog);
+  assert.deepEqual(calls, [{action: 'output_test_stop', data: {id: 'phone', test_id: 'existing'}}]);
+});
+
+test('failed transport recovers a pending cleanup token from the refreshed admin snapshot', async () => {
+  const p = deliveryPanel();
+  mount(p);p.openOutputTest(custom.id);
+  p._hass.callWS = async () => {};
+  p.load = async () => {p.data.output_test_sessions = {phone: {test_id: 'cleanup', state: 'cleanup_pending'}};};
+  p.manage = async () => {throw new Error('Transport fehlgeschlagen');};
+  await p.requestOutputTest(p.outputTestDialog, 'sound');
+  assert.equal(p.outputTestDialog.session.test_id, 'cleanup');
+  assert.match(p.outputTestDialog.status, /Transport fehlgeschlagen/);
+});
+
+test('global recovery state blocks new test requests and stopping accepted test audio', async () => {
+  const p = deliveryPanel();
+  const {root} = mount(p);p.openOutputTest(custom.id);
+  p.data.output_tests_blocked = 'Wiederherstellung läuft';
+  p.outputTestDialog.session = {test_id: 'ours', device_id: 'phone', owned: true};
+  p.renderOutputTest();
+  assert.match(root.innerHTML, /Wiederherstellung läuft/);
+  assert.match(root.innerHTML, /id="output-test-stop" disabled/);
+  p.manage = async () => {throw new Error('must not send');};
+  await assert.rejects(p.stopOutputTest(p.outputTestDialog), /Wiederherstellung läuft/);
+});
+
+test('source assignment refreshes only its delivery summary after a field change', () => {
+  const p = deliveryPanel();
+  const {root} = mount(p);
+  p.wizard = {kind: 'source', step: 1, draft: {type: custom.id, name: 'Tür', area: 'Alt', enabled: true}};
+  p.captureWizard = () => {p.wizard.draft.area = 'Neu';};
+  p.renderWizard();
+  const before = root.innerHTML;
+  root.querySelector('#wizard-form').onchange({target: {name: 'area'}});
+  assert.equal(root.innerHTML, before);
+  assert.match(root.querySelector('#source-delivery-preview').innerHTML, /Neu/);
+});
