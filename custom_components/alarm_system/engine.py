@@ -90,7 +90,12 @@ class AlarmEngine:
         """Cancel listeners/workers without writing a potentially incomplete model."""
         self.stopping = True
         while self.unsub:
-            self.unsub.pop()()
+            unsubscribe = self.unsub.pop()
+            try:
+                unsubscribe()
+            except Exception:
+                # Continue cancelling other listeners/workers and restoring devices.
+                _LOGGER.exception("Alarm-Ereignislistener konnte nicht abgemeldet werden")
         tasks = list(self.tasks)
         for task in tasks:
             task.cancel()
@@ -332,6 +337,8 @@ class AlarmEngine:
                 self.spawn(self.prepare_categories(d["id"], scheduled=True))
 
     async def setup_received(self, event):
+        if self.stopping:
+            return  # Ignore queued or unsuccessfully unsubscribed events during shutdown.
         tag = event.data.get("tag")
         playback = self.playback_receipts.get(tag)
         if playback and event.data.get("alarm_playback_id") == playback[0] and not playback[1].done():
@@ -908,6 +915,8 @@ class AlarmEngine:
                 self.spawn(self.show_popup(d, visible, launch=False))
 
     async def mobile_response(self, event):
+        if self.stopping:
+            return  # Ignore queued or unsuccessfully unsubscribed events during shutdown.
         action = event.data.get("action", "")
         if not action.startswith("AS_COMING:"):
             return
@@ -942,6 +951,8 @@ class AlarmEngine:
             await self.simple_message(message)
 
     async def state_changed(self, event):
+        if self.stopping:
+            return  # Ignore queued or unsuccessfully unsubscribed events during shutdown.
         state = event.data.get("new_state")
         if not state:
             return
