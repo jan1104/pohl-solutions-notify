@@ -46,3 +46,7 @@ Nach erneuter ausdrücklicher Benutzerfreigabe develop sowie die Tags v0.4.0/v0.
 ## Update 0.4.2 am 03.11.2026
 
 Mit fortgeltender Nutzerfreigabe develop und v0.4.2 gepusht, [Release v0.4.2](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.4.2) veröffentlicht. Release und HACS-Datei remote geprüft; lokales Installations-ZIP gegen alle enthaltenen Git-Dateien geprüft. main und ältere Tags unverändert, kein HA-Deployment.
+
+## Veröffentlichung 0.5.0 am 03.11.2026
+
+Nach Nutzerauftrag und fortgeltender Push-Freigabe develop und v0.5.0 übertragen sowie GitHub-Release veröffentlicht. Release und HACS-Datei remote geprüft; ZIP-Inhalte byteweise gegen den Tag geprüft. Hauptbranch und frühere Tags unverändert. Kein HA-Deployment und keine native Geräteprüfung.

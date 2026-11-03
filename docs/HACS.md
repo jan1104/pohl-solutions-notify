@@ -27,3 +27,7 @@ Am 03.11.2026 wurde zusätzlich [v0.4.2](https://github.com/jan1104/pohl-solutio
 ## Melderzuordnung 0.4.4
 
 [Release v0.4.4](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.4.4) enthält die einzelne Meldungsart-Auswahl und automatische Gruppierung. Dieses Release in HACS wählen. Übergang alter laufender Gruppen und Fehlalarm-Sperren siehe [CUSTOM_ALARM_TYPES.md](CUSTOM_ALARM_TYPES.md).
+
+## Ausgabetests und Empfängerübersicht 0.5.0
+
+[Release v0.5.0](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.5.0) ergänzt Einzeltests und die Vorschau wirksamer Ausgaben. Dieses Release in HACS auswählen, nach Installation HA neu starten. Anleitung: [OUTPUT_TESTS.md](OUTPUT_TESTS.md).
