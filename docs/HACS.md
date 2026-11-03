@@ -23,3 +23,7 @@ Vor einem praktischen Update vollständige HA-Sicherung erstellen; Hinweise zu e
 ## Aktuelles Update 0.4.2
 
 Am 03.11.2026 wurde zusätzlich [v0.4.2](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.4.2) veröffentlicht. Für die verständliche Sprachtexteingabe und Informationssprache dieses Release auswählen. Ältere Angaben zu v0.4.1 erklären die ursprüngliche HACS-Korrektur.
+
+## Melderzuordnung 0.4.4
+
+[Release v0.4.4](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.4.4) enthält die einzelne Meldungsart-Auswahl und automatische Gruppierung. Dieses Release in HACS wählen. Übergang alter laufender Gruppen und Fehlalarm-Sperren siehe [CUSTOM_ALARM_TYPES.md](CUSTOM_ALARM_TYPES.md).

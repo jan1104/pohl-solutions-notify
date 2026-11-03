@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.4 · 0.4.3 gepusht und als GitHub-Release veröffentlicht / kein HA-Deployment.
+Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.4 · 0.4.4 gepusht und als GitHub-Release veröffentlicht / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -242,3 +242,5 @@ ununterbrochene Arbeit bei ausgeschaltetem Rechner.
 - Regressionen auf Modell-, Import-, Engine- und Frontendebene; echte HA-/Android-/Browser-Prüfung weiterhin offen.
 
 - Umgesetzt und lokal geprüft: 156 Python-/26 Frontendtests; Stand für HACS-Veröffentlichung vorbereitet.
+
+- 0.4.4 mit fortgeltender Nutzerfreigabe gepusht und als GitHub-Release veröffentlicht; Release/HACS-Datei remote und ZIP-Inhalte gegen den Git-Tag geprüft.
