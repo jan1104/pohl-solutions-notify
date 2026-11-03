@@ -37,6 +37,17 @@ class AlarmTypeTests(unittest.TestCase):
         model.profile("FIRE")["name"] = "Lokal"
         self.assertEqual(profiles.default_alarm_types()["FIRE"]["name"], "Feueralarm")
 
+    def test_message_outputs_are_independent_and_roundtrip_without_changing_mode(self):
+        for kind in ('INFO', 'WARNING'):
+            for key in ('push', 'sound', 'speech', 'popup'):
+                with self.subTest(kind=kind, key=key):
+                    flags = {output: output == key for output in ('push', 'sound', 'speech', 'popup')}
+                    result = self.model.upsert_alarm_type({'id': kind, **flags})
+                    self.assertEqual(result['mode'], 'message')
+                    self.assertEqual({k: result[k] for k in flags}, flags)
+                    restored = AlarmModel(self.model.snapshot())
+                    self.assertEqual(restored.profile(kind), result)
+
     def test_partial_profile_migrates_and_full_registry_roundtrips(self):
         registry = profiles.normalize_alarm_types({"FIRE": {"push": False}})
         self.assertFalse(registry["FIRE"]["push"])

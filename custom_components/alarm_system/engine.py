@@ -2,6 +2,7 @@
 from __future__ import annotations
 import asyncio
 from copy import deepcopy
+from html import escape
 from datetime import timedelta
 from time import time
 import logging
@@ -14,6 +15,7 @@ from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, EVENT
+from .alarm_types import DEFAULT_SPEECH_TEMPLATE
 from .model import AlarmModel, stamp
 from .charts import cleanup_history_images
 
@@ -1036,17 +1038,61 @@ class AlarmEngine:
                 data["message"] = data.get("message", "") + "\nVerlaufsbild derzeit nicht verfügbar."
         if data.get("camera") and not data.get("image"):
             data["image"] = "/api/camera_proxy/" + data["camera"]
-        for raw_device in self.model.recipients(data['type']):
-            d = self.effective_device(raw_device, data['type'])
-            if not d.get("push"):
+        kind = data['type']
+        profile = self.model.profile(kind)
+        source = {"id": data.get("source_id", ""), "name": data.get("source_name", ""), **data}
+        for raw_device in self.model.recipients(kind):
+            d = self.effective_device(raw_device, kind)
+            if not self.device_active(d, {'type': kind}):
                 continue
-            payload = {"title": data.get("title", self.model.label(data['type'])), "message": data.get("message", ""),
-                       "data": {"channel": self.model.profile(data['type'])['channel'], "url": data.get("url") or "/alarm-system", "clickAction": data.get("url") or "/alarm-system"}}
-            if data.get("image"):
-                payload["data"]["image"] = data["image"]
-            if data.get("silent"):
-                payload["data"]["push"] = {"sound": "none"}
-                if d["platform"] == "android":
-                    payload["data"]["channel"] = "Alarmstatus"
-                    payload["data"]["importance"] = "low"
-            await self.send(d, payload, source={"id": data.get("source_id", ""), "name": data.get("source_name", ""), **data}, kind=data["type"])
+            # Ordinary messages never take over ongoing alarm audio or its popup.
+            interrupted = bool(self.primary_for_device(d) or self.model.data['leases'].get(d['id']))
+            quiet = bool(data.get('silent') or interrupted)
+            tone = bool(d.get('sound') and not quiet)
+            if (d.get('push') or tone) and d.get('platform') != 'browser':
+                payload = {"title": data.get("title", self.model.label(kind)), "message": data.get("message", ""),
+                           "data": {"channel": profile['channel'], "url": data.get("url") or "/alarm-system", "clickAction": data.get("url") or "/alarm-system"}}
+                if data.get("image"):
+                    payload["data"]["image"] = data["image"]
+                if not tone:
+                    payload["data"]["push"] = {"sound": "none"}
+                    if d['platform'] == 'android':
+                        payload['data'].update(channel='Alarmstatus', importance='low')
+                await self.send(d, payload, source=source, kind=kind)
+            # Recheck after each transport await: a real alarm may have started.
+            if not self.message_outputs_available(d, kind):
+                continue
+            if d.get('speech') and not quiet and d.get('platform') == 'android':
+                template = profile['speech_template']
+                text = (data.get('message') or self.model.label(kind)) if template == DEFAULT_SPEECH_TEMPLATE else template.format(
+                    name=self.model.label(kind), site=self.model.data['site_id'], areas=data.get('area', ''))
+                # One utterance on the normal media stream, without changing phone volume.
+                await self.send(d, {'message': 'TTS', 'data': {'tts_text': text, 'media_stream': 'music_stream'}}, source=source, kind=kind)
+            if d.get('popup') and self.message_outputs_available(d, kind):
+                await self.message_popup(d, data)
+
+    def message_outputs_available(self, d, kind):
+        return (self.device_active(d, {'type': kind})
+                and not self.primary_for_device(d)
+                and not self.model.data['leases'].get(d['id']))
+
+    async def message_popup(self, d, data):
+        """A dismissable information popup; never creates an alarm incident."""
+        async with self.popup_lock:
+            for browser in d.get('browsers', []):
+                if not self.message_outputs_available(d, data['type']):
+                    return
+                bid = browser['id']
+                if self.open_popups.get(bid):
+                    continue
+                try:
+                    await self.hass.services.async_call('browser_mod', 'popup', {
+                        'browser_id': [bid], 'tag': 'alarm_system_message',
+                        'title': data.get('title', self.model.label(data['type'])),
+                        'dismissable': True,
+                        'content': {'type': 'markdown', 'content': escape(data.get('message', ''))}}, blocking=True)
+                    self.model.log('popup_requested', kind=data['type'], device=d, browser_id=bid)
+                    self.defer_transport_save()
+                except Exception as err:
+                    self.model.log('popup_error', kind=data['type'], device=d, browser_id=bid, text=str(err))
+                    self.defer_transport_save()

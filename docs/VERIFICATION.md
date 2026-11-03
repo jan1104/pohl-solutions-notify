@@ -1,5 +1,12 @@
 # Prüfprotokoll
 
+## Sprachtexteingabe und Informationsausgabe 0.4.2 – 03.11.2026
+
+- 146 Python- und 24 Frontendtests erfolgreich, Syntax/Metadaten konsistent.
+- Neue Regressionen: unabhängige Meldungsschalter und Persistenz, Sprache ohne Push, Geräte-/Plattformgrenzen, normale Ton-/Stummregeln, eigene Texte, schließbares Fenster mit escaped Inhalt, deaktivierte Empfänger sowie Alarmstart während Push-Transport.
+- Frontend prüft Standardtext ohne rohes Muster, deutsche Einfügeschaltflächen mit Cursorposition/Längenbegrenzung, sichere Live-Textvorschau und erhaltene Schalter auch beim Umbenennen.
+- Kein echter Home-Assistant-, Android-, Browser- oder Browser-Mod-Test. Vorschau ist Text mit Beispieldaten, kein Wiedergabetest.
+
 ## HACS-Korrektur 0.4.1 – 03.11.2026
 
 - Fehlende Root-hacs.json im unveränderten Commit 47f170b als konkrete Ursache identifiziert, mit offiziellem HACS-Downloadcode abgeglichen.

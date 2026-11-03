@@ -64,8 +64,6 @@ def normalize_alarm_type(kind, record):
         value = record.get(field, field == "push" or mode == "alarm")
         if type(value) is not bool:
             raise ValueError("Schalter muss ein/aus sein: " + field)
-        if mode == 'message' and field != 'push' and value:
-            raise ValueError('Normale Meldungen unterstützen nur den Push-Schalter')
         result[field] = value
     for field, default, maximum in (("tone_seconds", 5, 15), ("speech_seconds", 8, 12)):
         value = record.get(field, None if builtin else default)

@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.1 · 0.4.1 gepusht und als GitHub-Release veröffentlicht / kein HA-Deployment.
+Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.2 · 0.4.1 gepusht und als GitHub-Release veröffentlicht / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -215,3 +215,11 @@ ununterbrochene Arbeit bei ausgeschaltetem Rechner.
 - Nach ausdrücklicher Freigabe am 03.11.2026 develop und Tags 0.4.0/0.4.1 übertragen; GitHub-Release v0.4.1 veröffentlicht und HACS-Datei am Release-Tag remote geprüft. Defaultbranch main bleibt unverändert; in HACS v0.4.1 auswählen.
 - Alten Commit/Tags nicht umschreiben. Kein weiterer lokaler Codeumbau behebt die Auswahl des alten Commits.
 - Anleitung und Quellen: [HACS.md](HACS.md). Echte Installation weiterhin offen.
+
+## Nutzerkorrektur 0.4.2: Sprachtext und Informationsausgaben
+
+- Ausdrücklicher Auftrag: technische Platzhalter verständlich machen, spätere Sprache auch bei Information ermöglichen.
+- Optionaler normaler Sprachtext, deutsche Einfügeschaltflächen und konkrete Beispielvorschau; vorhandene Vorlagen erhalten.
+- INFO/WARNING unterstützen unabhängige Push-/Ton-/Sprach-/Fenster-Ausgaben; Defaults erhalten, einmalig und ohne erzwungene Lautstärke. Ereignis-/Quittierungsmodus unverändert.
+- Reale Alarme haben auf dem jeweiligen Gerät Vorrang, Stummschalter unterdrückt auch Sprache. Rechte und Geräteschalter bleiben wirksam.
+- 146 Python-/24 Frontendtests erfolgreich; HA-/Android-/Browser-Mod-Tests offen. Benutzer hat selbstständiges Pushen am 03.11.2026 erlaubt.

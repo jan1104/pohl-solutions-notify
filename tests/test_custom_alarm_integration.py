@@ -253,3 +253,114 @@ class CustomAlarmIntegration(unittest.IsolatedAsyncioTestCase):
         self.hass.services = types.SimpleNamespace(async_call=AsyncMock())
         await self.engine.show_popup(self.device, incident, launch=False)
         self.hass.services.async_call.assert_not_awaited()
+
+
+class MessageOutputIntegration(unittest.IsolatedAsyncioTestCase):
+    """Exercise the real one-shot message transport, not the alarm cycle."""
+
+    def setUp(self):
+        CustomAlarmIntegration.setUp(self)
+        self.engine.model.data['users']['user']['types'] = ['INFO', 'FIRE']
+        self.engine.send = AsyncMock(return_value=True)
+        self.engine.command = AsyncMock(return_value=True)
+        self.engine.defer_transport_save = Mock()
+        self.hass.services = types.SimpleNamespace(async_call=AsyncMock())
+
+    async def asyncTearDown(self):
+        await CustomAlarmIntegration.asyncTearDown(self)
+
+    def configure(self, **flags):
+        self.engine.model.upsert_alarm_type({'id': 'INFO', **flags})
+
+    async def test_message_speech_works_without_push_and_without_incident_or_volume_commands(self):
+        self.configure(push=False, speech=True)
+        await self.engine.dispatch({'type': 'INFO', 'message': 'Garagentor offen'})
+        payload = self.engine.send.await_args.args[1]
+        self.assertEqual(payload, {'message': 'TTS', 'data': {'tts_text': 'Garagentor offen', 'media_stream': 'music_stream'}})
+        self.assertEqual(self.engine.send.await_count, 1)
+        self.engine.command.assert_not_awaited()
+        self.assertFalse(self.engine.model.active())
+        self.assertFalse(self.engine.model.data['leases'])
+
+    async def test_message_custom_speech_template_is_expanded(self):
+        self.configure(push=False, speech=True, speech_template='{name}: {areas} am Standort {site}')
+        await self.engine.simple_message({'type': 'INFO', 'message': 'Text', 'area': 'Küche'})
+        self.assertEqual(self.engine.send.await_args.args[1]['data']['tts_text'], 'Information: Küche am Standort TEST')
+
+    async def test_device_speech_off_and_non_android_prevent_tts(self):
+        self.configure(push=False, speech=True)
+        for platform, speech in [('android', False), ('ios', True), ('browser', True)]:
+            with self.subTest(platform=platform):
+                self.device.update(platform=platform, speech=speech)
+                await self.engine.simple_message({'type': 'INFO', 'message': 'Text'})
+        self.engine.send.assert_not_awaited()
+
+    async def test_normal_message_sound_respects_profile_device_and_silent(self):
+        self.configure(sound=True)
+        for device_sound, silent, audible in [(True, False, True), (False, False, False), (True, True, False)]:
+            self.device['sound'] = device_sound
+            await self.engine.simple_message({'type': 'INFO', 'message': 'Text', 'silent': silent})
+            payload = self.engine.send.await_args.args[1]['data']
+            self.assertEqual(payload['channel'], self.engine.model.profile('INFO')['channel'] if audible else 'Alarmstatus')
+            self.assertEqual(payload.get('push', {}).get('sound') == 'none', not audible)
+        self.engine.command.assert_not_awaited()
+
+    async def test_message_popup_without_push_is_dismissable_and_escapes_content(self):
+        self.configure(push=False, popup=True)
+        self.device['browsers'] = [{'id': 'browser'}]
+        await self.engine.simple_message({'type': 'INFO', 'message': '<script>alert(1)</script>'})
+        call = self.hass.services.async_call.await_args
+        self.assertEqual(call.args[:2], ('browser_mod', 'popup'))
+        self.assertTrue(call.args[2]['dismissable'])
+        self.assertIn('&lt;script&gt;', call.args[2]['content']['content'])
+        self.engine.send.assert_not_awaited()
+
+    async def test_alarm_has_priority_over_message_speech_sound_and_popup(self):
+        self.configure(sound=True, speech=True, popup=True)
+        self.device['browsers'] = [{'id': 'browser'}]
+        self.engine.model.raise_alarm({'type': 'FIRE', 'alarm_key': 'fire', 'source_id': 'smoke'})
+        await self.engine.simple_message({'type': 'INFO', 'message': 'Text'})
+        self.assertEqual(self.engine.send.await_count, 1)
+        self.assertEqual(self.engine.send.await_args.args[1]['data']['channel'], 'Alarmstatus')
+        self.hass.services.async_call.assert_not_awaited()
+
+    async def test_alarm_starting_during_push_prevents_following_message_audio(self):
+        self.configure(speech=True, popup=True)
+        async def push_then_alarm(*args, **kwargs):
+            self.engine.model.raise_alarm({'type': 'FIRE', 'alarm_key': 'fire', 'source_id': 'smoke'})
+            return True
+        self.engine.send.side_effect = push_then_alarm
+        await self.engine.simple_message({'type': 'INFO', 'message': 'Text'})
+        self.assertEqual(self.engine.send.await_count, 1)
+        self.hass.services.async_call.assert_not_awaited()
+
+    async def test_disabled_user_receives_no_message_outputs(self):
+        self.configure(sound=True, speech=True, popup=True)
+        self.engine.model.data['users']['user']['enabled'] = False
+        await self.engine.simple_message({'type': 'INFO', 'message': 'Text'})
+        self.engine.send.assert_not_awaited()
+        self.hass.services.async_call.assert_not_awaited()
+
+    async def test_silent_message_does_not_speak(self):
+        self.configure(speech=True)
+        await self.engine.simple_message({'type': 'INFO', 'message': 'Text', 'silent': True})
+        self.assertEqual(self.engine.send.await_count, 1)
+        self.assertNotEqual(self.engine.send.await_args.args[1]['message'], 'TTS')
+
+    async def test_later_recipient_revoked_during_first_transport_gets_no_message(self):
+        self.engine.model.data['users']['later'] = {'id': 'later', 'enabled': True, 'types': ['INFO']}
+        self.engine.model.data['devices']['later'] = {**self.device, 'id': 'later', 'user_id': 'later'}
+        async def revoke_later(*args, **kwargs):
+            self.engine.model.data['users']['later']['enabled'] = False
+            return True
+        self.engine.send.side_effect = revoke_later
+        await self.engine.simple_message({'type': 'INFO', 'message': 'Text'})
+        self.assertEqual(self.engine.send.await_count, 1)
+        self.assertEqual(self.engine.send.await_args.args[0]['id'], 'phone')
+
+    async def test_warning_can_speak_without_enabling_other_outputs(self):
+        self.engine.model.data['users']['user']['types'] = ['WARNING']
+        self.engine.model.upsert_alarm_type({'id': 'WARNING', 'push': False, 'speech': True})
+        await self.engine.dispatch({'type': 'WARNING', 'message': 'Fenster noch offen'})
+        self.assertEqual(self.engine.send.await_count, 1)
+        self.assertEqual(self.engine.send.await_args.args[1]['data']['tts_text'], 'Fenster noch offen')

@@ -198,11 +198,67 @@ test('Android sensor requirements follow assigned profile outputs and the device
 });
 
 
-test('ordinary message profiles expose their push switch without alarm audio controls', () => {
+test('information and warning retain every output switch when renamed or disabled', () => {
   const p = panel();
-  const info = p.typeChoices().find(t => t.id === 'INFO');
-  const html = p.alarmTypeFields(info);
-  assert.match(html, /name="push"/);
-  assert.doesNotMatch(html, /name="sound"/);
-  assert.doesNotMatch(html, /name="speech"/);
+  for (const id of ['INFO', 'WARNING']) {
+    const info = {...p.typeChoices().find(t => t.id === id), name: 'Eigene Meldung', push: false, sound: false, speech: false, popup: false};
+    const html = p.alarmTypeFields(info);
+    for (const key of ['push', 'sound', 'speech', 'popup']) assert.match(html, new RegExp('name="'+key+'"'));
+    assert.match(html, /ohne „Ich komme“/);
+    assert.match(html, /Benachrichtigungstext des Melders vorgelesen/);
+    assert.match(html, /Das Garagentor ist noch offen/);
+    assert.doesNotMatch(html, /name="priority"/);
+    p.alarmTypeDraft = info;
+    const values = {speech: {type: 'checkbox', checked: true}, speech_template: {value: 'Bitte das Tor schließen.'}};
+    const result = p.captureAlarmType({querySelector: selector => values[selector.match(/"(.*?)"/)[1]]});
+    assert.equal(result.speech, true);
+    assert.equal(result.push, false);
+    assert.equal(result.mode, 'message');
+    assert.equal(result.speech_template, 'Bitte das Tor schließen.');
+  }
+});
+
+test('standard speech is hidden behind plain instructions and an escaped concrete preview', () => {
+  const p = panel({site_id: 'Werkstatt <Ost>'});
+  const html = p.alarmTypeFields(custom);
+  assert.match(html, /<textarea[^>]*><\/textarea>/);
+  assert.match(html, /Alarmname einfügen/);
+  assert.match(html, /Standort einfügen/);
+  assert.match(html, /Betroffene Bereiche einfügen/);
+  assert.match(html, /Achtung. Wasser &lt;Keller&gt;. Standort Werkstatt &lt;Ost&gt;. Erdgeschoss, Küche./);
+  assert.doesNotMatch(html, /<Keller>|<Ost>/);
+  assert.equal(p.speechPreview({...custom, speech_template: 'Bitte am Eingang melden.'}), 'Bitte am Eingang melden.');
+  assert.equal(p.speechPreview({...custom, speech_template: '{name} bei {site}: {areas}'}), 'Wasser <Keller> bei Werkstatt <Ost>: Erdgeschoss, Küche');
+});
+
+test('speech preview updates with typing and labelled buttons insert at the cursor safely', () => {
+  const p = panel({site_id: 'Haus'});
+  const {root, nodes} = mount(p);
+  const speech = {value: '', selectionStart: 0, selectionEnd: 0, focus() {}, setSelectionRange(start, end) {this.selectionStart = start;this.selectionEnd = end;}};
+  const name = {value: 'Hausalarm'};
+  const insert = {dataset: {speechInsert: 'name'}};
+  root.querySelectorAll = selector => selector === '[data-speech-insert]' ? [insert] : [];
+  root.querySelector('#type-form').querySelector = selector => selector === '[name="speech_template"]' ? speech : name;
+  p.openAlarmType(custom.id);
+  speech.value = 'Bitte prüfen.';
+  speech.oninput();
+  assert.equal(nodes.get('#speech-preview').textContent, 'Bitte prüfen.');
+  speech.value = 'Meldung: Ende';speech.selectionStart = 9;speech.selectionEnd = 13;
+  insert.onclick();
+  assert.equal(speech.value, 'Meldung: {name}');
+  assert.equal(nodes.get('#speech-preview').textContent, 'Meldung: Hausalarm');
+  name.value = '<img src=x>';
+  name.oninput();
+  assert.equal(nodes.get('#speech-preview').textContent, 'Meldung: <img src=x>');
+  speech.value = 'x'.repeat(240);speech.selectionStart = 240;speech.selectionEnd = 240;
+  insert.onclick();
+  assert.equal(speech.value.length, 240);
+  assert.match(nodes.get('#type-error').textContent, /höchstens 240/);
+});
+
+test('message notification tone does not require alarm volume sensors', () => {
+  const p = panel({users: {user: {id: 'user', types: ['INFO']}}});
+  p.data.alarm_types.INFO = {...p.typeChoices().find(t => t.id === 'INFO'), sound: true};
+  p.wizard = {kind: 'device', step: 2, draft: {platform: 'android', user_id: 'user', sound: true, popup: false}};
+  assert.doesNotThrow(() => p.validateWizard());
 });

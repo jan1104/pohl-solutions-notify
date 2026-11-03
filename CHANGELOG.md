@@ -1,5 +1,13 @@
 # Änderungen
 
+## 0.4.2 – verständliche Ansagen und flexible Informationsausgabe
+
+- Sprachtext ist optional und zeigt bei der Standardansage kein technisches Vorlagenmuster mehr. Deutsche Einfügeschaltflächen und eine laufend aktualisierte Textvorschau erklären die dynamischen Angaben.
+- Information/Warnung behalten alle vier Ausgabeschalter. Benachrichtigungston, Android-Sprachansage und Meldungsfenster sind unabhängig vom Push wählbar.
+- Ohne eigenen Sprachtext lesen normale Meldungen ihren Benachrichtigungstext einmal vor. Geräteschalter und Empfängerrechte gelten weiterhin.
+- Normale Meldungen erzwingen keine Handy-Lautstärke, erzeugen keinen quittierungspflichtigen Alarm und verdrängen laufende Alarme nicht. Stumm senden unterdrückt Ton und Sprache.
+- 146 Python- und 24 Frontendtests bestanden; echte HA-/Android-Prüfung offen.
+
 ## 0.4.1 – HACS-Downloadmetadaten, lokal vorbereitet
 
 - Fehlende `hacs.json` im Repository-Hauptverzeichnis ergänzt; Ursache der Meldung beim Download von `47f170b`.
