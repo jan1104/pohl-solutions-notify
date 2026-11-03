@@ -1,5 +1,12 @@
 # Änderungen
 
+## Entwicklungsplanung – 03.11.2026
+
+- Detaillierte Arbeitsliste mit 36 Paketen, Prioritäten, Abhängigkeiten und Fertig-Kriterien erstellt.
+- Technische Gegenprüfung und zusätzliche Randfälle dokumentiert; neue Produktideen
+  von laufender Fehler-/Testarbeit getrennt. App-Code und Versionstags unverändert.
+
+
 ## Versionssicherung – 03.11.2026
 
 - Quellstände 0.3.27 und 0.3.25 mit festen lokalen Tags markiert; keine Änderung am App-Code.

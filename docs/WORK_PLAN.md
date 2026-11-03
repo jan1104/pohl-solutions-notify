@@ -6,6 +6,14 @@ Feste Rücksprungpunkte: **v0.3.27** (aktueller Stand) und **v0.3.25** (vom Benu
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
 Siehe [VERSIONS.md](VERSIONS.md); Tags nicht verschieben oder überschreiben.
 
+## Detaillierte Arbeitsliste
+
+[DEVELOPMENT_BACKLOG.md](DEVELOPMENT_BACKLOG.md) enthält 36 priorisierte Arbeitspakete
+mit Abhängigkeiten und Fertig-Kriterien. Für automatische Fehler-/Testarbeit zunächst
+B1/B3, danach B2/B4 und B6/C3 bearbeiten. Neue Funktionsvorschläge aus D/E/H sind
+Planungsoptionen; ihre Aufnahme ist keine automatische Freigabe zum Einbauen.
+Gesicherte Tags und App 0.3.27 wurden bei der Planung nicht verändert.
+
 ## Auftrag und Arbeitsweise
 
 Der Benutzer hat die Behebung der analysierten Probleme und automatische Weiterarbeit
