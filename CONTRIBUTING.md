@@ -1,6 +1,7 @@
 # Entwicklung
 
-Arbeitsordner: `D:\depot\pohl-solutions-notify`. Standardbranch: `main`.
+Arbeitsordner: `D:\depot\pohl-solutions-notify`. Gesicherter Ausgangsbranch: `main`; weitere Entwicklung auf `develop`.
+Feste Versionen und Rückkehr sind in [VERSIONS.md](docs/VERSIONS.md) beschrieben.
 Dieses Repository ist proprietär; diese Anleitung erteilt keine Nutzungsrechte.
 
 ## Lokal prüfen

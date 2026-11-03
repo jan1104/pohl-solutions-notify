@@ -40,6 +40,7 @@ Details, Voraussetzungen und Aktualisierung: [Installationsanleitung](docs/INSTA
 - [Projektanalyse des Ausgangsstands](docs/PROJECT_REVIEW.md)
 - [Arbeitsplan und aktueller Status](docs/WORK_PLAN.md)
 - [Praktische HA- und Geräteprüfung](docs/HA_TEST_PROTOCOL.md)
+- [Gesicherte Versionen und Rückkehr](docs/VERSIONS.md)
 - [Änderungen](CHANGELOG.md)
 - [Rechtehinweis](LICENSE)
 

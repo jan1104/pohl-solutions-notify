@@ -1,7 +1,10 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 02.11.2026 · lokaler Entwicklungsstand 0.3.27 · kein Push / kein Deployment.
-Arbeitsordner: `D:\depot\pohl-solutions-notify`.
+Stand: 03.11.2026 · lokaler Entwicklungsstand 0.3.27 · kein Push / kein Deployment.
+Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
+Feste Rücksprungpunkte: **v0.3.27** (aktueller Stand) und **v0.3.25** (vom Benutzer
+als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
+Siehe [VERSIONS.md](VERSIONS.md); Tags nicht verschieben oder überschreiben.
 
 ## Auftrag und Arbeitsweise
 
@@ -10,11 +13,24 @@ alle sechs Stunden beauftragt. Die aktive chatgebundene Automation heißt
 **Pohl Notify weiterentwickeln**, ID `pohl-notify-weiterentwickeln`.
 Sie liest diesen Plan und bearbeitet den nächsten sinnvollen offenen Schritt.
 
-Vor jedem Lauf `git status` und letzte Commits lesen; fremde Änderungen erhalten.
+Vor jedem Lauf `git status`, aktuellen Branch und letzte Commits lesen; fremde Änderungen erhalten.
+Auf `develop` weiterarbeiten. Wenn ein anderer Branch mit fremder Arbeit aktiv ist,
+nicht ungefragt wechseln oder dessen Änderungen übernehmen. Geeignete abgegrenzte
+Programmieraufgaben an Subagenten geben; der Hauptagent prüft und integriert.
+Kleinere Modelle für Routineaufgaben verwenden, soweit verfügbar und geeignet.
 Nur belegte Fehler und klar beschriebene Folgeschritte bearbeiten. Aussagekräftige
 Prüfungen ergänzen, Dokumentation aktualisieren und zusammenhängende lokale Commits
 erstellen. Kein Push, Release, Deployment, Lizenzwechsel oder neue Produktfunktion
 ohne gesonderten Auftrag. Keine Änderung nur zur Erzeugung vermeintlichen Fortschritts.
+
+## Versionssicherung am 03.11.2026
+
+- Aktueller unveränderter App-Stand 0.3.27 und älterer lokaler Stand 0.3.25 mit Tags gesichert.
+- Weiterentwicklung von der bisherigen Version auf eigenem Branch getrennt.
+- Lokales Verpackungswerkzeug mit vier Tests, geprüfte Installations-ZIPs aus beiden Tags
+  und zusätzliche Git-Historiensicherung erstellt. 79 Python- und sieben Frontendtests bestanden.
+- Rückkehr zum Quellstand und Grenzen gegenüber HA-Laufzeitdaten dokumentiert.
+- Benutzer bestätigt Android und Priorität **Einbruch vor Feuer** auf gemeinsamen Geräten.
 
 ## Festgelegte Produktregeln für die Korrekturen
 
@@ -88,7 +104,7 @@ Bedienung und wichtiger Hinweis beim Update von 0.3.26: [OUTPUT_SETTINGS.md](OUT
    reproduzierbarem Fehlverhalten ändern. Fehler in Aufräumfunktionen selbst und
    fehlgeschlagenes reguläres Entladen gezielt mitprüfen.
 2. Benachrichtigungs-/Browser-Mod-Anfragen gegen dokumentierte Schnittstellen prüfen;
-   lokale Beispielkonfiguration und wiederholbares Installationspaket vorbereiten.
+   lokale Beispielkonfiguration ergänzen. Das Installationspaket aus Tags ist bereits umgesetzt.
 3. Lastverhalten bei vielen abgeschlossenen Ereignissen und Transporteinträgen messen.
    Erst anhand der Ergebnisse begrenzte Datenabfragen oder Speichermaßnahmen umsetzen.
 4. Die bereits ergänzten Schalter-/Assistententests um Export-/Verlaufstests erweitern.

@@ -1,0 +1,79 @@
+# Gesicherte Versionen und Rückkehr
+
+Stand: 03.11.2026. Alle Sicherungen wurden lokal erstellt; nichts auf GitHub veröffentlicht.
+
+| Stand | Fester Git-Tag | Quellcommit | Einordnung |
+| --- | --- | --- | --- |
+| 0.3.27 | `v0.3.27` | `47f170b` | Aktueller eingefrorener Quellstand; 75 Python- und sieben Frontendtests bestanden |
+| 0.3.25 | `v0.3.25` | `c76c70f` | Lokaler Stand zur vom Benutzer als bereits gelaufen gemeldeten Versionsnummer |
+
+Der auf dem Handy tatsächlich installierte Quellinhalt wurde nicht aus HA ausgelesen.
+Deshalb ist die Zuordnung von 0.3.25 zur Nutzerangabe keine zusätzliche technische
+Prüfung der Installation. 0.3.27 wurde noch nicht auf echten Geräten bestätigt.
+
+## Weitere Entwicklung
+
+`main` bleibt auf `47f170b`. Die weitere Arbeit einschließlich Verpackungswerkzeug
+und dieser Dokumentation erfolgt auf `develop`. Die Tags halten exakt den damaligen
+Inhalt fest, unabhängig von späteren Änderungen. Keine dieser Marken automatisch
+verschieben oder durch ein erzwungenes Update ersetzen.
+
+Der Benutzer hat Subagenten für geeignete Programmieraufgaben gewünscht. Kleine,
+abgrenzbare Aufgaben können kleinere Modelle bearbeiten; der Hauptagent prüft und
+integriert das Ergebnis. So werden parallele Änderungen an denselben Dateien vermieden.
+
+## Installation aus einer gesicherten Version
+
+Das lokale Werkzeug erstellt Installations-ZIPs ausschließlich aus Git-Tags:
+
+```powershell
+python scripts/package_snapshot.py --ref v0.3.27
+python scripts/package_snapshot.py --ref v0.3.25
+```
+
+Die Dateien liegen unter `dist/alarm_system-0.3.27.zip` und
+`dist/alarm_system-0.3.25.zip`. Sie enthalten nur die verfolgten Integrationsdateien
+unter `custom_components/alarm_system`, keine Caches, Dokumentation oder privaten
+HA-Daten. Bereits vorhandene Pakete werden nicht überschrieben. Weitere Kopien in
+anderen Zielordnern lassen sich mit `--output-dir` erstellen.
+
+Die aktuelle Windows-Python-Umgebung ist in [WORK_PLAN.md](WORK_PLAN.md) angegeben.
+Die SHA-256-Werte und zugehörigen Quellcommits stehen in `dist/snapshots.json`.
+Ein zusätzliches Git-Bundle unter `dist/pohl-solutions-notify-history.bundle`
+sichert die lokale Versionshistorie einschließlich Tags und Entwicklungszweig zum
+Zeitpunkt seiner Erstellung. Spätere Commits sind darin erst nach einer erneuten,
+separaten Sicherung enthalten. `dist` wird nicht in Git aufgenommen.
+
+## Sicher zurückkehren
+
+**Quellcode:** Die Tags können unabhängig vom Entwicklungszweig als ZIP ausgepackt
+oder in einem separaten Verzeichnis betrachtet werden. Kein `git reset --hard` und
+keine uncommitteten Änderungen für einen Rücksprung löschen. Ein separater Checkout
+lässt sich bei Bedarf beispielsweise so anlegen:
+
+```powershell
+git worktree add --detach ..\pohl-solutions-notify-0.3.27 v0.3.27
+```
+
+Das neue Verzeichnis muss noch frei sein. Im eigentlichen Arbeitsordner bleibt
+`develop` unverändert.
+
+**Home Assistant:** Ein Quellcode-Tag sichert weder HA-Einstellungen noch Ereignisse
+oder ursprüngliche Handyeinstellungen. Vor jedem praktischen Update eine vollständige
+HA-Sicherung erstellen und ihr die Integrationsversion zuordnen. Vor einem Downgrade
+aktive Alarme und Gerätetests beenden, die Wiederherstellung am Handy abwarten und
+dann HA stoppen. Anschließend den Integrationsordner durch das gewählte Paket ersetzen
+und wieder starten. Bei Problemen mit Laufzeitdaten die zur Version passende vollständige
+HA-Sicherung verwenden, statt interne Speicherdateien willkürlich zu bearbeiten.
+
+Insbesondere kennt 0.3.25 die später eingeführten reinen Sprachaufträge nicht. Nicht
+mit ausstehenden Sprach-/Wiederherstellungsaufträgen auf diese Version zurückgehen.
+Lokale Git-Snapshots ermöglichen die exakte Rückkehr zum Code; sie garantieren keine
+verlustfreie Rückwärtsmigration fremder HA-Laufzeitdaten.
+
+## Unabhängige Sicherung
+
+ZIPs und Bundle auf demselben Rechner schützen vor versehentlichen Codeänderungen,
+aber nicht vor Ausfall dieses Rechners. Für eine unabhängige Kopie diese Dateien auf
+ein anderes Laufwerk oder ein vorhandenes Sicherungsziel kopieren. Es wurde dafür
+kein neues externes Konto oder Cloudspeicher eingerichtet.

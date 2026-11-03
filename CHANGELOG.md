@@ -1,5 +1,13 @@
 # Änderungen
 
+## Versionssicherung – 03.11.2026
+
+- Quellstände 0.3.27 und 0.3.25 mit festen lokalen Tags markiert; keine Änderung am App-Code.
+- Weitere Entwicklung auf `develop`, bisheriger `main` bleibt als Ausgangsstand erhalten.
+- Installationspakete aus Tags, lokale Git-Historiensicherung und Rückkehranleitung ergänzt.
+- Gewünschte Nutzung von Subagenten für geeignete Programmieraufgaben dokumentiert.
+
+
 ## 0.3.27 – lokal vorbereitet, nicht veröffentlicht
 
 - Android-Sprachansage funktioniert unabhängig vom Alarmton; eigene stoppbare

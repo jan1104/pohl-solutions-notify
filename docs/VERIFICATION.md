@@ -1,5 +1,21 @@
 # Prüfprotokoll
 
+## Versionssicherung – 03.11.2026
+
+- Vor Beginn sauberer Arbeitsstand auf `main`, HEAD `47f170b`; keine fremden Änderungen.
+- `v0.3.27` auf `47f170b`, `v0.3.25` auf `c76c70f` annotiert und auf Manifestversion geprüft.
+- `develop` für die weitere Arbeit angelegt; App-Dateien gegenüber `v0.3.27` unverändert.
+- Installationspakete ausschließlich aus verfolgten Integrationsdateien beider Tags erzeugt,
+  alle ZIP-Dateien gegen Git-Blobs abgeglichen und ZIP-Integrität geprüft. SHA-256-Werte
+  in `dist/snapshots.json` dokumentiert. Keine Caches oder privaten HA-Laufzeitdaten enthalten.
+- Ein kleinerer Subagent implementierte das Verpackungswerkzeug; der Hauptagent prüfte
+  Ergebnis, Fehlerbehandlung und die integrierte Testserie.
+- 79 Python-Tests und sieben Node.js-Frontendtests bestanden. 19 Python-Dateien,
+  drei JSON-Dateien und Versionskonsistenz geprüft; Git-Whitespaceprüfung erfolgreich.
+- Zusätzliche lokale Sicherung aller Git-Referenzen als Bundle; keine externe Kopie,
+  kein Push, kein Deployment und kein neuer HA-/Handytest.
+
+
 ## Lokaler Entwicklungsstand 0.3.27 – 02.11.2026
 
 - Ausgabeoptionen erneut geprüft: unabhängige Android-Sprache, nur Ton, nur Push,

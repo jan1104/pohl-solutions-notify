@@ -3,7 +3,8 @@
 - Repository: https://github.com/jan1104/pohl-solutions-notify
 - Lokaler Arbeitsordner: `D:\depot\pohl-solutions-notify`
 - Remote `origin`: `https://github.com/jan1104/pohl-solutions-notify.git`
-- Branch: `main`
+- Gesicherter Ausgangsbranch: `main`; Weiterentwicklung: `develop`
+- Lokale Versionstags: `v0.3.25` und `v0.3.27`
 - Commit-Autor: `jan1104 <152987784+jan1104@users.noreply.github.com>`
 - Rechte: Pohl Solutions, alle Rechte vorbehalten; keine Open-Source-Freigabe.
 
