@@ -115,3 +115,5 @@ Die Umstellung vorhandener Melder sowie laufender alter Gruppen ist in [CUSTOM_A
 ## Kompakter Verlauf ab 0.4.5
 
 Jeder abgeschlossene Alarm steht zunächst zugeklappt im Verlauf. Datum/Uhrzeit, Status, Alarmart und beteiligte Melder sind sofort sichtbar. Ein Klick oder die Tastatur öffnet Bereiche, Rückmeldungen, Zeitpunkte sowie Verlauf/Transport. Der Aufklappzustand bleibt während automatischer Aktualisierungen erhalten; beim erneuten Öffnen der Seite beginnen die Einträge wieder geschlossen. Aktive Alarme bleiben vollständig sichtbar. Informationen/Warnungen zeigen als Status **Gemeldet**; das ist keine Bestätigung des tatsächlichen Empfangs.
+
+Ab 0.5.0: Unter **Alarmarten → Ausgaben testen** einzelne Ausgaben prüfen. Die Melderzuordnung zeigt **Wer bekommt was?** einschließlich Geräteschaltern und offenen Prüfungen. Siehe [OUTPUT_TESTS.md](OUTPUT_TESTS.md).

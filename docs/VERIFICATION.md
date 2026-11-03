@@ -1,5 +1,14 @@
 # Prüfprotokoll
 
+## Einzeltests und Empfängerübersicht 0.5.0 – 03.11.2026
+
+- 185 Python- und 41 Frontendtests erfolgreich; Syntax, Versionen und Metadaten konsistent.
+- Testgrenzen: Adminrechte und verschachtelte Kennungen, Profil-/Geräteschalter, Plattform, echte Meldertexte, Stummschaltung, deaktivierte Zuordnungen und keine Gerätefreigabe.
+- Lebenszyklus: gezielter Stopp mit aktueller Kennung, abgelaufene/ersetzte Tests, Fehler und erneute Bereinigung, Ablauf, Entladen und verspätete Dialogantworten.
+- Unabhängige Gegenprüfung fand unbeschränkt wartende Testtransporte. Behoben und mit hängendem Transport, neuem Alarm, Zeitüberschreitung, unbestätigtem Abbruch und Popup-Sperrübernahme geprüft. Speicherung hält die Transportsperre nicht mehr.
+- Vorschau und Bedienelemente prüfen Empfänger, Plattformen, effektive Ausgaben, offene Freigaben und Wiederherstellung; keine aktuelle Erreichbarkeit behauptet.
+- Modell/Engine/Frontend laufen in lokalen Adaptern. Keine echte HA-, Browser-, Android- oder Browser-Mod-Prüfung. Bereits extern angenommene Befehle bleiben eine native Prüfgrenze.
+
 ## Sprachtexteingabe und Informationsausgabe 0.4.2 – 03.11.2026
 
 - 146 Python- und 24 Frontendtests erfolgreich, Syntax/Metadaten konsistent.

@@ -1,5 +1,14 @@
 # Änderungen
 
+## 0.5.0 – gezielte Ausgabetests und Empfängerübersicht
+
+- Unter Alarmarten einzelne Push-, Ton-, Sprach- oder Fensterproben für ein zugeordnetes Gerät anfordern; optional echte Melderdaten statt Beispielen verwenden.
+- TEST-Kennzeichnung, gezielter Stopp, automatische Bereinigung und erneuter Stopp nach Transportfehlern. Keine Sensoränderung, Alarmereignisse oder Gerätefreigabe.
+- Tests beachten Profil-/Geräteschalter, Plattform und Empfängerrechte; während Alarmen, Einrichtung und Wiederherstellung gesperrt. Tonprobe verwendet normale Benachrichtigungseinstellungen.
+- Neue Übersicht „Wer bekommt was?“ bei Melderzuordnung und Alarmarten zeigt wirksame Ausgaben, fehlende Zuordnungen und offene Geräteprüfungen ohne Zustellversprechen.
+- Zeitlich begrenzte Testtransporte geben beim Alarmstart die Transportsteuerung frei; nicht bestätigte Abbrüche bleiben zur Bereinigung gesperrt. Speicherung außerhalb der Transportsperre.
+- 185 Python- und 41 Frontendtests erfolgreich. Echte HA-/Android-/Browser-Mod-Prüfung offen; Anleitung in docs/OUTPUT_TESTS.md.
+
 ## 0.4.5 – kompakter Alarmverlauf
 
 - Abgeschlossene Alarme sind einzeln standardmäßig zugeklappt. Die Kurzzeile zeigt Datum/Uhrzeit, Status, Alarmart und alle beteiligten Melder.

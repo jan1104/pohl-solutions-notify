@@ -97,3 +97,9 @@ und Freigabestatus aktualisieren.
 Zwei Binary-Sensoren verschiedener Bereiche derselben eigenen Alarmart zuordnen. Im Assistenten darf nur **Art der Meldung** erscheinen, kein Freitext zur Meldungsart und keine manuelle Ereignisgruppe. Beide Signale einschalten: ein gemeinsamer Alarm mit zwei Meldern und beiden Bereichen. Eine andere Alarmart muss einen getrennten Alarm erzeugen. Einzelne Melder beenden und deren AUS/AN-Wechsel prüfen; ein normales Signal beendet weiterhin keinen offenen Alarm.
 
 Upgrade auf einer vollständigen Kopie der Testinstanz mit alten getrennten Gruppen sowie einer Fehlalarm-Sperre prüfen: laufende Gruppen/Titel und Sperren erhalten, AUS muss Sperren lösen; spätere neue Auslösungen automatisch gruppieren. Export/Import einer alten Konfiguration normalisiert Gruppen ohne historische Ereignisse zu überschreiben. INFO/WARNING bleiben einzelne Meldungen. Kein Ergebnis dieser Hardware-/HA-Prüfungen wurde bislang bestätigt.
+
+## Einzeltests und Empfängerübersicht ab 0.5.0
+
+Admin legt je Alarmart unterschiedliche Empfänger und Ausgabeschalter fest: Vorschau bei Melderzuordnung muss die kombinierten Einstellungen und offenen Prüfungen zeigen. Einzelne Push-/Ton-/Sprach-/Fenstertests auch für INFO/WARNING und ein unbestätigtes Gerät prüfen; kein Test darf eine Gerätefreigabe erteilen. Reale Melderdaten statt Beispieldaten auswählen und sichtbare/gesprochene TEST-Kennzeichnung prüfen.
+
+Stopp, Dialog schließen, Ablauf nach 30 Sekunden, Transportfehler und Wiederholen prüfen. Ein späterer echter Alarm muss Vorrang behalten; dessen Audio/Fenster darf durch verspätete Testbereinigung nicht beendet werden. Stoppen einer bereits vom Handy angenommenen Ansage und tatsächliche Tonlänge sind native Prüfungen. Normale maximale Alarm-Lautstärke wird mit einer Einzelprobe nicht geprüft. Kein Ergebnis dieser praktischen Schritte ist bislang bestätigt.

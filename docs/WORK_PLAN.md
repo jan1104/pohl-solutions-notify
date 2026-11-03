@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.5 · 0.4.5 gepusht und als GitHub-Release veröffentlicht / kein HA-Deployment.
+Stand: 03.11.2026 · lokaler Entwicklungsstand 0.5.0 · 0.4.5 gepusht und als GitHub-Release veröffentlicht / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -252,3 +252,14 @@ ununterbrochene Arbeit bei ausgeschaltetem Rechner.
 - 29 Frontendtests sowie Syntax und Versionen geprüft. Letzte Python-Verhaltensprüfung: 156 Tests in 0.4.4; keine Änderung der Python-Alarmregeln.
 
 - 0.4.5 gepusht und als GitHub-Release veröffentlicht; Release/HACS-Datei remote sowie ZIP-Inhalte gegen Git-Tag geprüft.
+
+## Beauftragte Verbesserungen 0.5.0: Einzeltests und Empfängerübersicht
+
+- Nutzer beauftragt die vorgeschlagenen nächsten Schritte: einzelne Ausgaben pro Alarmart/Gerät testen und wirksame Empfänger vorab anzeigen.
+- Administratorrechte, reale oder ausdrücklich beispielhafte Melderdaten, TEST-Kennzeichnung, keine Sensoränderungen oder Gerätefreigabe. Normale Tonprobe statt erzwungener Lautstärke.
+- Ein Test pro Gerät mit Kennung, gezielter Stopp und automatische Bereinigung; Alarme/Leases/Einrichtung schützen, Fehlerzustände für erneuten Stopp erhalten.
+- Vorschau zeigt Profil-/Geräteschalter, Plattform, deaktivierte Zuordnungen, offene Geräteprüfungen und vorübergehende Einschränkungen ohne Empfangsbestätigung.
+- Gegenprüfung fand unbeschränkt wartenden Testtransport unter gemeinsamer Sperre. Vor Veröffentlichung durch begrenzten, bei Alarm abbrechbaren Transport absichern.
+- Korrigiert: gemeinsame Fünf-Sekunden-Grenze, laufende Alarmprüfung und begrenztes Abbruchwarten; Speicherung außerhalb der Transportsperre. Regressionen bestätigen Freigabe bei hängender Probe und eintreffendem Alarm sowie korrekte Popup-Sperren.
+- Gesamtprüfung: 185 Python- und 41 Frontendtests, Syntax/Metadaten/Versionen und Whitespace erfolgreich. Unabhängige Gegenprüfung abgeschlossen; native HA-/Android-/Browser-Mod-Prüfung offen.
+- Anleitung und Grenzen: [OUTPUT_TESTS.md](OUTPUT_TESTS.md). Nur diese zwei Vorschläge beauftragt; weitere Ideen bleiben Optionen.
