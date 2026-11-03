@@ -1,5 +1,22 @@
 # Prüfprotokoll
 
+## Lokaler Entwicklungsstand 0.4.0 – 03.11.2026
+
+- Ausgangsstand sauber auf `develop`, HEAD `037b832`.
+- 132 Python-Tests und 21 Node.js-Tests erfolgreich; 25 Python-Dateien, drei JSON-
+  Dateien und Versionskonsistenz geprüft. Frontend-Syntax gültig, Git-Whitespaceprüfung sauber.
+- Neue Prüfungen: Migration/Profilvalidierung, eigene Ereignisse/Melder/Priorität,
+  Caps am Gerät, individuelle TTS/Zeiten/Kanäle, Admin-Verwaltung, erneute Geräteprüfung,
+  Schema 1/2, Erhalt historischer Referenzen, dynamische Auswahl und Namens-Escaping.
+- Eigene Basistests für ausschließlich eigenen Alarmarten zugeordnete Konten waren
+  zunächst nicht sichtbar/bedienbar; gezielt nachgestellt und korrigiert. Tests sichern
+  weiterhin Ablehnung fremder Tests, echter nicht zugewiesener Alarme und deaktivierter Konten ab.
+- Zwei Subagenten bearbeiteten Modell und Frontend; Hauptagent prüfte und integrierte
+  reale Projektmethoden mit ersetzten HA-/HTTP-/Browsergrenzen.
+- Keine echte HA-, Browser- oder Android-Prüfung, kein Deployment und kein neuer Push.
+- Feste Ausgangstags und `main` unverändert; Anleitung und Sicherungsgrenzen in CUSTOM_ALARM_TYPES.md.
+
+
 ## Lokaler Entwicklungsstand 0.3.29 – 03.11.2026, automatischer Nachmittagslauf
 
 - Sauberer Ausgangsstand auf `develop`, HEAD `b9e4527`.

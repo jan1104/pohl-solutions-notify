@@ -1,4 +1,4 @@
-# Praktische Home-Assistant- und Geräteprüfung für 0.3.29
+# Praktische Home-Assistant- und Geräteprüfung für 0.4.0
 
 Status: noch nicht durchgeführt. Nicht als Produktionsfreigabe verwenden.
 Eine getrennte Testinstanz mit Sicherung, Testkonten und kontrollierten Sensoren
@@ -69,6 +69,21 @@ Bei nur Sprache die unveränderten Rufton-/Benachrichtigungseinstellungen sowie 
 Abbruch, Offline-Wiederholung und HA-Neustart prüfen. Für INFO/WARNING Push aus testen.
 Android-Kanal `Alarmstatus` mit vorhandenen persönlichen Einstellungen auf tatsächlich
 stummes Verhalten prüfen. iPhone und Browser dürfen keinen Sprachschalter anzeigen.
+
+## Eigene Alarmarten ab 0.4.0
+
+Hausalarm und Amokalarm auf der Testinstanz anlegen, getrennte Konten zuordnen und
+Binary-Sensoren verbinden. Je Profil Push/Ton/Sprache/Popup unabhängig prüfen;
+Geräte-Aus darf vom Profil nicht überschrieben werden. Individuelle Kategorien,
+Tonwahl und Sprachvorlagen am Android-Gerät testen. Prioritäten 30 und bewusst 5
+gegen Einbruch 10/Feuer 20 auf gemeinsamen und getrennten Geräten prüfen.
+
+Nur einem eigenen Typ zugeordnetes normales Konto muss seinen Basistest sehen/
+stoppen können, aber keinen echten unzugewiesenen Feueralarm oder fremden Test.
+Umbenennen muss ID und gewählten Android-Kanal erhalten. Schema-2-Export auf derselben
+Testinstanz wieder importieren; anschließend Geräte neu prüfen. Alte Schema-1-Sicherung
+weiter einlesen; vorhandene Historie mit eigenen Typen erhalten. Gebrauchte Arten
+nicht löschen können. Rückkehr nur mit passender vollständiger HA-Sicherung proben.
 
 ## Abschluss
 

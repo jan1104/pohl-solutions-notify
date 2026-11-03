@@ -4,12 +4,15 @@
 - Lokaler Arbeitsordner: `D:\depot\pohl-solutions-notify`
 - Remote `origin`: `https://github.com/jan1104/pohl-solutions-notify.git`
 - Gesicherter Ausgangsbranch: `main`; Weiterentwicklung: `develop`
-- Lokale Versionstags: `v0.3.25` und `v0.3.27`
+- Versionstags: `v0.3.25`, `v0.3.27` und neu lokal `v0.4.0`
 - Commit-Autor: `jan1104 <152987784+jan1104@users.noreply.github.com>`
 - Rechte: Pohl Solutions, alle Rechte vorbehalten; keine Open-Source-Freigabe.
 
 Das Remote wurde eingerichtet und lesend geprüft. Bei der Einrichtung lieferte es
-keine Branches oder Tags, war also leer. Es wurde weder gepusht noch ein Release erstellt.
+keine Branches oder Tags, war also leer. Bei der Ersteinrichtung wurde weder gepusht noch ein Release erstellt. Am 03.11.2026
+wurden main, develop (damals 0.3.29) und die Tags 0.3.25/0.3.27 ausdrücklich vom
+Benutzer zum Push freigegeben und erfolgreich übertragen. Der neue lokale Stand
+0.4.0 wurde noch nicht gepusht; es wurde kein Release erstellt.
 Die Sichtbarkeit des Repositories wird damit nicht geprüft oder geändert.
 
 ## Vor der ersten Übertragung

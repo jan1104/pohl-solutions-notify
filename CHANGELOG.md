@@ -1,5 +1,22 @@
 # Änderungen
 
+## 0.4.0 – eigene Alarmarten, lokal vorbereitet
+
+- Bis zu 32 frei benannte eigene Alarmarten; dynamische Auswahl bei Benutzern,
+  Meldern, Gerätetests und Automationsaktionen.
+- Name, Empfängerzuordnung, Priorität, Push, Ton, Sprache, Popup, Ablaufzeiten und
+  Sprachvorlage individuell konfigurieren; Geräteschalter gelten zusätzlich.
+- Vorhandene vier Arten automatisch übernehmen; Einbruch-/Feuerprioritäten beibehalten.
+- Persistente eindeutige Typen-IDs und stabile Android-Kategorien bei Umbenennung.
+- Neuer Alarmarten-Editor, Empfängerübersicht und IDs für Automationen; Namen auch
+  in Versand, Verlauf und CSV dynamisch anzeigen.
+- Konfigurationssicherung Schema 2 einschließlich Profilen, Schema 1 weiter lesbar.
+- Eigene Geräte-Basistests unabhängig von regulärer Alarmzuordnung erlauben; fremde
+  Tests und nicht zugewiesene echte Alarme bleiben gesperrt.
+- Verwendete Arten nicht löschen und Änderungen bei laufender Alarmierung/Wiederherstellung sperren.
+- 132 Python- und 21 Frontendtests erfolgreich. Reale HA-/Android-Prüfung steht aus.
+
+
 ## 0.3.29 – lokal vorbereitet, nicht veröffentlicht
 
 - Vor dem Übergang vom Android-Alarmton zur Sprachansage wird die aktuelle Priorität

@@ -1,9 +1,11 @@
 # Gesicherte Versionen und Rückkehr
 
-Stand: 03.11.2026. Alle Sicherungen wurden lokal erstellt; nichts auf GitHub veröffentlicht.
+Stand: 03.11.2026. Neuer Stand 0.4.0 lokal vorbereitet; kein Deployment.
+Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerauftrag zu GitHub gepusht; 0.4.0 noch nicht.
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.4.0 | `v0.4.0` | über Tag auflösbar | Eigene Alarmarten, lokal geprüft; echte HA-/Android-Prüfung offen |
 | 0.3.27 | `v0.3.27` | `47f170b` | Aktueller eingefrorener Quellstand; 75 Python- und sieben Frontendtests bestanden |
 | 0.3.25 | `v0.3.25` | `c76c70f` | Lokaler Stand zur vom Benutzer als bereits gelaufen gemeldeten Versionsnummer |
 
@@ -27,22 +29,34 @@ integriert das Ergebnis. So werden parallele Änderungen an denselben Dateien ve
 Das lokale Werkzeug erstellt Installations-ZIPs ausschließlich aus Git-Tags:
 
 ```powershell
+python scripts/package_snapshot.py --ref v0.4.0
 python scripts/package_snapshot.py --ref v0.3.27
 python scripts/package_snapshot.py --ref v0.3.25
 ```
 
-Die Dateien liegen unter `dist/alarm_system-0.3.27.zip` und
+Die neue Datei liegt unter `dist/alarm_system-0.4.0.zip`; die älteren Dateien unter
+`dist/alarm_system-0.3.27.zip` und
 `dist/alarm_system-0.3.25.zip`. Sie enthalten nur die verfolgten Integrationsdateien
 unter `custom_components/alarm_system`, keine Caches, Dokumentation oder privaten
 HA-Daten. Bereits vorhandene Pakete werden nicht überschrieben. Weitere Kopien in
 anderen Zielordnern lassen sich mit `--output-dir` erstellen.
 
 Die aktuelle Windows-Python-Umgebung ist in [WORK_PLAN.md](WORK_PLAN.md) angegeben.
-Die SHA-256-Werte und zugehörigen Quellcommits stehen in `dist/snapshots.json`.
+Die ursprünglichen SHA-256-Werte und Quellcommits stehen in `dist/snapshots.json`;
+für 0.4.0 in `dist/snapshot-0.4.0.json`. Eine zusätzliche Historienkopie zu diesem
+Stand ist `dist/pohl-solutions-notify-history-0.4.0.bundle`.
 Ein zusätzliches Git-Bundle unter `dist/pohl-solutions-notify-history.bundle`
 sichert die lokale Versionshistorie einschließlich Tags und Entwicklungszweig zum
 Zeitpunkt seiner Erstellung. Spätere Commits sind darin erst nach einer erneuten,
 separaten Sicherung enthalten. `dist` wird nicht in Git aufgenommen.
+
+## Eigene Alarmarten ab 0.4.0
+
+0.4.0 ergänzt persistente Alarmprofile und Konfigurationssicherungen mit Schema 2.
+Vor einem praktischen Update eine vollständige Sicherung der bisherigen HA-Instanz
+anlegen. Ältere Versionen verstehen selbst definierte Alarmarten in den Laufzeitdaten
+nicht. Bei einem Downgrade gegebenenfalls die zur alten Version passende vollständige
+HA-Sicherung verwenden. Die alten Quell-Tags und ZIPs werden nicht überschrieben.
 
 ## Sicher zurückkehren
 

@@ -13,7 +13,7 @@ zusätzlichen Python-Pakete und installieren kein Home Assistant:
 python scripts/validate.py
 python -m unittest discover -s tests -v
 node --check custom_components/alarm_system/frontend/panel.js
-node --test tests/frontend_outputs.test.cjs
+node --test tests/frontend_outputs.test.cjs tests/frontend_alarm_types.test.cjs
 ```
 
 `validate.py` prüft Python-Syntax, JSON, Domain und Versionskonsistenz.

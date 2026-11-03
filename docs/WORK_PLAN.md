@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 03.11.2026 · lokaler Entwicklungsstand 0.3.29 · kein Push / kein Deployment.
+Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.0 · neuer Stand noch nicht gepusht / kein Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -142,6 +142,25 @@ implementierte die kleine Prioritätskorrektur und die Start-Aufräumkorrektur.
 Keine HA-/Handytests oder neue Produktregel; Einbruch-Vorrang pro Gerät bleibt bestehen.
 Weitere Speicher-/Transportgrenzen und echte Zeit-/Wiedergabewirkung bleiben offen.
 
+## Eigene Alarmarten: ausdrücklicher Folgeauftrag in 0.4.0
+
+Benutzer wünscht frei benannte Arten (z. B. Hausalarm/Amokalarm) und hat ausdrücklich
+Empfänger sowie Ton/Sprache/Push/Popup/Priorität je Art bestätigt.
+
+- [x] Persistente Profile, sichere Migration und eindeutige IDs mit bis zu 32 eigenen Arten.
+- [x] Verwaltung, Empfänger-/Melderauswahl, Profilpriorität und Ausgabeverknüpfung umgesetzt.
+- [x] Android-Kategorien bei Umbenennung stabil; Zeiten und sichere Sprachvorlagen ergänzt.
+- [x] Schema-2-Export/Import mit Schema-1-Kompatibilität und Erhaltung historischer Verweise.
+- [x] Eigene Gerätetests bei eingeschränkter Alarmzuordnung ohne Öffnung fremder Rechte.
+- [x] 132 Python- und 21 Frontendtests bestanden; Bedienung und Rückkehrgrenzen dokumentiert.
+
+Modell und Frontend wurden in getrennten Subagenten bearbeitet; Hauptagent integrierte
+Transport, Verwaltung, Import und zusätzliche Tests. Keine neuen Arten oder Empfänger
+in der tatsächlichen HA-Instanz angelegt. Bedienung: [CUSTOM_ALARM_TYPES.md](CUSTOM_ALARM_TYPES.md).
+Prioritäten: Einbruch 10 vor Feuer 20 bleibt fest; eigene Arten starten mit 30 und
+können durch ausdrücklich konfigurierte Werte 1–100 vor-/nachgeordnet werden.
+Die neue Profilfunktion ist beauftragt; übrige neue D/E/H-Vorschläge bleiben Planungsoptionen.
+
 ## Nächste unabhängig ausführbare Schritte
 
 1. Weitere Speicher-/Transportfehler, fehlgeschlagenes reguläres Entladen sowie
@@ -179,7 +198,7 @@ Der normale Windows-`python`-Aufruf verweist hier auf den Store-Alias. Verwendet
 & 'C:\Users\jpohl\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' scripts/validate.py
 & 'C:\Users\jpohl\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m unittest discover -s tests -v
 node --check custom_components/alarm_system/frontend/panel.js
-node --test tests/frontend_outputs.test.cjs
+node --test tests/frontend_outputs.test.cjs tests/frontend_alarm_types.test.cjs
 git diff --check
 ```
 

@@ -103,3 +103,9 @@ Der Abruf über die Companion-App muss auf den Zielgeräten noch praktisch getes
 
 Sprachansage und Alarmton sind auf Android unabhängig schaltbar. Die genaue
 Schalterwirkung, Plattformgrenzen und Update-Hinweise stehen in [OUTPUT_SETTINGS.md](OUTPUT_SETTINGS.md).
+
+## Eigene Alarmarten ab 0.4.0
+
+Alarmarten mit eigenen Namen, Empfängern und Ausgaben unter **Alarmarten** einrichten.
+Die vollständige Anleitung einschließlich Sprachtexten und Schema-2-Sicherung steht
+in [CUSTOM_ALARM_TYPES.md](CUSTOM_ALARM_TYPES.md).
