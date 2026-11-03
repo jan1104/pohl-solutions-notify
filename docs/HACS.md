@@ -19,3 +19,7 @@ Vor einem praktischen Update vollständige HA-Sicherung erstellen; Hinweise zu e
 - [HACS-Allgemeine Anforderungen und Releases](https://www.hacs.xyz/docs/publish/start/)
 - [HACS-Integrationslayout und Manifest](https://www.hacs.xyz/docs/publish/integration/)
 - [HACS-Downloadprüfung `_ensure_download_capabilities`](https://github.com/hacs/integration/blob/main/custom_components/hacs/repositories/base.py)
+
+## Aktuelles Update 0.4.2
+
+Am 03.11.2026 wurde zusätzlich [v0.4.2](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.4.2) veröffentlicht. Für die verständliche Sprachtexteingabe und Informationssprache dieses Release auswählen. Ältere Angaben zu v0.4.1 erklären die ursprüngliche HACS-Korrektur.

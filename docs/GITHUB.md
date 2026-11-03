@@ -42,3 +42,7 @@ HACS-Metadaten sind jetzt lokal ergänzt; Anleitung in [HACS.md](HACS.md). 0.4.1
 ## Veröffentlichung am 03.11.2026
 
 Nach erneuter ausdrücklicher Benutzerfreigabe develop sowie die Tags v0.4.0/v0.4.1 gepusht und [Release v0.4.1](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.4.1) veröffentlicht. HACS-Metadaten am Release-Tag remote geprüft. Repository ist öffentlich; Sichtbarkeit und Defaultbranch main wurden nicht geändert. Die API lieferte unmittelbar danach keine Workflow-Läufe für develop; deshalb keine erfolgreiche GitHub-CI behauptet. Lokale Prüfungen bestanden, echte HACS-/HA-/Android-Installation offen. Frühere Angaben zum rein lokalen Stand sind historisch.
+
+## Update 0.4.2 am 03.11.2026
+
+Mit fortgeltender Nutzerfreigabe develop und v0.4.2 gepusht, [Release v0.4.2](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.4.2) veröffentlicht. Release und HACS-Datei remote geprüft; lokales Installations-ZIP gegen alle enthaltenen Git-Dateien geprüft. main und ältere Tags unverändert, kein HA-Deployment.
