@@ -9,7 +9,7 @@ from homeassistant.components import frontend, panel_custom, websocket_api
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
-from .const import DOMAIN, VERSION, TYPES
+from .const import DOMAIN, VERSION
 from .engine import AlarmEngine
 from .model import stamp
 from .discovery import connections, complete_device
@@ -74,7 +74,7 @@ async def async_setup_entry(hass, entry):
             await engine.confirm_popup(call.data["incident_id"], call.context.user_id, call.data["browser_id"])
 
         hass.services.async_register(DOMAIN, "raise_alarm", dispatch, schema=vol.Schema({
-            vol.Required("type"): vol.In(TYPES),
+            vol.Required("type"): str,
             vol.Optional("alarm_key", default="message"): str,
             vol.Optional("source_id", default="manual"): str,
             vol.Optional("source_name"): str, vol.Optional("entity_id"): str,
@@ -155,6 +155,7 @@ def validate_manage_payload(engine, action, payload):
         "device_upsert": ("user_id",), "device_remove": ("id",),
         "device_test_begin": ("id",), "device_test_stop": ("id",),
         "device_confirm": ("id",), "device_setup": ("id",), "device_test": ("id",),
+        "alarm_type_remove": ("id",),
     }
     if not isinstance(payload, dict):
         raise HomeAssistantError("Verwaltungsdaten müssen ein Objekt sein")
@@ -228,6 +229,31 @@ async def ws_manage(hass, connection, msg):
     await engine.actor(connection.user.id, admin=True)
     action, payload = msg["action"], msg["data"]
     validate_manage_payload(engine, action, payload)
+    if action in ('alarm_type_upsert', 'alarm_type_remove'):
+        async with engine.lock:
+            if engine.model.active() or engine.model.data['leases'] or engine.setup_running:
+                raise HomeAssistantError('Alarmarten erst nach Ende aller Alarme und Wiederherstellungen ändern')
+            try:
+                if action == 'alarm_type_upsert':
+                    profile = engine.model.upsert_alarm_type(payload)
+                    profile_id = profile['id']
+                else:
+                    profile_id = payload['id']
+                    engine.model.remove_alarm_type(profile_id)
+            except (ValueError, TypeError, KeyError) as err:
+                raise HomeAssistantError(str(err)) from err
+            for device in engine.model.data['devices'].values():
+                user = engine.model.data['users'].get(device.get('user_id'), {})
+                if profile_id in user.get('types', []):
+                    device['tested'] = False
+                    device.pop('tested_at', None)
+                    device.pop('test_session', None)
+            engine.model.log(action, user_id=connection.user.id, user_name=connection.user.name,
+                             details={'alarm_type_id': profile_id})
+            await engine.save()
+        engine.schedule_category_setup()
+        connection.send_result(msg['id'], {'ok': True, 'alarm_type_id': profile_id})
+        return
     if action == 'device_test_stop':
         await engine.abort_test(payload['id'], connection.user.id)
         connection.send_result(msg['id'], {'ok': True})
@@ -271,10 +297,11 @@ async def ws_manage(hass, connection, msg):
             user = await hass.auth.async_get_user(payload["id"])
             if not user or not user.is_active or user.system_generated:
                 raise HomeAssistantError("Aktiven HA-Benutzer auswählen")
-            if any(t not in TYPES for t in payload.get("types", [])):
+            if (not isinstance(payload.get("types", []), list)
+                    or any(not isinstance(t, str) or t not in engine.model.type_ids() for t in payload.get("types", []))):
                 raise HomeAssistantError("Unbekannte Alarmart")
             engine.model.data["users"][user.id] = {"id": user.id, "name": user.name or user.id,
-                "enabled": bool(payload.get("enabled", True)), "types": [t for t in payload.get("types", []) if t in TYPES]}
+                "enabled": bool(payload.get("enabled", True)), "types": list(dict.fromkeys(payload.get("types", [])))}
         elif action == "user_remove":
             uid = payload["id"]
             for device in engine.model.data["devices"].values():
@@ -376,7 +403,7 @@ async def ws_manage(hass, connection, msg):
         if engine.model.active():
             raise HomeAssistantError("Vor dem Gerätetest alle aktiven Ereignisse beenden")
         kind = payload.get("alarm_type", "FIRE")
-        if kind not in ("FIRE", "INTRUSION"):
+        if not engine.model.is_alarm(kind):
             raise HomeAssistantError("Ungültiger Testtyp")
         i, _ = engine.model.raise_alarm({"type": kind, "alarm_key": f'test_{d["id"]}',
                                         "source_id": uuid4().hex, "source_name": "Testmelder", "title": "Gerätetest", "area": "Erdgeschoss"})

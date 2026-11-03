@@ -13,7 +13,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN, CHANNELS, LABELS, EVENT, TYPES
+from .const import DOMAIN, EVENT
 from .model import AlarmModel, stamp
 from .charts import cleanup_history_images
 
@@ -152,18 +152,22 @@ class AlarmEngine:
             raise Unauthorized("Antwort erfordert angemeldeten HA-Benutzer")
         if admin and not user.is_admin:
             raise Unauthorized("Nur Administratoren dürfen die Konfiguration ändern")
-        if incident and incident.get("test_device") and not user.is_admin and self.model.data["devices"].get(incident["test_device"], {}).get("user_id") != user.id:
+        if incident and incident.get("test_device") and not user.is_admin and not self.model.owns_test(user.id, incident):
             raise Unauthorized("Dieser Gerätetest gehört zu einem anderen Benutzer")
-        if incident and not (user.is_admin or self.model.authorized(user.id, incident)):
+        if incident and not (user.is_admin or self.model.owns_test(user.id, incident) or self.model.authorized(user.id, incident)):
             raise Unauthorized("Benutzer ist kein Empfänger dieser Alarmart")
         return user
 
     async def dispatch(self, data, user_id=None):
         # Logic from automations/Node-RED can have no user context. Authenticated manual calls
         # must be admins, or registered recipients for the corresponding type.
+        try:
+            self.model.profile(data['type'])
+        except (ValueError, KeyError, TypeError) as err:
+            raise HomeAssistantError('Unbekannte Alarmart') from err
         if user_id:
             await self.actor(user_id, {"type": data["type"]})
-        if data["type"] in ("INFO", "WARNING"):
+        if not self.model.is_alarm(data['type']):
             await self.simple_message(data)
             return
         async with self.lock:
@@ -316,8 +320,12 @@ class AlarmEngine:
                 or (d.get("platform") == "android" and not d.get("sound"))):
             return []  # No phone-wide muting/sensor prerequisites without alarm tones.
         user = self.model.data["users"].get(d.get("user_id"), {})
-        categories = [CHANNELS[t] for t in TYPES if t in user.get("types", [])]
-        if any(t in user.get("types", []) for t in ("FIRE", "INTRUSION")):
+        audible = [t for t in user.get('types', [])
+                   if self.model.is_alarm(t) and self.model.profile(t)['sound']]
+        if d.get('platform') == 'android' and not audible:
+            return []
+        categories = [self.model.profile(t)['channel'] for t in audible]
+        if audible:
             categories.append("Alarmstatus")
         return categories
 
@@ -487,20 +495,42 @@ class AlarmEngine:
             self.setup_running.discard(device_id)
             await self.save()
 
+    def effective_device(self, device, kind):
+        """An alarm profile can restrict outputs, never override a device's off switch."""
+        profile = self.model.profile(kind)
+        effective = dict(device)
+        for key in ('push', 'sound', 'speech', 'popup'):
+            if not profile[key]:
+                effective[key] = False
+        return effective
+
+    def tone_seconds(self, device, kind):
+        configured = self.model.profile(kind)['tone_seconds']
+        return float(configured if configured is not None else device.get(
+            'fire_seconds' if kind == 'FIRE' else 'intrusion_seconds', 5))
+
+    def speech_seconds(self, device, kind):
+        configured = self.model.profile(kind)['speech_seconds']
+        return float(configured if configured is not None else device.get('speech_seconds', 8))
+
     def recipients(self, incident):
         if incident.get("test_device"):
             device = self.model.data["devices"].get(incident["test_device"])
-            return [device] if device else []
-        return self.model.recipients(incident["type"])
+            devices = [device] if device else []
+        else:
+            devices = self.model.recipients(incident["type"])
+        return [self.effective_device(d, incident['type']) for d in devices]
 
     def primary(self):
-        return sorted(self.model.active(), key=lambda i: (bool(i.get("test_device")), i["type"] != "INTRUSION", i["started_at"]))
+        return sorted(self.model.active(), key=lambda i: (bool(i.get("test_device")),
+                      self.model.profile(i['type'])['priority'], i["started_at"]))
 
     def primary_for_device(self, device, *, open_only=False):
         """Choose priority among incidents assigned to this particular device."""
         candidates = [i for i in self.primary()
                       if (not open_only or i["status"] == "open")
-                      and any(d["id"] == device["id"] for d in self.recipients(i))]
+                      and any(d["id"] == device["id"] and any(d.get(k) for k in ('push', 'sound', 'speech', 'popup'))
+                              for d in self.recipients(i))]
         return next((i for i in candidates if i["status"] == "open"),
                     candidates[0] if candidates else None)
 
@@ -541,7 +571,7 @@ class AlarmEngine:
                 if playback:
                     await asyncio.gather(*playback)
                 elif any(d.get("sound") and d["platform"] == "ios" for d in recipients):
-                    await asyncio.sleep(max(float(d.get("fire_seconds",5) if i["type"] == "FIRE" else d.get("intrusion_seconds",5)) for d in recipients if d.get("sound") and d["platform"] == "ios"))
+                    await asyncio.sleep(max(self.tone_seconds(d, i['type']) for d in recipients if d.get("sound") and d["platform"] == "ios"))
                 else:
                     return  # Push-only or unavailable audio retains the 30-second retry.
                 # No fixed pause after the configured TTS/audio duration.
@@ -614,7 +644,7 @@ class AlarmEngine:
             if i["status"] != "open" or self.model.data["leases"].get(d["id"], {}).get("playback_id") != playback_id:
                 return
             if d.get("sound"):
-                await asyncio.sleep(float(d.get("fire_seconds", 5) if i["type"] == "FIRE" else d.get("intrusion_seconds", 5)))
+                await asyncio.sleep(self.tone_seconds(d, i['type']))
             async with self.transport:
                 if i["status"] != "open" or not self.device_active(d, i) or self.model.data["leases"].get(d["id"], {}).get("playback_id") != playback_id:
                     return
@@ -623,10 +653,11 @@ class AlarmEngine:
                     return  # A higher-priority alarm may have arrived during the tone/receipt wait.
                 if d.get("speech"):
                     areas = list(dict.fromkeys(s["area"] for s in i["sources"].values() if s["active"] and s["area"]))
-                    text = f'Achtung. {LABELS[i["type"]]}. Standort {i["site_id"]}. {". ".join(areas)}.'
+                    text = self.model.profile(i['type'])['speech_template'].format(
+                        name=self.model.label(i['type']), site=i['site_id'], areas='. '.join(areas))
                     await self.command(d, "TTS", media_stream="alarm_stream_max", tts_text=text)
             if d.get("speech"):
-                await asyncio.sleep(float(d.get("speech_seconds", 8)))
+                await asyncio.sleep(self.speech_seconds(d, i['type']))
             completed = True
         finally:
             tag = self.notification_tag(d, i)
@@ -674,7 +705,7 @@ class AlarmEngine:
             command = payload.get("message", "").startswith("command_") or payload.get("message") in ("TTS", "clear_notification")
             extra = payload.get("data", {})
             self.model.log("command_requested" if command else "notification_requested", incident=incident, device=d,
-                source=source, kind=kind or next((k for k, v in CHANNELS.items() if v == extra.get("channel")), None),
+                source=source, kind=kind or next((k for k, p in self.model.data['alarm_types'].items() if p['channel'] == extra.get('channel')), None),
                 text=extra.get("tts_text", payload.get("message", "")),
                 details={"title": payload.get("title", ""), "channel": extra.get("channel", ""),
                          "command": payload.get("message", "") if command else "", "value": extra.get("command", ""),
@@ -701,7 +732,7 @@ class AlarmEngine:
                 "actions": [{"action": f'AS_COMING:{i["id"]}', "title": "Ich komme"},
                             {"action": "URI", "title": "Fehlalarm / Details", "uri": f"/alarm-system?alarm={i['id']}"}]}
         if d["platform"] == "android":
-            data.update(channel=CHANNELS[i["type"]] if loud else "Alarmstatus",
+            data.update(channel=self.model.profile(i['type'])['channel'] if loud else "Alarmstatus",
                         importance="high" if loud else "low", visibility="public", sticky=True,
                         alert_once=not loud, clickAction=f"/alarm-system?alarm={i['id']}")
             lease = self.model.data["leases"].get(d["id"])
@@ -716,7 +747,7 @@ class AlarmEngine:
         else:
             data["push"] = {"sound": "none"}
             data["url"] = f"/alarm-system?alarm={i['id']}"
-        sent = await self.send(d, {"title": f'{LABELS[i["type"]]} · {i["site_id"]}',
+        sent = await self.send(d, {"title": f'{self.model.label(i['type'])} · {i["site_id"]}',
                            "message": self.summary(i), "data": data}, i)
         if not sent and receipt is not None:
             self.playback_receipts.pop(data["tag"], None)
@@ -807,8 +838,9 @@ class AlarmEngine:
             f'{r.get("name") or self.model.data["users"].get(uid, {}).get("name") or "Name nicht verfügbar"}: Ich komme'
             for uid, r in i["responses"].items() if r.get("answer") == "coming")
         for d in deepcopy(self.recipients(i)):
-            if d.get("push"):
-                await self.send(d, {"title": f'{i["site_id"]} · ' + ("Gerätetest beendet" if i.get("test_device") and i["status"] in ("false_alarm", "ended") else "FEHLALARM bestätigt" if i["status"] == "false_alarm" else f'{LABELS[i["type"]]} · Status'),
+            if d.get("push") or d.get("sound"):
+                # A tone's technical notification still needs a quiet final status.
+                await self.send(d, {"title": f'{i["site_id"]} · ' + ("Gerätetest beendet" if i.get("test_device") and i["status"] in ("false_alarm", "ended") else "FEHLALARM bestätigt" if i["status"] == "false_alarm" else f'{self.model.label(i['type'])} · Status'),
                                    "message": f'{text}\n{self.summary(i)}\n' + (responses or "Noch keine Zusage") + f'\n{dt_util.as_local(dt_util.utcnow()).strftime("%d.%m.%Y %H:%M:%S")}',
                                    "data": {"channel": "Alarmstatus", "importance": "low", "tag": self.notification_tag(d, i),
                                             "priority": "high", "ttl": 0, "alert_once": True,
@@ -821,6 +853,9 @@ class AlarmEngine:
         await self.save()
 
     async def show_popup(self, d, i, launch):
+        d = self.effective_device(d, i['type'])
+        if not d.get('popup'):
+            return
         browsers = d.get('browsers', [])
         if not browsers or all(self.open_popups.get(b['id']) == i['id'] for b in browsers):
             return
@@ -837,7 +872,7 @@ class AlarmEngine:
                     return  # Reopened by the visibility transition when the browser connects.
             else:
                 await asyncio.sleep(0.5)
-        if i["status"] not in ("open", "claimed") or not self.device_active(d, i) or not self.model.authorized(d["user_id"], i):
+        if i["status"] not in ("open", "claimed") or not self.device_active(d, i) or not (self.model.authorized(d["user_id"], i) or self.model.owns_test(d['user_id'], i)):
             return
         changed = False
         async with self.popup_lock:
@@ -848,7 +883,7 @@ class AlarmEngine:
                 if i['status'] not in ('open', 'claimed'):
                     return
                 data = {"browser_id": [bid], "tag": "alarm_system",
-                        "title": f'{LABELS[i["type"]]} · {i["site_id"]}',
+                        "title": f'{self.model.label(i['type'])} · {i["site_id"]}',
                         "initial_style": "fullscreen", "dismissable": False,
                         "content": {"type": "custom:alarm-system-card", "incident_id": i["id"]}}
                 try:
@@ -938,7 +973,7 @@ class AlarmEngine:
                 self.model.log("signal_changed", kind=binding["type"], source=binding,
                     details={"previous": previous, "state": state})
             if payload:
-                if payload["type"] in ("FIRE", "INTRUSION"):
+                if self.model.is_alarm(payload["type"]):
                     incident, result = self.model.raise_alarm(payload)
                     self.model.log("alarm_raised" if result == "new" else result, kind=binding["type"], incident=incident, source=binding)
                 else:
@@ -1001,11 +1036,12 @@ class AlarmEngine:
                 data["message"] = data.get("message", "") + "\nVerlaufsbild derzeit nicht verfügbar."
         if data.get("camera") and not data.get("image"):
             data["image"] = "/api/camera_proxy/" + data["camera"]
-        for d in self.model.recipients(data["type"]):
+        for raw_device in self.model.recipients(data['type']):
+            d = self.effective_device(raw_device, data['type'])
             if not d.get("push"):
                 continue
-            payload = {"title": data.get("title", LABELS[data["type"]]), "message": data.get("message", ""),
-                       "data": {"channel": CHANNELS[data["type"]], "url": data.get("url") or "/alarm-system", "clickAction": data.get("url") or "/alarm-system"}}
+            payload = {"title": data.get("title", self.model.label(data['type'])), "message": data.get("message", ""),
+                       "data": {"channel": self.model.profile(data['type'])['channel'], "url": data.get("url") or "/alarm-system", "clickAction": data.get("url") or "/alarm-system"}}
             if data.get("image"):
                 payload["data"]["image"] = data["image"]
             if data.get("silent"):

@@ -23,4 +23,4 @@ jobs:
       - name: Check frontend syntax
         run: node --check custom_components/alarm_system/frontend/panel.js
       - name: Test frontend output switches and setup steps
-        run: node --test tests/frontend_outputs.test.cjs
+        run: node --test tests/frontend_outputs.test.cjs tests/frontend_alarm_types.test.cjs

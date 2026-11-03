@@ -4,6 +4,7 @@ from copy import deepcopy
 from datetime import datetime, timezone, timedelta
 from calendar import monthrange
 from uuid import uuid4
+from .alarm_types import normalize_alarm_types
 
 
 def stamp():
@@ -21,6 +22,59 @@ class AlarmModel:
         self.data.setdefault("retention_days", 0)
         self.data.setdefault("retention_mode", "unlimited")
         self.data.setdefault("journal", [])
+        self.data["alarm_types"] = normalize_alarm_types(self.data.get("alarm_types", {}))
+
+    def profile(self, kind):
+        if not isinstance(kind, str) or kind not in self.data["alarm_types"]:
+            raise ValueError("Unbekannte Alarmart")
+        return self.data["alarm_types"][kind]
+
+    def is_alarm(self, kind):
+        return isinstance(kind, str) and self.data["alarm_types"].get(kind, {}).get("mode") == "alarm"
+
+    def label(self, kind):
+        return self.data["alarm_types"].get(kind, {}).get("name", kind)
+
+    def type_ids(self):
+        return tuple(self.data["alarm_types"])
+
+    def upsert_alarm_type(self, payload):
+        if self.active():
+            raise ValueError("Vor dem Ändern von Alarmarten alle aktiven Ereignisse beenden")
+        if not isinstance(payload, dict):
+            raise ValueError("Ungültiges Alarmartenprofil")
+        kind = payload.get("id")
+        if kind is None:
+            kind = "CUSTOM_" + uuid4().hex[:12].upper()
+            while kind in self.data["alarm_types"]:
+                kind = "CUSTOM_" + uuid4().hex[:12].upper()
+            record = dict(payload, id=kind)
+            if "channel" in payload and payload["channel"] != payload.get("name"):
+                raise ValueError("Neue Alarmarten verwenden ihren Namen als Benachrichtigungskanal")
+            record["channel"] = payload.get("name")
+        else:
+            old = self.profile(kind)
+            # Android channel names identify existing channels even after a rename.
+            if "channel" in payload and payload["channel"] != old["channel"]:
+                raise ValueError("Der Benachrichtigungskanal ist unveränderlich")
+            record = dict(old, **payload)
+        registry = dict(self.data["alarm_types"], **{kind: record})
+        validated = normalize_alarm_types(registry)
+        self.data["alarm_types"] = validated
+        return validated[kind]
+
+    def remove_alarm_type(self, kind):
+        record = self.profile(kind)
+        if self.active():
+            raise ValueError("Vor dem Entfernen von Alarmarten alle aktiven Ereignisse beenden")
+        if record["builtin"]:
+            raise ValueError("Systemalarmarten können nicht entfernt werden")
+        if (any(kind in user.get("types", []) for user in self.data["users"].values())
+                or any(source.get("type") == kind for source in self.data["sources"].values())
+                or any(incident.get("type") == kind for incident in self.data["incidents"].values())
+                or any(row.get("type") == kind for row in self.data['journal'])):
+            raise ValueError("Die Alarmart wird noch von Konten, Meldern oder Ereignissen verwendet")
+        del self.data["alarm_types"][kind]
 
     def log(self, action, *, kind=None, incident=None, source=None, user_id=None,
             user_name=None, device=None, browser_id=None, text="", details=None):
@@ -81,13 +135,19 @@ class AlarmModel:
         u = self.data["users"].get(user_id)
         return bool(u and u.get("enabled", True) and incident["type"] in u.get("types", []))
 
+    def owns_test(self, user_id, incident):
+        account = self.data['users'].get(user_id, {})
+        device = self.data['devices'].get(incident.get('test_device'), {})
+        return bool(incident.get('test_device') and account and account.get('enabled', True)
+                    and device.get('user_id') == user_id)
+
     def register_source(self, payload, current_state=None):
         source_id = payload.get("id") or uuid4().hex
         old = self.data["sources"].get(source_id, {})
         entity_id = str(payload.get("entity_id", ""))
         name = str(payload.get("name", "")).strip()
         kind = payload.get("type", "FIRE")
-        if not entity_id.startswith("binary_sensor.") or not name or kind not in ("INFO", "WARNING", "FIRE", "INTRUSION"):
+        if not entity_id.startswith("binary_sensor.") or not name or not isinstance(kind, str) or kind not in self.type_ids():
             raise ValueError("Meldername, Binary-Sensor und gültige Alarmart erforderlich")
         if any(x["entity_id"] == entity_id and x["id"] != source_id for x in self.data["sources"].values()):
             raise ValueError("Dieser Binary-Sensor ist bereits zugeordnet")
@@ -98,7 +158,7 @@ class AlarmModel:
         changed = any(old.get(k) != value for k, value in (("entity_id", entity_id), ("type", kind), ("alarm_key", key)))
         if old and changed and any(source_id in i["sources"] and i["sources"][source_id]["active"] for i in self.active()):
             raise ValueError("Vor dem Ändern der Signalzuordnung die aktive Melderzeile beenden")
-        if kind in ("FIRE", "INTRUSION") and (any(x["alarm_key"] == key and x["type"] != kind and x["type"] in ("FIRE", "INTRUSION") and x["id"] != source_id for x in self.data["sources"].values()) or any(i["alarm_key"] == key and i["type"] != kind for i in self.active())):
+        if self.is_alarm(kind) and (any(x["alarm_key"] == key and x["type"] != kind and self.is_alarm(x["type"]) and x["id"] != source_id for x in self.data["sources"].values()) or any(i["alarm_key"] == key and i["type"] != kind for i in self.active())):
             raise ValueError("Eine Ereignisgruppe darf nur eine Alarmart enthalten")
         source = {"id": source_id, "name": name, "entity_id": entity_id, "type": kind,
                   "alarm_key": key, "area": str(payload.get("area", "")),
@@ -138,8 +198,8 @@ class AlarmModel:
 
     def raise_alarm(self, payload):
         kind = payload["type"]
-        if kind not in ("FIRE", "INTRUSION"):
-            raise ValueError("Only FIRE/INTRUSION create incidents")
+        if not self.is_alarm(kind):
+            raise ValueError("Nur gültige Alarmarten erzeugen Ereignisse")
         key, source_id = payload["alarm_key"], payload["source_id"]
         suppression = f"{key}|{source_id}"
         if suppression in self.data["suppressed"]:
@@ -151,7 +211,7 @@ class AlarmModel:
         if created:
             incident = {
                 "id": uuid4().hex, "alarm_key": key, "type": kind,
-                "title": payload.get("title") or kind, "site_id": self.data["site_id"],
+                "title": payload.get("title") or self.label(kind), "site_id": self.data["site_id"],
                 "started_at": stamp(), "ended_at": None, "status": "open",
                 "sources": {}, "responses": {}, "audit": [], "delivery": [],
                 "next_due": 0,

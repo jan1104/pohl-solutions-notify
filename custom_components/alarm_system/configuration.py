@@ -2,7 +2,7 @@
 from copy import deepcopy
 from math import isfinite
 from .model import AlarmModel
-from .const import TYPES
+from .alarm_types import normalize_alarm_types
 
 def device_outputs(payload, platform):
     """Normalize supported output switches, rejecting ambiguous string booleans."""
@@ -22,8 +22,11 @@ def device_outputs(payload, platform):
 
 
 def prepare_import(current, document, accounts, states, notify_actions):
-    if not isinstance(document, dict) or document.get('format') != 'alarm_system_configuration' or document.get('schema_version') != 1:
-        raise ValueError('Keine unterstützte Alarm-Einrichtungssicherung (Schema 1)')
+    if (not isinstance(document, dict) or document.get('format') != 'alarm_system_configuration'
+            or document.get('schema_version') not in (1, 2)):
+        raise ValueError('Keine unterstützte Alarm-Einrichtungssicherung (Schema 1 oder 2)')
+    if document['schema_version'] == 2 and not isinstance(document.get('alarm_types'), dict):
+        raise ValueError('Alarmarten fehlen in der Sicherung')
     if AlarmModel(current).active() or current.get('leases'):
         raise ValueError('Vor dem Import aktive Alarme beenden und die Handy-Wiederherstellung abschließen')
     if document.get('site_id') != current['site_id']:
@@ -35,12 +38,20 @@ def prepare_import(current, document, accounts, states, notify_actions):
         if not isinstance(document.get(key), dict) or len(document[key]) > 1000:
             raise ValueError('Ungültige Liste: ' + key)
     staged = AlarmModel(current)
-    staged.data.update(users={}, devices={}, sources={}, signal_values={}, retention_mode=mode)
+    registry = normalize_alarm_types(document['alarm_types']) if document['schema_version'] == 2 else staged.data['alarm_types']
+    # Historical data survives configuration import; keep its referenced profile definitions too.
+    historical = {i.get('type') for i in current.get('incidents', {}).values()}
+    historical.update(e.get('type') for e in current.get('journal', []))
+    for kind in historical:
+        if kind not in registry and kind in staged.data['alarm_types']:
+            registry[kind] = deepcopy(staged.data['alarm_types'][kind])
+    staged.data.update(users={}, devices={}, sources={}, signal_values={}, retention_mode=mode,
+                       alarm_types=normalize_alarm_types(registry))
     for uid, record in document['users'].items():
         if not isinstance(record, dict) or record.get('id') != uid or uid not in accounts:
             raise ValueError('HA-Konto nicht vorhanden oder ungültige Konto-ID: ' + str(uid))
         types = record.get('types', [])
-        if not isinstance(types, list) or any(t not in TYPES for t in types):
+        if not isinstance(types, list) or any(not isinstance(t, str) or t not in staged.type_ids() for t in types):
             raise ValueError('Ungültige Alarmarten für ein Konto')
         staged.data['users'][uid] = {'id': uid, 'name': accounts[uid], 'types': list(dict.fromkeys(types)), 'enabled': bool(record.get('enabled', True))}
     phones, browsers = set(), set()
@@ -95,12 +106,18 @@ def user_view(data, user_id):
     account = data['users'].get(user_id, {})
     enabled = bool(account and account.get('enabled', True))
     allowed = account.get('types', []) if enabled else []
+    own_tests = {k for k, i in data['incidents'].items() if enabled and i.get('test_device')
+                 and data['devices'].get(i['test_device'], {}).get('user_id') == user_id}
+    if 'alarm_types' in data:
+        visible_types = set(allowed) | {data['incidents'][k]['type'] for k in own_tests}
+        data['alarm_types'] = {k: p for k, p in data['alarm_types'].items() if k in visible_types}
     hidden_tests = {k for k, i in data['incidents'].items() if i.get('test_device') and data['devices'].get(i['test_device'], {}).get('user_id') != user_id}
-    data['incidents'] = {k: i for k, i in data['incidents'].items() if i['type'] in allowed and
+    data['incidents'] = {k: i for k, i in data['incidents'].items() if (i['type'] in allowed or k in own_tests) and
                          (not i.get('test_device') or data['devices'].get(i['test_device'], {}).get('user_id') == user_id)}
     data['sources'] = {k: s for k, s in data['sources'].items() if s['type'] in allowed}
     data['signal_values'] = {k: v for k, v in data.get('signal_values', {}).items() if k in data['sources']}
-    data['journal'] = [e for e in data['journal'] if e['type'] in allowed and e.get('incident_id') not in hidden_tests]
+    data['journal'] = [e for e in data['journal'] if (e['type'] in allowed or e.get('incident_id') in own_tests)
+                       and e.get('incident_id') not in hidden_tests]
     data['devices'] = {k: d for k, d in data['devices'].items() if enabled and d['user_id'] == user_id}
     data['users'] = {k: ({'id': u['id'], 'name': u['name'], 'types': list(u.get('types', [])), 'enabled': u.get('enabled', True)}
                         if k == user_id else {'id': u['id'], 'name': u['name']})

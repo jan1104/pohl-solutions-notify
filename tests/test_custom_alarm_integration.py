@@ -1,0 +1,255 @@
+"""Custom alarms across real engine/entry/import boundaries with HA adapters."""
+import asyncio
+from copy import deepcopy
+import types
+import unittest
+from unittest.mock import AsyncMock, Mock, patch
+
+from ha_test_support import load_runtime_modules, load_entry_module
+
+runtime, _ = load_runtime_modules()
+entry = load_entry_module()
+
+
+class CustomAlarmIntegration(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self.hass = types.SimpleNamespace(
+            data={}, states=types.SimpleNamespace(get=lambda entity: None),
+            async_create_background_task=lambda coro, name: asyncio.create_task(coro))
+        self.engine = runtime.AlarmEngine(self.hass, types.SimpleNamespace(data={"site_id": "TEST"}))
+        self.engine.save = AsyncMock()
+        self.engine.actor = AsyncMock()
+        self.engine.schedule_category_setup = Mock()
+        self.hass.data['alarm_system'] = self.engine
+        self.profile = self.engine.model.upsert_alarm_type({'name': 'Hausalarm'})
+        self.kind = self.profile['id']
+        self.engine.model.data['users'] = {'user': {'id': 'user', 'name': 'User', 'enabled': True, 'types': [self.kind]}}
+        self.device = {'id': 'phone', 'user_id': 'user', 'platform': 'android', 'enabled': True,
+                       'tested': True, 'notify_action': 'notify.mobile_app_phone',
+                       'push': True, 'sound': True, 'speech': True, 'popup': True}
+        self.engine.model.data['devices'] = {'phone': self.device}
+        self.connection = types.SimpleNamespace(user=types.SimpleNamespace(id='admin',name='Admin'), send_result=Mock())
+
+    async def asyncTearDown(self):
+        tasks = list(self.engine.tasks)
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+
+    def incident(self):
+        return self.engine.model.raise_alarm({'type': self.kind, 'alarm_key': 'house',
+            'source_id': 'door', 'source_name': 'Tür', 'area': 'EG'})[0]
+
+    async def manage(self, action, data):
+        await entry.ws_manage(self.hass, self.connection, {'id': 1, 'action': action, 'data': data})
+
+    async def test_admin_creation_and_edit_retest_only_assigned_devices(self):
+        await self.manage('alarm_type_upsert', {'id': self.kind, 'name': 'Hausalarm neu', 'speech': False})
+        self.assertEqual(self.engine.model.label(self.kind), 'Hausalarm neu')
+        self.assertFalse(self.device['tested'])
+        self.assertEqual(self.connection.send_result.call_args.args[1]['alarm_type_id'], self.kind)
+        self.engine.save.assert_awaited_once()
+
+    async def test_registry_changes_are_blocked_during_incident(self):
+        self.incident()
+        before = self.engine.model.snapshot()
+        with self.assertRaises(entry.HomeAssistantError):
+            await self.manage('alarm_type_upsert', {'id': self.kind, 'name': 'Changed'})
+        self.assertEqual(self.engine.model.snapshot(), before)
+        self.engine.save.assert_not_awaited()
+
+    async def test_registry_changes_are_blocked_during_pending_recovery(self):
+        self.engine.model.data['leases']['phone'] = {'incident_id': 'ended', 'restore_pending': True}
+        with self.assertRaises(entry.HomeAssistantError):
+            await self.manage('alarm_type_upsert', {'name': 'Amokalarm'})
+        self.engine.save.assert_not_awaited()
+
+    async def test_regular_account_cannot_manage_alarm_registry(self):
+        user = types.SimpleNamespace(id='user', is_active=True, is_admin=False)
+        self.hass.auth = types.SimpleNamespace(async_get_user=AsyncMock(return_value=user))
+        del self.engine.actor
+        with self.assertRaises(runtime.Unauthorized):
+            await self.manage('alarm_type_upsert', {'name': 'Amokalarm'})
+        self.engine.save.assert_not_awaited()
+
+    def test_profile_output_flags_respect_device_off_switches(self):
+        self.engine.model.upsert_alarm_type({'id': self.kind, 'sound': False, 'popup': False})
+        self.device['speech'] = False
+        effective = self.engine.recipients(self.incident())[0]
+        self.assertFalse(effective['sound'])
+        self.assertFalse(effective['popup'])
+        self.assertFalse(effective['speech'])
+        self.assertTrue(effective['push'])
+
+    def test_custom_priority_applies_per_device(self):
+        self.engine.model.upsert_alarm_type({'id': self.kind, 'priority': 5})
+        self.engine.model.data['users']['user']['types'].append('INTRUSION')
+        custom = self.incident()
+        self.engine.model.raise_alarm({'type': 'INTRUSION', 'alarm_key': 'intrusion', 'source_id': 'motion'})
+        self.assertEqual(self.engine.primary_for_device(self.device)['id'], custom['id'])
+
+    async def test_unknown_action_type_is_controlled_error(self):
+        with self.assertRaises(runtime.HomeAssistantError):
+            await self.engine.dispatch({'type': 'NOT_CONFIGURED'})
+        self.engine.save.assert_not_awaited()
+
+    async def test_custom_dispatch_creates_real_event_and_cycle(self):
+        self.engine.cycle = AsyncMock()
+        await self.engine.dispatch({'type': self.kind, 'alarm_key': 'house', 'source_id': 'door'})
+        await asyncio.sleep(0)
+        self.assertEqual(len(self.engine.model.active()), 1)
+        self.engine.cycle.assert_awaited_once()
+
+    async def test_custom_notify_uses_own_name_and_stable_android_channel(self):
+        self.engine.model.upsert_alarm_type({'id': self.kind, 'name': 'Neuer Hausalarm'})
+        self.engine.send = AsyncMock(return_value=True)
+        await self.engine.notify(self.device, self.incident(), loud=True)
+        payload = self.engine.send.await_args.args[1]
+        self.assertIn('Neuer Hausalarm', payload['title'])
+        self.assertEqual(payload['data']['channel'], 'Hausalarm')
+
+    async def test_custom_speech_template_and_duration_are_used(self):
+        self.engine.model.upsert_alarm_type({'id': self.kind, 'sound': False, 'speech_seconds': 2,
+            'speech_template': '{name}: {site}; {areas}'})
+        device = self.engine.effective_device(self.device, self.kind)
+        incident = self.incident()
+        self.engine.model.data['leases']['phone'] = {'incident_id': incident['id'], 'playback_id': 'speech', 'speech_only': True}
+        self.engine.command = AsyncMock(return_value=True)
+        with patch.object(runtime.asyncio, 'sleep', new_callable=AsyncMock) as sleep:
+            await self.engine.finish_android_cycle(device, incident, 'speech')
+        self.assertEqual(self.engine.command.await_args.kwargs['tts_text'], 'Hausalarm: TEST; EG')
+        sleep.assert_awaited_once_with(2.0)
+
+    def test_custom_voice_only_profile_needs_no_tone_sensor_setup(self):
+        self.engine.model.upsert_alarm_type({'id': self.kind, 'sound': False})
+        self.assertEqual(self.engine.required_categories(self.device), [])
+
+    def backup(self):
+        return {'format': 'alarm_system_configuration', 'schema_version': 2, 'site_id': 'TEST',
+                'alarm_types': deepcopy(self.engine.model.data['alarm_types']),
+                'users': deepcopy(self.engine.model.data['users']),
+                'devices': deepcopy(self.engine.model.data['devices']), 'sources': {}}
+
+    def test_custom_configuration_round_trip_revalidates_devices(self):
+        data = entry.prepare_import(self.engine.model.snapshot(), self.backup(), {'user': 'User'}, {}, {'notify.mobile_app_phone'})
+        self.assertEqual(data['alarm_types'][self.kind]['name'], 'Hausalarm')
+        self.assertIn(self.kind, data['users']['user']['types'])
+        self.assertFalse(data['devices']['phone']['tested'])
+
+    def test_schema_two_requires_profile_definitions_and_stays_atomic(self):
+        backup = self.backup()
+        del backup['alarm_types']
+        before = self.engine.model.snapshot()
+        with self.assertRaises(ValueError):
+            entry.prepare_import(before, backup, {'user': 'User'}, {}, {'notify.mobile_app_phone'})
+        self.assertEqual(self.engine.model.snapshot(), before)
+
+    def test_custom_registry_is_filtered_for_normal_accounts(self):
+        self.engine.model.upsert_alarm_type({'name': 'Amokalarm'})
+        view = entry.user_view(self.engine.model.snapshot(), 'user')
+        self.assertEqual(set(view['alarm_types']), {self.kind})
+
+    def test_unassigned_or_disabled_accounts_get_no_custom_profile_names(self):
+        self.engine.model.data['users']['user']['enabled'] = False
+        self.assertEqual(entry.user_view(self.engine.model.snapshot(), 'user')['alarm_types'], {})
+        self.assertEqual(entry.user_view(self.engine.model.snapshot(), 'unknown')['alarm_types'], {})
+
+    def baseline_test(self, device_id='phone', key='baseline'):
+        incident = self.engine.model.raise_alarm({'type': 'FIRE', 'alarm_key': key, 'source_id': 'test'})[0]
+        incident['test_device'] = device_id
+        return incident
+
+    async def test_custom_only_user_can_respond_to_own_baseline_device_test(self):
+        incident = self.baseline_test()
+        self.hass.auth = types.SimpleNamespace(async_get_user=AsyncMock(return_value=types.SimpleNamespace(
+            id='user', name='User', is_active=True, is_admin=False)))
+        del self.engine.actor
+        self.engine.finish_response = AsyncMock()
+        await self.engine.respond(incident['id'], 'coming', 'user')
+        self.assertEqual(incident['status'], 'claimed')
+
+    async def test_custom_only_user_cannot_respond_to_regular_fire(self):
+        incident = self.baseline_test()
+        del incident['test_device']
+        self.hass.auth = types.SimpleNamespace(async_get_user=AsyncMock(return_value=types.SimpleNamespace(
+            id='user', is_active=True, is_admin=False)))
+        del self.engine.actor
+        with self.assertRaises(runtime.Unauthorized):
+            await self.engine.respond(incident['id'], 'coming', 'user')
+        self.assertEqual(incident['status'], 'open')
+
+    def test_custom_only_view_includes_own_test_but_hides_other_tests(self):
+        own = self.baseline_test()
+        self.engine.model.data['devices']['other'] = {'id': 'other', 'user_id': 'other'}
+        other = self.baseline_test('other', 'other-baseline')
+        view = entry.user_view(self.engine.model.snapshot(), 'user')
+        self.assertIn(own['id'], view['incidents'])
+        self.assertNotIn(other['id'], view['incidents'])
+
+    async def test_own_baseline_test_can_open_assigned_browser_popup(self):
+        incident = self.baseline_test()
+        self.device['browsers'] = [{'id': 'own-browser'}]
+        self.hass.services = types.SimpleNamespace(async_call=AsyncMock())
+        await self.engine.show_popup(self.device, incident, launch=False)
+        self.hass.services.async_call.assert_awaited_once()
+
+    async def test_disabled_user_cannot_use_own_test_exception(self):
+        incident = self.baseline_test()
+        self.engine.model.data['users']['user']['enabled'] = False
+        self.hass.auth = types.SimpleNamespace(async_get_user=AsyncMock(return_value=types.SimpleNamespace(
+            id='user', is_active=True, is_admin=False)))
+        del self.engine.actor
+        with self.assertRaises(runtime.Unauthorized):
+            await self.engine.respond(incident['id'], 'coming', 'user')
+        self.assertEqual(entry.user_view(self.engine.model.snapshot(), 'user')['incidents'], {})
+
+    async def test_custom_sensor_signal_creates_incident_not_plain_message(self):
+        self.engine.model.register_source({'id': 'door', 'name': 'Tür', 'entity_id': 'binary_sensor.door', 'type': self.kind}, 'off')
+        self.engine.cycle = AsyncMock()
+        self.engine.simple_message = AsyncMock()
+        await self.engine.receive_signal('binary_sensor.door', 'on')
+        await asyncio.sleep(0)
+        self.assertEqual(self.engine.model.active()[0]['type'], self.kind)
+        self.engine.cycle.assert_awaited_once()
+        self.engine.simple_message.assert_not_awaited()
+
+    def test_legacy_backup_keeps_registered_types_for_existing_history(self):
+        incident = self.incident()
+        self.engine.model.end_source(incident['id'], 'door', 'user')
+        backup = {'format': 'alarm_system_configuration', 'schema_version': 1,
+                  'site_id': 'TEST', 'users': {}, 'devices': {}, 'sources': {}}
+        restored = entry.prepare_import(self.engine.model.snapshot(), backup, {}, {}, set())
+        self.assertIn(self.kind, restored['alarm_types'])
+        self.assertIn(incident['id'], restored['incidents'])
+
+    def test_schema_two_preserves_profiles_referenced_by_retained_history(self):
+        incident = self.incident()
+        self.engine.model.end_source(incident['id'], 'door', 'user')
+        backup = {'format': 'alarm_system_configuration', 'schema_version': 2,
+                  'site_id': 'TEST', 'alarm_types': {}, 'users': {}, 'devices': {}, 'sources': {}}
+        restored = entry.prepare_import(self.engine.model.snapshot(), backup, {}, {}, set())
+        self.assertEqual(restored['alarm_types'][self.kind]['name'], 'Hausalarm')
+        self.assertIn(incident['id'], restored['incidents'])
+
+    def test_profile_referenced_only_by_journal_cannot_disappear(self):
+        self.engine.model.data['users'] = {}
+        self.engine.model.log('notification_requested', kind=self.kind)
+        with self.assertRaises(ValueError):
+            self.engine.model.remove_alarm_type(self.kind)
+
+    async def test_tone_notification_gets_final_status_even_with_normal_push_off(self):
+        self.engine.model.upsert_alarm_type({'id': self.kind, 'push': False, 'sound': True})
+        incident = self.incident()
+        self.engine.model.end_source(incident['id'], 'door', 'user')
+        self.engine.send = AsyncMock(return_value=True)
+        await self.engine.status(incident, 'Beendet', popup=False)
+        self.engine.send.assert_awaited_once()
+        self.assertEqual(self.engine.send.await_args.args[1]['data']['actions'], [])
+
+    async def test_profile_popup_off_is_enforced_for_raw_browser_visibility_routes(self):
+        self.engine.model.upsert_alarm_type({'id': self.kind, 'popup': False})
+        incident = self.incident()
+        self.device['browsers'] = [{'id': 'own-browser'}]
+        self.hass.services = types.SimpleNamespace(async_call=AsyncMock())
+        await self.engine.show_popup(self.device, incident, launch=False)
+        self.hass.services.async_call.assert_not_awaited()

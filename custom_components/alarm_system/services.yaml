@@ -1,13 +1,14 @@
 raise_alarm:
   name: Meldung auslösen
-  description: INFO/WARNING versenden oder FIRE/INTRUSION als gespeichertes Ereignis auslösen.
+  description: INFO/WARNING versenden oder eine konfigurierte Alarmart als gespeichertes Ereignis auslösen.
   fields:
     type:
-      name: Alarmart
+      name: Alarmart-ID
+      description: INFO, WARNING, FIRE, INTRUSION oder die ID unter Alarmarten → Für Automationen.
       required: true
+      example: FIRE
       selector:
-        select:
-          options: [INFO, WARNING, FIRE, INTRUSION]
+        text:
     alarm_key:
       name: Ereignisgruppe
       example: fire_house
