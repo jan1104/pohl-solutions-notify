@@ -165,3 +165,7 @@ Es wurde keine Softwareversion veröffentlicht und nichts zu GitHub gepusht.
 - Nach Nutzerfreigabe develop und neue Tags erfolgreich gepusht, GitHub-Release v0.4.1 erstellt.
 - Über GitHub-API veröffentlichten Release-Status und hacs.json am Tag geprüft. Defaultbranch main unverändert.
 - API lieferte unmittelbar danach keine Workflow-Läufe für develop; keine GitHub-CI-Bestätigung. Kein HA-Deployment oder echter HACS-/Android-Test.
+
+## Standardvorschau 0.4.3 – 03.11.2026
+
+24 Frontendtests erfolgreich, bestehende Tests um immer sichtbaren Standard neben eigenem Text sowie Live-Namensänderung und sichere Textausgabe erweitert. Frontend-Syntax und Versions-/Metadatenprüfung erfolgreich. Python-Verhaltenscode unverändert, dessen letzte Gesamtprüfung war 146 Tests in 0.4.2. Keine native HA-/Android-/Browser-Prüfung.

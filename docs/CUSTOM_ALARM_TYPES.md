@@ -139,3 +139,7 @@ Diese Meldungen erzeugen keinen wiederholten, quittierungspflichtigen Alarm. Der
 Wie bei allen Alarmarten müssen die entsprechenden Ausgaben auch am Gerät aktiviert sein. Eine Änderung an einer zugeordneten Alarmart setzt dessen Geräteprüfung zurück; vor dem Einsatz erneut prüfen. Die Vorschau bestätigt keine tatsächliche Sprachausgabe oder Zustellung.
 
 Bereits ans Handy übergebene Sprache lässt sich beim anschließenden Start eines Alarms nicht durch lokale Vorabprüfungen garantiert abbrechen; dieses Übergangsverhalten muss auf echtem Android geprüft werden.
+
+## Standard-Sprachtext ab 0.4.3
+
+Direkt unter dem Eingabefeld bleibt der **Standard-Sprachtext – wenn das Feld leer bleibt** immer sichtbar, auch wenn ein eigener Text eingetragen ist. Er übernimmt den aktuellen Alarmnamen und Standort. Bereiche sind als Beispieldaten erklärt. Bei Informationen ist der Beispieltext entsprechend gekennzeichnet; tatsächlich wird der Benachrichtigungstext des auslösenden Melders gesprochen. Die zusätzliche Vorschau darunter zeigt weiterhin die eigene Ansage.

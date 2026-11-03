@@ -1,5 +1,11 @@
 # Änderungen
 
+## 0.4.3 – Standard-Sprachtext immer sichtbar
+
+- Unter dem Eingabefeld steht zusätzlich immer der automatische Standard-Sprachtext als verständliche Vorschau, auch bei einem eigenen Text.
+- Der Standard folgt beim Bearbeiten dem Alarmnamen. Standort wird übernommen, Bereiche sind ausdrücklich Beispieldaten; bei Informationen wird der tatsächliche Meldertext erst beim Auslösen bestimmt.
+- 24 Frontendtests einschließlich Standardvorschau und Namensänderung erfolgreich; Syntax und Versionskonsistenz geprüft. Keine echte Browser-/HA-/Android-Prüfung.
+
 ## 0.4.2 – verständliche Ansagen und flexible Informationsausgabe
 
 - Sprachtext ist optional und zeigt bei der Standardansage kein technisches Vorlagenmuster mehr. Deutsche Einfügeschaltflächen und eine laufend aktualisierte Textvorschau erklären die dynamischen Angaben.

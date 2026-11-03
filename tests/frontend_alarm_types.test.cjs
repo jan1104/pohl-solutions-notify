@@ -222,6 +222,10 @@ test('standard speech is hidden behind plain instructions and an escaped concret
   const p = panel({site_id: 'Werkstatt <Ost>'});
   const html = p.alarmTypeFields(custom);
   assert.match(html, /<textarea[^>]*><\/textarea>/);
+  assert.match(html, /Standard-Sprachtext – wenn das Feld leer bleibt/);
+  const customHtml = p.alarmTypeFields({...custom, speech_template: 'Bitte zum Eingang.'});
+  assert.match(customHtml, /id="standard-speech-preview">Achtung\. Wasser &lt;Keller&gt;/);
+  assert.match(customHtml, /id="speech-preview"[^>]*>Bitte zum Eingang\./);
   assert.match(html, /Alarmname einfügen/);
   assert.match(html, /Standort einfügen/);
   assert.match(html, /Betroffene Bereiche einfügen/);
@@ -243,6 +247,7 @@ test('speech preview updates with typing and labelled buttons insert at the curs
   speech.value = 'Bitte prüfen.';
   speech.oninput();
   assert.equal(nodes.get('#speech-preview').textContent, 'Bitte prüfen.');
+  assert.equal(nodes.get('#standard-speech-preview').textContent, 'Achtung. Hausalarm. Standort Haus. Erdgeschoss, Küche.');
   speech.value = 'Meldung: Ende';speech.selectionStart = 9;speech.selectionEnd = 13;
   insert.onclick();
   assert.equal(speech.value, 'Meldung: {name}');
@@ -250,6 +255,7 @@ test('speech preview updates with typing and labelled buttons insert at the curs
   name.value = '<img src=x>';
   name.oninput();
   assert.equal(nodes.get('#speech-preview').textContent, 'Meldung: <img src=x>');
+  assert.equal(nodes.get('#standard-speech-preview').textContent, 'Achtung. <img src=x>. Standort Haus. Erdgeschoss, Küche.');
   speech.value = 'x'.repeat(240);speech.selectionStart = 240;speech.selectionEnd = 240;
   insert.onclick();
   assert.equal(speech.value.length, 240);
