@@ -66,17 +66,62 @@ test('recipient checkbox capture stores only known IDs in types, without checkbo
   p.captureWizard();
   assert.deepEqual(plain(p.wizard.draft), {id: 'user', types: [custom.id], enabled: true});
 });
-test('custom source uses alarm grouping and rejects an empty event name', () => {
+test('source assignment offers one existing-type dropdown and automatic grouping', () => {
+  const p = panel();
+  p.data.alarm_types.FIRE = {...p.typeChoices().find(t => t.id === 'FIRE'), name: 'Brand & Rauch'};
+  const {root} = mount(p);
+  p.wizard = {kind: 'source', step: 1, draft: {type: custom.id, alarm_key: 'Alte Gruppe', detection: 'Alte Beschreibung', name: 'Sensor', enabled: true}};
+  p.renderWizard();
+  assert.match(root.innerHTML, /Art der Meldung<select name="type">/);
+  assert.match(root.innerHTML, /value="CUSTOM_123456789ABC" selected/);
+  assert.match(root.innerHTML, /Wasser &lt;Keller&gt;/);
+  assert.match(root.innerHTML, /Brand &amp; Rauch/);
+  assert.match(root.innerHTML, /automatisch zu einem gemeinsamen Alarm zusammengefasst/);
+  assert.doesNotMatch(root.innerHTML, /name="detection"|alarm_key|Gemeinsames Alarmereignis|Neues Ereignis/);
+  assert.doesNotMatch(root.innerHTML, /Benachrichtigungstext/);
+  delete p.wizard.draft.alarm_key;
+  assert.doesNotThrow(() => p.validateWizard());
+  p.wizard.draft.type = 'UNKNOWN';
+  assert.throws(() => p.validateWizard(), /vorhandene Art der Meldung/);
+});
+
+test('information source keeps its message settings without an event group', () => {
   const p = panel();
   const {root} = mount(p);
-  p.wizard = {kind: 'source', step: 1, draft: {type: custom.id, alarm_key: 'Keller', name: 'Sensor', enabled: true}};
+  p.wizard = {kind: 'source', step: 1, draft: {type: 'INFO', name: 'Tor', message: 'Tor offen', enabled: true}};
   p.renderWizard();
-  assert.match(root.innerHTML, /value="CUSTOM_123456789ABC" selected/);
-  assert.match(root.innerHTML, /Gemeinsames Alarmereignis/);
-  assert.doesNotMatch(root.innerHTML, /Benachrichtigungstext/);
-  p.wizard.draft.alarm_key = '';
-  assert.throws(() => p.validateWizard(), /gemeinsame Alarmereignis/);
+  assert.match(root.innerHTML, /Art der Meldung<select name="type">/);
+  assert.match(root.innerHTML, /Benachrichtigungstext/);
+  assert.match(root.innerHTML, /name="silent"/);
+  assert.doesNotMatch(root.innerHTML, /name="detection"|alarm_key|Gemeinsames Alarmereignis/);
+  assert.doesNotThrow(() => p.validateWizard());
 });
+
+test('saving an edited source sends no stale manual event group', async () => {
+  const p = panel();
+  const {root} = mount(p);
+  const draft = {id: 'source', name: 'Sensor', entity_id: 'binary_sensor.source', type: custom.id,
+    alarm_key: 'Legacy', _new_group: true, detection: 'Legacy detail', enabled: true};
+  p.wizard = {kind: 'source', step: 2, editing: true, draft};
+  p.captureWizard = () => {};
+  p.renderAdmin = () => {};
+  p.closeWizard = () => {};
+  const calls = [];
+  p.manage = async (action, data) => calls.push({action, data: plain(data)});
+  p.renderWizard();
+  assert.match(root.innerHTML, /Art der Meldung/);
+  assert.match(root.innerHTML, /Automatisch mit allen Meldern derselben Alarmart/);
+  assert.doesNotMatch(root.innerHTML, /Legacy/);
+  await root.querySelector('#wizard-form').onsubmit({preventDefault() {}});
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].action, 'source_upsert');
+  assert.equal(calls[0].data.type, custom.id);
+  assert.equal(calls[0].data.detection, 'Legacy detail');
+  assert.equal(Object.hasOwn(calls[0].data, 'alarm_key'), false);
+  assert.equal(Object.hasOwn(calls[0].data, '_new_group'), false);
+  assert.equal(draft.alarm_key, 'Legacy');
+});
+
 test('configuration export includes registry schema 2 and custom history retains current name', () => {
   const data = panel().data;
   data.journal = [{id: 'row', at: '2026-11-03T12:00:00Z', type: custom.id, action: 'alarm_raised'}];

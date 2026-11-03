@@ -141,6 +141,22 @@ class AlarmModel:
         return bool(incident.get('test_device') and account and account.get('enabled', True)
                     and device.get('user_id') == user_id)
 
+    def source_group_key(self, source):
+        """Use stable type groups, but let legacy in-flight events finish unchanged."""
+        sid = source['id']
+        for incident in self.active():
+            if (incident['type'] == source['type'] and sid in incident['sources']):
+                return incident['alarm_key']
+        # An ended/false alarm stays suppressed until its real signal returns OFF.
+        suffix = '|' + sid
+        suppressed = [key[:-len(suffix)] for key in self.data['suppressed']
+                      if key.endswith(suffix)]
+        if source.get('alarm_key') in suppressed:
+            return source['alarm_key']
+        if suppressed:
+            return suppressed[0]
+        return '__alarm_type__:' + source['type']
+
     def register_source(self, payload, current_state=None):
         source_id = payload.get("id") or uuid4().hex
         old = self.data["sources"].get(source_id, {})
@@ -154,7 +170,9 @@ class AlarmModel:
         url = str(payload.get("url", "")).strip()
         if url and (not url.startswith("/") or url.startswith("//")):
             raise ValueError("HA-Seite als internen Pfad angeben, zum Beispiel /lovelace/energie")
-        key = str(payload.get("alarm_key", "")).strip() or {"FIRE": "Feueralarm Gebäude", "INTRUSION": "Einbruchalarm Gebäude"}.get(kind, name)
+        # Group identity comes from the selected type, never from an editable name.
+        # Preserve the existing key only for an in-flight legacy source of this type.
+        key = self.source_group_key(dict(old, id=source_id, type=kind))
         changed = any(old.get(k) != value for k, value in (("entity_id", entity_id), ("type", kind), ("alarm_key", key)))
         if old and changed and any(source_id in i["sources"] and i["sources"][source_id]["active"] for i in self.active()):
             raise ValueError("Vor dem Ändern der Signalzuordnung die aktive Melderzeile beenden")
@@ -162,7 +180,7 @@ class AlarmModel:
             raise ValueError("Eine Ereignisgruppe darf nur eine Alarmart enthalten")
         source = {"id": source_id, "name": name, "entity_id": entity_id, "type": kind,
                   "alarm_key": key, "area": str(payload.get("area", "")),
-                  "detection": str(payload.get("detection", "")), "camera": str(payload.get("camera", "")),
+                  "detection": str(payload.get("detection", old.get("detection", ""))), "camera": str(payload.get("camera", "")),
                   "message": str(payload.get("message", "")), "url": url, "enabled": bool(payload.get("enabled", True)),
                   "silent": bool(payload.get("silent", False)), "graph_entity": str(payload.get("graph_entity", "")),
                   "graph_minutes": max(1, min(1440, int(payload.get("graph_minutes", 15))))}
@@ -186,12 +204,22 @@ class AlarmModel:
         previous = self.data["signal_values"].get(source["id"])
         self.data["signal_values"][source["id"]] = state
         if state == "off":
-            self.normal(source["alarm_key"], source["id"])
+            # A binding may still be referenced under an older key after an update.
+            keys = {source['alarm_key']}
+            keys.update(i['alarm_key'] for i in self.data['incidents'].values()
+                        if source['id'] in i['sources'] and i['type'] == source['type'])
+            suffix = '|' + source['id']
+            keys.update(key[:-len(suffix)] for key in self.data['suppressed']
+                        if key.endswith(suffix))
+            for key in keys:
+                self.normal(key, source['id'])
+            source['alarm_key'] = self.source_group_key(source)
             return None
         if previous == "on" or not source["enabled"]:
             return None
+        source['alarm_key'] = self.source_group_key(source)
         return {"type": source["type"], "alarm_key": source["alarm_key"], "source_id": source["id"],
-                "source_name": source["name"], "entity_id": entity_id, "title": source["alarm_key"],
+                "source_name": source["name"], "entity_id": entity_id, "title": self.label(source['type']),
                 "message": source["message"] or f'{source["name"]} · {source["area"]}',
                 "area": source["area"], "detection": source["detection"], "camera": source["camera"],
                 "url": source.get("url", ""), "silent": source["silent"], "graph_entity": source["graph_entity"], "graph_minutes": source["graph_minutes"]}

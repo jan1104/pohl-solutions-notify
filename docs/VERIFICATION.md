@@ -169,3 +169,11 @@ Es wurde keine Softwareversion veröffentlicht und nichts zu GitHub gepusht.
 ## Standardvorschau 0.4.3 – 03.11.2026
 
 24 Frontendtests erfolgreich, bestehende Tests um immer sichtbaren Standard neben eigenem Text sowie Live-Namensänderung und sichere Textausgabe erweitert. Frontend-Syntax und Versions-/Metadatenprüfung erfolgreich. Python-Verhaltenscode unverändert, dessen letzte Gesamtprüfung war 146 Tests in 0.4.2. Keine native HA-/Android-/Browser-Prüfung.
+
+## Vereinfachte Melderzuordnung 0.4.4 – 03.11.2026
+
+- 156 Python- und 26 Frontendtests erfolgreich. Syntax, Metadaten/Versionen und Whitespace geprüft.
+- Modellregressionen für gleiche/unterschiedliche Alarmarten, stabile Gruppe bei Umbenennung, alte gespeicherte Gruppen, unveränderte aktive Ereignisse und Signalnormalisierung, Fehlalarm-Sperre bis AUS, direkte Service-Gruppen.
+- Engine-/Importfälle für mehrere Bereiche im selben Ereignis, getrennte Typen, atomaren Altimport und weiter einmalige INFO-Meldungen.
+- Frontend prüft einzelne Dropdown-Auswahl, dynamische Namen, Wegfall manueller Felder/Validierung, keine veralteten Gruppenschlüssel beim Speichern, Informationseinstellungen weiter verfügbar.
+- Zwei Subagenten bearbeiteten Modell und Frontend getrennt; Hauptagent prüfte Migration und integrierte Engine-/Importtests. Keine native Prüfung behauptet.

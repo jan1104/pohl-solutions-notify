@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.3 · 0.4.3 gepusht und als GitHub-Release veröffentlicht / kein HA-Deployment.
+Stand: 03.11.2026 · lokaler Entwicklungsstand 0.4.4 · 0.4.3 gepusht und als GitHub-Release veröffentlicht / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -232,3 +232,13 @@ ununterbrochene Arbeit bei ausgeschaltetem Rechner.
 - 24 Frontendtests, Syntax und Versionsprüfung erfolgreich. Keine Backend-Logik geändert, keine erneute native Prüfung behauptet.
 
 - 0.4.3 mit fortgeltender Nutzerfreigabe gepusht und veröffentlicht; Release und hacs.json am Tag remote geprüft.
+
+## Ausdrückliche Produktentscheidung 0.4.4: eine Auswahl pro Melder
+
+- Nutzer bestätigt: Art der Meldung wählt angelegte Alarmarten; alle Melder derselben Alarmart bilden automatisch einen gemeinsamen Alarm.
+- Zusätzliches Freitextfeld und manuelle Ereignisgruppe aus dem Melderassistenten entfernen. Interne Gruppierung an stabile Typen-ID binden; reine Umbenennung darf keine neue Gruppe erzeugen.
+- Laufende/Historienereignisse nicht zusammenführen oder umschreiben; alte Signal-/Fehlalarm-Sperren bis AUS erhalten und danach auf neue Gruppierung übergehen.
+- Direkte Service-Aufrufe mit explizitem alarm_key bleiben kompatibel. Info/Warnung bleiben einzelne Meldungen.
+- Regressionen auf Modell-, Import-, Engine- und Frontendebene; echte HA-/Android-/Browser-Prüfung weiterhin offen.
+
+- Umgesetzt und lokal geprüft: 156 Python-/26 Frontendtests; Stand für HACS-Veröffentlichung vorbereitet.

@@ -145,13 +145,98 @@ class AlarmTypeTests(unittest.TestCase):
         payload = self.model.signal_update(source["entity_id"], "on")
         incident, state = self.model.raise_alarm(payload)
         self.assertEqual((incident["type"], state), (kind, "new"))
+        # Manual group input on a binding is ignored; the type is authoritative.
+        smoke = self.model.register_source({"entity_id": "binary_sensor.smoke", "name": "Rauch", "type": "FIRE", "alarm_key": "Wasser"})
+        self.assertNotEqual(smoke['alarm_key'], source['alarm_key'])
+        self.assertNotEqual(source['alarm_key'], 'Wasser')
         with self.assertRaises(ValueError):
-            self.model.register_source({"entity_id": "binary_sensor.smoke", "name": "Rauch", "type": "FIRE", "alarm_key": "Wasser"})
-        with self.assertRaises(ValueError):
-            self.model.raise_alarm({"type": "FIRE", "source_id": "smoke", "alarm_key": "Wasser"})
+            self.model.raise_alarm({"type": "FIRE", "source_id": "smoke", "alarm_key": incident['alarm_key']})
         for kind in ("UNKNOWN", "INFO", "WARNING"):
             with self.subTest(kind=kind), self.assertRaises(ValueError):
                 self.model.raise_alarm({"type": kind, "alarm_key": "message", "source_id": "message"})
+
+    def source(self, sid, kind='FIRE', **extra):
+        return self.model.register_source(dict(id=sid, entity_id='binary_sensor.' + sid,
+                                              name=sid, type=kind, **extra), 'off')
+
+    def test_bound_sources_of_same_type_share_one_event_and_distinct_types_do_not(self):
+        first = self.source('kitchen', area='Küche', alarm_key='Old kitchen')
+        second = self.source('hall', area='Flur', alarm_key='Old hall')
+        other = self.source('door', kind='INTRUSION')
+        self.assertEqual(first['alarm_key'], second['alarm_key'])
+        self.assertNotEqual(first['alarm_key'], other['alarm_key'])
+        incident, state = self.model.raise_alarm(self.model.signal_update(first['entity_id'], 'on'))
+        joined, result = self.model.raise_alarm(self.model.signal_update(second['entity_id'], 'on'))
+        self.assertEqual((state, result), ('new', 'source_added'))
+        self.assertEqual(incident['id'], joined['id'])
+        self.assertEqual(incident['title'], self.model.label('FIRE'))
+        self.assertEqual(set(incident['sources']), {'kitchen', 'hall'})
+        self.assertEqual({s['area'] for s in incident['sources'].values()}, {'Küche', 'Flur'})
+
+    def test_automatic_group_is_stable_across_alarm_type_rename(self):
+        kind = self.custom()['id']
+        source = self.source('water', kind=kind)
+        key = source['alarm_key']
+        self.model.upsert_alarm_type({'id': kind, 'name': 'Wasser neu'})
+        updated = self.model.register_source(dict(source, name='Sensor neu'))
+        self.assertEqual(updated['alarm_key'], key)
+        payload = self.model.signal_update(updated['entity_id'], 'on')
+        self.assertEqual(payload['title'], 'Wasser neu')
+
+    def test_saved_legacy_group_migrates_at_next_signal_without_rewriting_history(self):
+        source = self.source('smoke', detection='Rauch')
+        source['alarm_key'] = 'Alte Gruppe'
+        saved = self.model.snapshot()
+        restored = AlarmModel(saved)
+        payload = restored.signal_update(source['entity_id'], 'on')
+        self.assertEqual(payload['alarm_key'], '__alarm_type__:FIRE')
+        self.assertEqual(saved['sources']['smoke']['alarm_key'], 'Alte Gruppe')
+        self.assertEqual(payload['detection'], 'Rauch')
+        edited = restored.register_source({'id': 'smoke', 'entity_id': source['entity_id'],
+                                           'name': 'Neu', 'type': 'FIRE'})
+        self.assertEqual(edited['detection'], 'Rauch')
+
+    def test_active_legacy_event_keeps_key_and_normal_signal_until_it_finishes(self):
+        source = self.source('smoke')
+        source['alarm_key'] = 'Alte Gruppe'
+        incident, _ = self.model.raise_alarm({'type': 'FIRE', 'alarm_key': 'Alte Gruppe',
+            'source_id': source['id'], 'entity_id': source['entity_id'], 'title': 'Alter Titel'})
+        restored = AlarmModel(self.model.snapshot())
+        edited = restored.register_source(dict(source, name='Neu'))
+        self.assertEqual(edited['alarm_key'], 'Alte Gruppe')
+        restored.signal_update(source['entity_id'], 'off')
+        active = restored.data['incidents'][incident['id']]
+        self.assertFalse(active['sources']['smoke']['signal_active'])
+        self.assertEqual(active['title'], 'Alter Titel')
+        self.assertEqual(active['alarm_key'], 'Alte Gruppe')
+        restored.end_source(incident['id'], source['id'], None)
+        payload = restored.signal_update(source['entity_id'], 'on')
+        self.assertEqual(payload['alarm_key'], '__alarm_type__:FIRE')
+        self.assertEqual(active['alarm_key'], 'Alte Gruppe')
+
+    def test_legacy_false_alarm_suppression_survives_until_real_off(self):
+        source = self.source('smoke')
+        source['alarm_key'] = 'Alte Gruppe'
+        incident, _ = self.model.raise_alarm({'type': 'FIRE', 'alarm_key': 'Alte Gruppe',
+            'source_id': source['id'], 'entity_id': source['entity_id']})
+        self.model.false_alarm(incident['id'], None)
+        restored = AlarmModel(self.model.snapshot())
+        restored.data['signal_values']['smoke'] = None  # State was not known at restart.
+        payload = restored.signal_update(source['entity_id'], 'on')
+        self.assertEqual(payload['alarm_key'], 'Alte Gruppe')
+        self.assertEqual(restored.raise_alarm(payload), (None, 'suppressed'))
+        restored.signal_update(source['entity_id'], 'off')
+        self.assertFalse(restored.data['suppressed'])
+        payload = restored.signal_update(source['entity_id'], 'on')
+        self.assertEqual(payload['alarm_key'], '__alarm_type__:FIRE')
+        self.assertEqual(restored.raise_alarm(payload)[1], 'new')
+
+    def test_direct_service_groups_remain_explicit_and_separate(self):
+        for key in ('Werkstatt', 'Haus'):
+            self.model.raise_alarm({'type': 'FIRE', 'alarm_key': key, 'source_id': key})
+        self.assertEqual({i['alarm_key'] for i in self.model.active()}, {'Werkstatt', 'Haus'})
+        saved = self.model.snapshot()
+        self.assertEqual(AlarmModel(saved).data['incidents'], saved['incidents'])
 
     def test_custom_recipients_and_authorization_follow_user_type_membership(self):
         kind = self.custom()["id"]

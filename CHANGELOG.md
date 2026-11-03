@@ -1,5 +1,13 @@
 # Änderungen
 
+## 0.4.4 – eine Meldungsart und automatische Meldergruppen
+
+- Im Melderassistenten nur noch eine Auswahlliste **Art der Meldung** mit den angelegten Alarmarten; zusätzlicher Freitext und manuelle Ereignisgruppe entfallen.
+- Angebundene Melder derselben Alarmart werden automatisch zu einem gemeinsamen Alarm zusammengefasst; stabile Typen-ID erhält die Zuordnung auch beim Umbenennen.
+- Laufende alte Gruppen und Titel bleiben unverändert; vorhandene Fehlalarm-Sperren bis zum echten AUS erhalten. Alte Beschreibungen und Historie bleiben gespeichert.
+- Direkte HA-Aktionen behalten ihre expliziten Gruppen; Informationen/Warnungen bleiben einzelne Meldungen.
+- 156 Python- und 26 Frontendtests erfolgreich. Echte HA-/Android-/Browser-Prüfung weiterhin offen.
+
 ## 0.4.3 – Standard-Sprachtext immer sichtbar
 
 - Unter dem Eingabefeld steht zusätzlich immer der automatische Standard-Sprachtext als verständliche Vorschau, auch bei einem eigenen Text.

@@ -91,3 +91,9 @@ Laden/Entladen, erneutes Laden, normale INFO/WARNING, Kameras, Import/Export und
 CSV-Verlauf prüfen. Ergebnis pro Schritt als bestanden, fehlgeschlagen oder nicht
 getestet protokollieren. Erst nach tatsächlichen Ergebnissen unterstützte Versionsmatrix
 und Freigabestatus aktualisieren.
+
+## Automatische Meldergruppen ab 0.4.4
+
+Zwei Binary-Sensoren verschiedener Bereiche derselben eigenen Alarmart zuordnen. Im Assistenten darf nur **Art der Meldung** erscheinen, kein Freitext zur Meldungsart und keine manuelle Ereignisgruppe. Beide Signale einschalten: ein gemeinsamer Alarm mit zwei Meldern und beiden Bereichen. Eine andere Alarmart muss einen getrennten Alarm erzeugen. Einzelne Melder beenden und deren AUS/AN-Wechsel prüfen; ein normales Signal beendet weiterhin keinen offenen Alarm.
+
+Upgrade auf einer vollständigen Kopie der Testinstanz mit alten getrennten Gruppen sowie einer Fehlalarm-Sperre prüfen: laufende Gruppen/Titel und Sperren erhalten, AUS muss Sperren lösen; spätere neue Auslösungen automatisch gruppieren. Export/Import einer alten Konfiguration normalisiert Gruppen ohne historische Ereignisse zu überschreiben. INFO/WARNING bleiben einzelne Meldungen. Kein Ergebnis dieser Hardware-/HA-Prüfungen wurde bislang bestätigt.

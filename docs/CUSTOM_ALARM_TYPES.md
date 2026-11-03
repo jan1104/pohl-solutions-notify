@@ -41,8 +41,7 @@ abgeschlossene Wiedergabe lassen sich aus den Wartezeiten nicht beweisen.
 3. **Sprachtext optional anpassen:** Einen normalen Satz schreiben, z. B. „Bitte zum Haupteingang kommen.“ Für veränderliche Angaben die beschrifteten Einfügeschaltflächen verwenden. Darunter zeigt eine Beispielvorschau den fertigen Text; sie spielt keinen Ton ab. Leer lassen verwendet die Standardansage.
 4. **Empfänger zuordnen:** Unter **Benutzer → Bearbeiten → Meldungen wählen** die neue Art
    für jedes gewünschte vorhandene HA-Konto auswählen.
-5. **Melder zuordnen:** Unter **Melder & Alarme** einen Binary-Sensor wählen und als
-   Alarmart beispielsweise **Hausalarm** auswählen. Eine eindeutige Ereignisgruppe vergeben.
+5. **Melder zuordnen:** Unter **Melder & Alarme** einen Binary-Sensor wählen und bei **Art der Meldung** beispielsweise **Hausalarm** auswählen. Melder derselben Alarmart werden automatisch zu einem gemeinsamen Alarm zusammengefasst; eine zusätzliche Ereignisgruppe wird nicht eingegeben.
 6. **Gerät prüfen:** Push/Ton/Sprache/Popup am jeweiligen Gerät kontrollieren. Der
    Assistent behält die Feuer-/Einbruch-Basisprüfung bei und bietet zusätzliche Tests
    der eigenen Alarmarten an. Neue Arten vor tatsächlichem Einsatz gezielt testen.
@@ -143,3 +142,13 @@ Bereits ans Handy übergebene Sprache lässt sich beim anschließenden Start ein
 ## Standard-Sprachtext ab 0.4.3
 
 Direkt unter dem Eingabefeld bleibt der **Standard-Sprachtext – wenn das Feld leer bleibt** immer sichtbar, auch wenn ein eigener Text eingetragen ist. Er übernimmt den aktuellen Alarmnamen und Standort. Bereiche sind als Beispieldaten erklärt. Bei Informationen ist der Beispieltext entsprechend gekennzeichnet; tatsächlich wird der Benachrichtigungstext des auslösenden Melders gesprochen. Die zusätzliche Vorschau darunter zeigt weiterhin die eigene Ansage.
+
+## Eine Meldungsart pro Melder ab 0.4.4
+
+Beim Anlegen und Bearbeiten steht unter **Alarm zuordnen** nur noch eine Auswahlliste **Art der Meldung** mit deinen angelegten Alarmarten. Der bisherige zusätzliche Freitext und die Auswahl **Gemeinsames Alarmereignis** entfallen. Name, Bereich und die vorhandenen Einstellungen der gewählten Alarmart bleiben nutzbar.
+
+Alle angebundenen Melder derselben Alarmart werden innerhalb dieses Standorts automatisch zu einem gemeinsamen Alarm zusammengefasst. Verschiedene Alarmarten bleiben getrennt. Ein umbenannter Alarm behält seine technische Zuordnung. Für getrennt zu behandelnde Alarmgruppen getrennte Alarmarten anlegen. Informationen und Warnungen bleiben einzelne Meldungen ohne quittierungspflichtigen Sammelalarm.
+
+Bei der Umstellung bleiben historische Ereignisse, frühere Beschreibungen und laufende Alarme erhalten. Bereits laufende alte Gruppen werden nicht nachträglich verschmolzen; sie können getrennt abgeschlossen werden. Nach Abschluss und nötigem Signalwechsel auf AUS greift für neue Auslösungen die automatische Gruppierung. Ein normal gewordenes Signal beendet einen offenen Alarm weiterhin nicht automatisch. Ein nach Fehlalarm/Beenden noch aktives Meldersignal bleibt bis AUS gesperrt.
+
+Die direkte HA-Aktion `alarm_system.raise_alarm` unterstützt weiterhin einen ausdrücklichen `alarm_key`; diese Vereinfachung betrifft im Panel angebundene Binary-Sensor-Melder. Direkt gestartete Automationsereignisse werden nicht nachträglich umgruppiert.

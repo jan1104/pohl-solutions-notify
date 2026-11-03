@@ -3,7 +3,7 @@
 ## Meldungen und Alarme
 
 `INFO` und `WARNING` sind Nachrichten. `FIRE` und `INTRUSION` erzeugen gespeicherte
-Ereignisse. Mehrere Melder derselben Ereignisgruppe (`alarm_key`) werden zusammengeführt.
+Ereignisse. Im Panel angebundene Melder derselben Alarmart werden ab 0.4.4 automatisch zusammengeführt. Dafür genügt die Auswahl **Art der Meldung**. Direkte Aktionsaufrufe verwenden weiterhin ihre ausdrücklich angegebene Ereignisgruppe (`alarm_key`).
 Feuer und Einbruch müssen verschiedene Ereignisgruppen verwenden.
 
 Im Panel **Alarme** verwalten Administratoren Benutzer, Geräte, Melder und Einstellungen.
@@ -109,3 +109,5 @@ Schalterwirkung, Plattformgrenzen und Update-Hinweise stehen in [OUTPUT_SETTINGS
 Alarmarten mit eigenen Namen, Empfängern und Ausgaben unter **Alarmarten** einrichten.
 Die vollständige Anleitung einschließlich Sprachtexten und Schema-2-Sicherung steht
 in [CUSTOM_ALARM_TYPES.md](CUSTOM_ALARM_TYPES.md).
+
+Die Umstellung vorhandener Melder sowie laufender alter Gruppen ist in [CUSTOM_ALARM_TYPES.md](CUSTOM_ALARM_TYPES.md) beschrieben.

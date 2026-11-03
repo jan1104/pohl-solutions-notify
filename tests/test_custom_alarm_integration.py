@@ -364,3 +364,61 @@ class MessageOutputIntegration(unittest.IsolatedAsyncioTestCase):
         await self.engine.dispatch({'type': 'WARNING', 'message': 'Fenster noch offen'})
         self.assertEqual(self.engine.send.await_count, 1)
         self.assertEqual(self.engine.send.await_args.args[1]['data']['tts_text'], 'Fenster noch offen')
+
+
+class AutomaticSourceGroupingIntegration(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        CustomAlarmIntegration.setUp(self)
+        self.engine.cycle = AsyncMock()
+        self.engine.status = AsyncMock()
+
+    async def asyncTearDown(self):
+        await CustomAlarmIntegration.asyncTearDown(self)
+
+    def bind(self, sid, kind=None, **extra):
+        return self.engine.model.register_source({'id': sid, 'name': sid,
+            'entity_id': 'binary_sensor.' + sid, 'type': kind or self.kind, **extra}, 'off')
+
+    async def test_two_custom_sources_share_event_without_user_group_key(self):
+        self.bind('door', area='Eingang')
+        self.bind('window', area='Büro')
+        await self.engine.receive_signal('binary_sensor.door', 'on')
+        await self.engine.receive_signal('binary_sensor.window', 'on')
+        await asyncio.sleep(0)
+        incidents = self.engine.model.active()
+        self.assertEqual(len(incidents), 1)
+        self.assertEqual(set(incidents[0]['sources']), {'door', 'window'})
+        self.assertEqual(incidents[0]['title'], 'Hausalarm')
+        self.engine.cycle.assert_awaited_once()
+        self.engine.status.assert_awaited_once()
+
+    async def test_different_source_types_remain_independent_events(self):
+        self.bind('door')
+        self.bind('smoke', 'FIRE')
+        await self.engine.receive_signal('binary_sensor.door', 'on')
+        await self.engine.receive_signal('binary_sensor.smoke', 'on')
+        self.assertEqual(len(self.engine.model.active()), 2)
+        self.assertEqual({i['type'] for i in self.engine.model.active()}, {self.kind, 'FIRE'})
+
+    def test_import_old_manual_groups_normalizes_same_type_without_mutating_input(self):
+        self.bind('door')
+        self.bind('window')
+        document = CustomAlarmIntegration.backup(self)
+        document['sources'] = deepcopy(self.engine.model.data['sources'])
+        document['sources']['door']['alarm_key'] = 'Old first'
+        document['sources']['window']['alarm_key'] = 'Old second'
+        original = deepcopy(document)
+        states = {s['entity_id']: 'off' for s in document['sources'].values()}
+        data = entry.prepare_import(self.engine.model.snapshot(), document, {'user': 'User'}, states, {'notify.mobile_app_phone'})
+        self.assertEqual(data['sources']['door']['alarm_key'], data['sources']['window']['alarm_key'])
+        self.assertEqual(document, original)
+        self.assertFalse(data['devices']['phone']['tested'])
+
+    async def test_info_sources_stay_one_shot_messages(self):
+        self.bind('info1', 'INFO')
+        self.bind('info2', 'INFO')
+        self.engine.simple_message = AsyncMock()
+        await self.engine.receive_signal('binary_sensor.info1', 'on')
+        await self.engine.receive_signal('binary_sensor.info2', 'on')
+        self.assertEqual(self.engine.simple_message.await_count, 2)
+        self.assertFalse(self.engine.model.active())
