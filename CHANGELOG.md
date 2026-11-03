@@ -1,5 +1,12 @@
 # Änderungen
 
+## 0.4.5 – kompakter Alarmverlauf
+
+- Abgeschlossene Alarme sind einzeln standardmäßig zugeklappt. Die Kurzzeile zeigt Datum/Uhrzeit, Status, Alarmart und alle beteiligten Melder.
+- Aufklappen zeigt die vorhandenen Details einschließlich Bereiche, Rückmeldungen und Verlauf/Transport. Geöffnete Einträge bleiben bei automatischer Aktualisierung geöffnet.
+- Informationen/Warnungen erhalten ebenfalls kompakte aufklappbare Verlaufseinträge. „Gemeldet“ bestätigt keine tatsächliche Zustellung.
+- Aktive Alarmansichten bleiben direkt sichtbar. 29 Frontendtests sowie Syntax-/Versionsprüfung erfolgreich; keine echte Browser-/HA-/Android-Prüfung.
+
 ## 0.4.4 – eine Meldungsart und automatische Meldergruppen
 
 - Im Melderassistenten nur noch eine Auswahlliste **Art der Meldung** mit den angelegten Alarmarten; zusätzlicher Freitext und manuelle Ereignisgruppe entfallen.

@@ -313,3 +313,55 @@ test('message notification tone does not require alarm volume sensors', () => {
   p.wizard = {kind: 'device', step: 2, draft: {platform: 'android', user_id: 'user', sound: true, popup: false}};
   assert.doesNotThrow(() => p.validateWizard());
 });
+
+
+test('completed history entries start collapsed with date status type and every source in summary', () => {
+  const p = panel();
+  const i = {id: 'event<1>', type: custom.id, status: 'false_alarm', started_at: '2026-11-03T12:00:00Z',
+    ended_at: '2026-11-03T12:01:00Z', site_id: 'Haus', title: 'Hausalarm',
+    sources: {one: {id: 'one', name: 'Tür <Ost>', area: 'EG', triggered_at: '2026-11-03T12:00:00Z'},
+      two: {id: 'two', name: 'Fenster', area: 'OG', triggered_at: '2026-11-03T12:00:01Z'}}, responses: {}, audit: [], delivery: []};
+  p.responseRows = () => '<p>Rückmeldungen im Detail</p>';
+  const html = p.historyIncidentHTML(i);
+  assert.match(html, /^<details class="history-entry" data-disclosure-key="history-incident:event&lt;1&gt;">/);
+  assert.doesNotMatch(html.slice(0, html.indexOf('>')), /\bopen\b/);
+  const summary = html.match(/<summary>(.*?)<\/summary>/s)[1];
+  assert.match(summary, /history-time/);
+  assert.match(summary, /Fehlalarm bestätigt/);
+  assert.match(summary, /Wasser &lt;Keller&gt;/);
+  assert.match(summary, /Melder: Tür &lt;Ost&gt;, Fenster/);
+  assert.doesNotMatch(summary, /Rückmeldungen im Detail|Verlauf und Transport|WER KOMMT/);
+  assert.match(html.slice(html.indexOf('</summary>')), /Rückmeldungen im Detail/);
+  assert.match(html, /Verlauf und Transport/);
+  assert.doesNotMatch(html, /data-action=/);
+  const active = p.incidentHTML({...i, status: 'open'}, true);
+  assert.match(active, /^<section/);
+  assert.match(active, /data-action="coming"/);
+});
+
+test('history disclosure identity remains stable when summary text changes', () => {
+  const p = panel();
+  p.disclosures = new Map();
+  const entry = {dataset: {disclosureKey: 'history-incident:stable'}, open: true};
+  p.rememberDetails({querySelectorAll: () => [entry]});
+  const refreshed = {dataset: {disclosureKey: 'history-incident:stable'}, open: false};
+  p.restoreDetails({querySelectorAll: () => [refreshed]});
+  assert.equal(refreshed.open, true);
+  const other = {dataset: {disclosureKey: 'history-incident:other'}, open: false};
+  p.restoreDetails({querySelectorAll: () => [other]});
+  assert.equal(other.open, false);
+});
+
+test('information history is collapsed and distinguishes triggered from received', () => {
+  const p = panel();
+  const html = p.historyMessageHTML({id: 'msg', type: 'INFO', at: '2026-11-03T12:00:00Z',
+    source_name: 'Tor', area: 'Hof', text: '<script>Text</script>'});
+  assert.match(html, /^<details class="history-entry" data-disclosure-key="history-message:msg">/);
+  const summary = html.match(/<summary>(.*?)<\/summary>/s)[1];
+  assert.match(summary, /Gemeldet/);
+  assert.match(summary, /<strong>Info<\/strong>/);
+  assert.match(summary, /Melder: Tor/);
+  assert.doesNotMatch(summary, /Hof|Text|script/);
+  assert.match(html, /&lt;script&gt;Text&lt;\/script&gt;/);
+  assert.match(html, /keine Bestätigung von Empfang/);
+});

@@ -177,3 +177,7 @@ Es wurde keine Softwareversion veröffentlicht und nichts zu GitHub gepusht.
 - Engine-/Importfälle für mehrere Bereiche im selben Ereignis, getrennte Typen, atomaren Altimport und weiter einmalige INFO-Meldungen.
 - Frontend prüft einzelne Dropdown-Auswahl, dynamische Namen, Wegfall manueller Felder/Validierung, keine veralteten Gruppenschlüssel beim Speichern, Informationseinstellungen weiter verfügbar.
 - Zwei Subagenten bearbeiteten Modell und Frontend getrennt; Hauptagent prüfte Migration und integrierte Engine-/Importtests. Keine native Prüfung behauptet.
+
+## Kompakter Verlauf 0.4.5 – 03.11.2026
+
+29 Frontendtests erfolgreich. Neue Prüfungen für standardmäßig geschlossene Details mit vollständiger Kurzzeile, sichere Namen/Texte, erhaltenen Detailinhalt, stabilen Aufklappzustand anhand Ereignis-ID und unverändert offen dargestellte aktive Alarme mit Bedienaktionen. Informationseinträge unterscheiden Auslösung von Empfang. Syntax/Versionsmetadaten geprüft; unabhängiger Subagent fand keine blockierenden Befunde. Python-Verhaltenscode unverändert, dessen letzte Gesamtprüfung war 156 Tests in 0.4.4. Keine native Browser-/HA-/Android-Prüfung.
