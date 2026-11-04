@@ -35,3 +35,7 @@ Am 03.11.2026 wurde zusätzlich [v0.4.2](https://github.com/jan1104/pohl-solutio
 ## Korrekturstand für Gerätetests 0.5.3
 
 [Release v0.5.3](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.5.3) am 04.11.2026 nach Freigabe veröffentlicht. In HACS diese Version auswählen und HA nach Installation neu starten. Zuerst einzelne Ausgaben, dann vollständige Geräteprüfung durchführen; Ergebnisse anhand [HA_TEST_PROTOCOL.md](HA_TEST_PROTOCOL.md) erfassen.
+
+## Profilzeiten 0.5.4
+
+[Release v0.5.4](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.5.4) enthält die Zeitfelder bei Alarmarten. Nach Installation HA neu starten und Browser bzw. Companion-Webansicht vollständig neu laden; oben im Panel muss 0.5.4 stehen. Zeigt HACS bereits 0.5.4, das Panel aber noch 0.4.5, zunächst die geladene Ansicht prüfen; die Ursache wurde hier nicht auf dem Gerät bestätigt.
