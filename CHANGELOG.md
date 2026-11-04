@@ -1,5 +1,13 @@
 # Änderungen
 
+## 0.5.4 – Ton- und Sprachzeiten bei der Alarmart
+
+- Im Geräteassistenten entfallen Feuer-/Einbruch-/Sprachzeitfelder. Geräte behalten ihre Schalter für erlaubte Ausgaben; Zeiten werden unter Alarmarten bearbeitet.
+- Feuer und Einbruch unterstützen wie eigene Alarmarten zentrale Tonphasen- und Sprachzeiten. Die vorhandenen Prioritäten bleiben fest.
+- Bestehende individuelle Gerätezeiten bleiben erhalten, solange kein zentraler Wert gewählt wird; bei der Alarmart einsehbar. Ein leerer Systemalarm-Zeitwert verwendet diese bisherigen Gerätezeiten.
+- Vereinfachtes Speichern eines Geräts setzt ausgelassene bisherige Zeiten nicht zurück. Neue Profilzeiten bleiben über Schema-2-Sicherungen erhalten.
+- 210 Python- und 44 Frontendtests erfolgreich; echte HA-/Android-Prüfung offen.
+
 ## 0.5.3 – Entladen nach Aufräumfehlern wiederholbar, nur lokal
 
 - Reproduziert: Ein Fehler beim Entfernen eines Dienstes brach alle weiteren Aufräumschritte ab; die Engine war bereits entfernt und ein erneuter Entladeversuch meldete fälschlich Erfolg.

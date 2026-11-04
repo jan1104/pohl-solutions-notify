@@ -1,5 +1,12 @@
 # Prüfprotokoll
 
+## Profilzeiten 0.5.4 – 04.11.2026
+
+- 210 Python- und 44 Frontendtests erfolgreich. Neue Modell-/Engine-/Importfälle prüfen zentrale Systemprofilzeiten, feste Prioritäten, gültige Bereiche, unveränderte individuelle Altwerte und erneute Geräteprüfung.
+- Tatsächlicher Geräteverwaltungshandler erhält beim Weglassen alter Zeitfelder die Werte und bestehende Testfreigabe bei sonst unveränderter Konfiguration.
+- Frontend prüft fehlende Zeitfelder im Geräteassistenten, erhaltene Entwurfswerte, bearbeitbare Profilzeiten und die Übersicht unterschiedlicher Altwerte; einmalige Meldungen behalten keine nutzlosen Zeitfelder.
+- Keine echte HA-/Android-/Browser-Prüfung. Nutzerkopie zeigt Version 0.4.5; Ursache (alter Installationsstand oder geladene Oberfläche) nicht bestätigt.
+
 ## Reguläres Entladen 0.5.3 – 04.11.2026, automatischer Nachmittagslauf
 
 - Vorher echten async_unload_entry mit ersetzter HA-Ressourcenverwaltung ausgeführt: Dienstfehler nach einem Aufräumversuch, Sensorbereinigung ausgelassen, Engine verworfen, anschließender Versuch meldete fälschlich Erfolg.

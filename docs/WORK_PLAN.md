@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 04.11.2026 · Entwicklungsstand 0.5.3 · als GitHub-Release veröffentlicht / kein HA-Deployment.
+Stand: 04.11.2026 · Entwicklungsstand 0.5.4 · zur Veröffentlichung vorbereitet / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -298,3 +298,10 @@ Prüfstand Nachmittagslauf: 205 Python- und 41 Frontendtests bestanden; sechs ne
 ## Freigabe und Veröffentlichung 04.11.2026
 
 Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sowie GitHub-Release v0.5.3 veröffentlicht. HACS-Datei und Manifestversion am Release-Tag remote geprüft. Benutzer beginnt jetzt eigene Gerätetests; deren Ergebnisse noch offen. Kein HA-Deployment durch den Agenten. Frühere Angaben zum lokalen Stand dokumentieren den Zustand vor dieser Freigabe.
+
+## Nutzerkorrektur 0.5.4: Zeiten zur Alarmart verschieben
+
+- Ton-/Sprachzeiten bei Alarmarten führen, im Geräteassistenten nur Ausgabeschalter belassen. Feuer/Einbruch akzeptieren zentrale Werte, Prioritäten bleiben unverändert.
+- Vorhandene unterschiedliche Gerätewerte ohne ungefragte Vereinheitlichung bewahren. Leere Systemprofilfelder verwenden bisherige Zeiten, deren Übersicht steht bei der Alarmart.
+- Ausgelassene Gerätezeitfelder beim Speichern erhalten; Schema-2-Import unterstützt neue Profilwerte. Rücksprunggrenze älterer Validatoren dokumentiert.
+- 210 Python- und 44 Frontendtests erfolgreich. Nutzertext zeigte noch Frontend 0.4.5; tatsächliche installierte HA-Version unbekannt. Nach Update HACS-Version, HA-Neustart und vollständiges Neuladen des Panels prüfen. Keine native Geräteprüfung behauptet.

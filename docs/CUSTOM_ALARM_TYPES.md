@@ -29,8 +29,8 @@ sich ändern. Ihre technischen IDs und Modi bleiben gleich. Einbruch behält Pri
 Eine eigene Art startet mit 30. Wenn du einer eigenen Art ausdrücklich z. B. Priorität
 5 gibst, bekommt sie auf gemeinsamen Geräten Vorrang auch vor Einbruch.
 
-Bei Feuer/Einbruch bleiben die bestehenden Ton-/Sprachzeiten am Gerät eingestellt;
-die eigenen Arten haben zusätzlich ihre eigenen Zeitwerte. Eine Tonphase begrenzt
+Seit 0.5.4 werden Ton-/Sprachzeiten auch für Feuer und Einbruch unter **Alarmarten**
+eingestellt. Bisherige Gerätewerte bleiben zunächst erhalten. Eine Tonphase begrenzt
 nicht garantiert die tatsächliche Wiedergabelänge einer Tondatei. Empfang und
 abgeschlossene Wiedergabe lassen sich aus den Wartezeiten nicht beweisen.
 
@@ -120,6 +120,16 @@ Integrationsversionen verstehen eigene Alarmarten nicht. Zurücksetzen erfordert
 gegebenenfalls die zur alten Version passende HA-Sicherung; nur die Python-Dateien
 zurückzukopieren ist bei neu gespeicherten eigenen Alarmen keine sichere Datenmigration.
 Keine internen Speicherdateien auf Verdacht löschen. Siehe auch [VERSIONS.md](VERSIONS.md).
+
+## Ton- und Sprachzeiten ab 0.5.4
+
+Unter **Alarmarten → Bearbeiten** stehen bei Feuer, Einbruch und eigenen Alarmarten die Tonphase (1–15 Sekunden) und die Zeit für die Sprachphase (1–12 Sekunden). Eine eingegebene Zeit gilt für alle Geräte dieser Alarmart. Die Geräteschalter bleiben zusätzlich wirksam; eine Alarmart schaltet ein am Gerät ausgeschaltetes Audio nicht ein. Informationen und Warnungen bleiben einmalige Meldungen ohne diese Ablaufzeiten.
+
+Bei älteren Feuer-/Einbruchprofilen ist noch kein gemeinsamer Wert festgelegt. Leere Felder verwenden weiterhin die bisher gespeicherten Gerätezeiten; diese stehen im aufklappbaren Abschnitt **Bisherige Zeiten**. So werden unterschiedliche bisherige Einstellungen nicht beim Update überschrieben. Ein gemeinsamer Zahlenwert vereinheitlicht die gewählte Phase; erneutes Leeren schaltet wieder auf die bisherigen Gerätewerte zurück. Diese Altwerte bleiben beim Bearbeiten eines Geräts erhalten, auch wenn der vereinfachte Editor sie nicht mehr mitsendet.
+
+Änderungen an zugeordneten Alarmarten verlangen wie bisher eine erneute Geräteprüfung. Die Tondatei wird weiterhin pro Handy in der Android-Benachrichtigungskategorie ausgewählt. Die Tonphase bestimmt den Ablauf vor der Sprache, nicht garantiert die tatsächliche Länge einer Tondatei.
+
+Vor dem Update vollständige HA-Sicherung anlegen. Ältere Versionen bis 0.5.3 akzeptieren zentrale Zahlenwerte an Feuer-/Einbruchprofilen nicht; für einen Rücksprung die zur älteren Version passende Konfigurations-/HA-Sicherung verwenden. Die alten Git-Tags werden nicht verändert.
 
 ## Noch praktisch zu prüfen
 

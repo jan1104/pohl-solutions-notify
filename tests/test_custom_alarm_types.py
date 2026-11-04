@@ -130,7 +130,7 @@ class AlarmTypeTests(unittest.TestCase):
             profiles.normalize_alarm_types(records)
 
     def test_builtin_invariants_and_unknown_ids_are_not_editable(self):
-        for field, value in (("id", "CUSTOM_123456789ABC"), ("priority", 21), ("mode", "message"), ("channel", "Neu"), ("builtin", False), ("tone_seconds", 5), ("speech_seconds", 8)):
+        for field, value in (("id", "CUSTOM_123456789ABC"), ("priority", 21), ("mode", "message"), ("channel", "Neu"), ("builtin", False)):
             payload = {"id": "FIRE", field: value}
             with self.subTest(field=field), self.assertRaises(ValueError):
                 self.model.upsert_alarm_type(payload)
@@ -138,6 +138,21 @@ class AlarmTypeTests(unittest.TestCase):
         self.assertFalse(updated["push"])
         self.assertFalse(updated["speech"])
         self.assertEqual(updated["priority"], 20)
+
+    def test_builtin_alarm_times_are_editable_with_strict_ranges_and_legacy_none(self):
+        for kind in ('FIRE', 'INTRUSION'):
+            updated = self.model.upsert_alarm_type({'id': kind, 'tone_seconds': 7.5, 'speech_seconds': 3})
+            self.assertEqual((updated['tone_seconds'], updated['speech_seconds']), (7.5, 3))
+            for field, invalid in [('tone_seconds', False), ('tone_seconds', 16),
+                                   ('speech_seconds', 0), ('speech_seconds', float('nan'))]:
+                with self.subTest(kind=kind, field=field, invalid=invalid), self.assertRaises(ValueError):
+                    self.model.upsert_alarm_type({'id': kind, field: invalid})
+            reset = self.model.upsert_alarm_type({'id': kind, 'tone_seconds': None, 'speech_seconds': None})
+            self.assertIsNone(reset['tone_seconds'])
+            self.assertIsNone(reset['speech_seconds'])
+        for kind in ('INFO', 'WARNING'):
+            with self.subTest(kind=kind), self.assertRaises(ValueError):
+                self.model.upsert_alarm_type({'id': kind, 'tone_seconds': 5})
 
     def test_custom_source_generates_incident_and_group_must_keep_type(self):
         kind = self.custom()["id"]

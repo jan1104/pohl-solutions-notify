@@ -371,15 +371,18 @@ async def ws_manage(hass, connection, msg):
             critical_keys = ("user_id", "platform", "notify_action", "browsers", "ringer_sensor", "volume_sensor",
                              "push", "popup", "sound", "speech", "fire_seconds", "intrusion_seconds",
                              "speech_seconds", "fire_sound", "intrusion_sound")
-            compared = {**payload, **outputs}
+            # Keep legacy device values when the simplified editor omits them.
+            timings = {field: max(1, min(maximum, float(payload.get(field, old.get(field, default)))))
+                       for field, default, maximum in (("fire_seconds", 5, 15),
+                                                      ("intrusion_seconds", 5, 15),
+                                                      ("speech_seconds", 8, 12))}
+            compared = {**payload, **outputs, **timings}
             changed = any(old.get(k) != compared.get(k) for k in critical_keys)
             device = {"id": device_id, "user_id": uid, "name": payload.get("name", "Gerät"), "platform": platform,
                       "notify_action": notify, "browsers": browsers,
                       **outputs,
                       "ringer_sensor": payload.get("ringer_sensor", ""), "volume_sensor": payload.get("volume_sensor", ""),
-                      "fire_seconds": max(1, min(15, float(payload.get("fire_seconds", 5)))),
-                      "intrusion_seconds": max(1, min(15, float(payload.get("intrusion_seconds", 5)))),
-                      "speech_seconds": max(1, min(12, float(payload.get("speech_seconds", 8)))),
+                      **timings,
                       "fire_sound": payload.get("fire_sound", "default"), "intrusion_sound": payload.get("intrusion_sound", "default"),
                       "enabled": bool(payload.get("enabled", True)), "tested": old.get("tested", False) and not changed}
             same_handset = old.get("notify_action") == notify and old.get("platform") == platform

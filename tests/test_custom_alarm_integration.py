@@ -422,3 +422,54 @@ class AutomaticSourceGroupingIntegration(unittest.IsolatedAsyncioTestCase):
         await self.engine.receive_signal('binary_sensor.info2', 'on')
         self.assertEqual(self.engine.simple_message.await_count, 2)
         self.assertFalse(self.engine.model.active())
+
+
+class BuiltinTimingIntegration(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        CustomAlarmIntegration.setUp(self)
+        self.engine.model.data['users']['user']['types'] = ['FIRE', 'INTRUSION']
+        self.device.update(fire_seconds=11, intrusion_seconds=9, speech_seconds=10,
+                           browsers=[], ringer_sensor='', volume_sensor='',
+                           fire_sound='default', intrusion_sound='default')
+
+    async def asyncTearDown(self):
+        await CustomAlarmIntegration.asyncTearDown(self)
+
+    def test_unconfigured_profiles_keep_each_devices_legacy_times(self):
+        second = {**self.device, 'fire_seconds': 4, 'speech_seconds': 2}
+        self.assertEqual(self.engine.tone_seconds(self.device, 'FIRE'), 11)
+        self.assertEqual(self.engine.tone_seconds(second, 'FIRE'), 4)
+        self.assertEqual(self.engine.speech_seconds(self.device, 'FIRE'), 10)
+        self.assertEqual(self.engine.speech_seconds(second, 'FIRE'), 2)
+
+    async def test_saved_profile_times_apply_to_all_devices_and_require_retest(self):
+        second = {**self.device, 'id': 'second', 'fire_seconds': 4, 'speech_seconds': 2}
+        self.engine.model.data['devices']['second'] = second
+        await CustomAlarmIntegration.manage(self, 'alarm_type_upsert', {'id': 'FIRE', 'tone_seconds': 6, 'speech_seconds': 3})
+        for device in (self.device, second):
+            self.assertEqual(self.engine.tone_seconds(device, 'FIRE'), 6)
+            self.assertEqual(self.engine.speech_seconds(device, 'FIRE'), 3)
+            self.assertFalse(device['tested'])
+        self.assertEqual(self.device['fire_seconds'], 11)
+        self.assertEqual(self.engine.tone_seconds(self.device, 'INTRUSION'), 9)
+        self.assertEqual(self.engine.speech_seconds(self.device, 'INTRUSION'), 10)
+        self.assertEqual(self.engine.model.profile('FIRE')['priority'], 20)
+
+    def test_schema_two_preserves_profile_times_and_legacy_device_values(self):
+        self.engine.model.upsert_alarm_type({'id': 'FIRE', 'tone_seconds': 6, 'speech_seconds': 3})
+        document = CustomAlarmIntegration.backup(self)
+        restored = entry.prepare_import(self.engine.model.snapshot(), document, {'user': 'User'}, {}, {'notify.mobile_app_phone'})
+        self.assertEqual(restored['alarm_types']['FIRE']['tone_seconds'], 6)
+        self.assertEqual(restored['alarm_types']['FIRE']['speech_seconds'], 3)
+        self.assertEqual(restored['devices']['phone']['fire_seconds'], 11)
+
+    async def test_simplified_device_save_does_not_reset_omitted_legacy_times(self):
+        self.hass.services = types.SimpleNamespace(has_service=Mock(return_value=True))
+        payload = deepcopy(self.device)
+        for field in ('fire_seconds', 'intrusion_seconds', 'speech_seconds'):
+            del payload[field]
+        with patch.object(entry, 'connections', return_value=({}, [])):
+            await CustomAlarmIntegration.manage(self, 'device_upsert', payload)
+        saved = self.engine.model.data['devices']['phone']
+        self.assertEqual((saved['fire_seconds'], saved['intrusion_seconds'], saved['speech_seconds']), (11, 9, 10))
+        self.assertTrue(saved['tested'])

@@ -157,18 +157,64 @@ test('custom validation rejects invalid priorities, durations and unsafe speech 
     assert.throws(() => p.validateAlarmType({...custom, ...invalid}), JSON.stringify(invalid));
   }
 });
-test('built-in edits preserve fixed priorities and device durations', () => {
+test('built-in edits preserve fixed priorities and retain legacy timing on blank fields', () => {
   const p = panel();
   const builtin = p.typeChoices().find(t => t.id === 'INTRUSION');
   p.alarmTypeDraft = builtin;
-  const result = p.captureAlarmType({querySelector: selector => selector.includes('name') ? {value: 'Schutz'} : {type: 'number', value: '1'}});
+  const fields = {name: {value: 'Schutz'}, tone_seconds: {type: 'number', value: ''}, speech_seconds: {type: 'number', value: ''}, priority: {type: 'number', value: '1', disabled: true}};
+  const result = p.captureAlarmType({querySelector: selector => fields[selector.match(/"(.*?)"/)[1]]});
   assert.equal(result.priority, 10);
   assert.equal(result.tone_seconds, null);
   assert.equal(result.speech_seconds, null);
+  assert.doesNotThrow(() => p.validateAlarmType(result));
   const html = p.alarmTypeFields(builtin);
   assert.match(html, /name="priority"[^>]*disabled/);
-  assert.doesNotMatch(html, /name="tone_seconds"|name="speech_seconds"/);
+  assert.match(html, /name="tone_seconds"[^>]*value=""/);
+  assert.match(html, /name="speech_seconds"[^>]*value=""/);
+  assert.match(html, /Leer lassen: bisherige Gerätezeiten verwenden/);
 });
+
+test('built-in alarm times are editable per type and use the same bounded validation', () => {
+  const p = panel();
+  const builtin = p.typeChoices().find(t => t.id === 'FIRE');
+  p.alarmTypeDraft = builtin;
+  const fields = {tone_seconds: {type: 'number', value: '7'}, speech_seconds: {type: 'number', value: '4.5'}};
+  const result = p.captureAlarmType({querySelector: selector => fields[selector.match(/"(.*?)"/)[1]]});
+  assert.equal(result.tone_seconds, 7);
+  assert.equal(result.speech_seconds, 4.5);
+  assert.equal(result.priority, 20);
+  assert.doesNotThrow(() => p.validateAlarmType(result));
+  for (const change of [{tone_seconds: 0}, {tone_seconds: 16}, {tone_seconds: NaN}, {speech_seconds: 13}, {speech_seconds: false}]) {
+    assert.throws(() => p.validateAlarmType({...result, ...change}));
+  }
+  assert.doesNotMatch(p.alarmTypeFields(p.typeChoices().find(t => t.id === 'INFO')), /name="tone_seconds"|name="speech_seconds"/);
+});
+
+test('legacy timing disclosure shows assigned devices without hiding different values', () => {
+  const p = panel({users: {u: {id: 'u', types: ['FIRE']}}, devices: {
+    one: {id: 'one', name: 'Phone <One>', user_id: 'u', fire_seconds: 3, speech_seconds: 6},
+    two: {id: 'two', name: 'Phone Two', user_id: 'u', fire_seconds: 9, speech_seconds: 11},
+    other: {id: 'other', name: 'Not assigned', user_id: 'x', fire_seconds: 12}
+  }});
+  const html = p.alarmTimingFields(p.typeChoices().find(t => t.id === 'FIRE'));
+  assert.match(html, /Bisherige Zeiten/);
+  assert.match(html, /Phone &lt;One&gt;.*Tonphase: 3 Sekunden.*Sprache: 6 Sekunden/);
+  assert.match(html, /Phone Two.*Tonphase: 9 Sekunden.*Sprache: 11 Sekunden/);
+  assert.doesNotMatch(html, /Not assigned|Phone <One>/);
+});
+
+test('device wizard delegates timing to alarm types while retaining its saved legacy values', () => {
+  const p = panel();
+  const {root} = mount(p);
+  p.wizard = {kind: 'device', step: 2, editing: true, draft: {id: 'phone', platform: 'android', user_id: 'u',
+    popup: false, push: true, sound: true, speech: true, browsers: [], fire_seconds: 3, intrusion_seconds: 9, speech_seconds: 11}};
+  p.renderWizard();
+  assert.doesNotMatch(root.innerHTML, /name="fire_seconds"|name="intrusion_seconds"|name="speech_seconds"/);
+  assert.match(root.innerHTML, /Ton- und Sprachzeiten legst du unter Alarmarten fest/);
+  p.captureWizard();
+  assert.deepEqual(plain([p.wizard.draft.fire_seconds, p.wizard.draft.intrusion_seconds, p.wizard.draft.speech_seconds]), [3, 9, 11]);
+});
+
 test('registry list escapes names, exposes recipients, and locks changes during active alarms', () => {
   const p = panel({users: {user: {name: 'Ada', enabled: true, types: [custom.id]}},
     incidents: {incident: {type: 'FIRE', status: 'open', started_at: '2026-11-03'}}});

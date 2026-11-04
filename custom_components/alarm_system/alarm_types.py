@@ -67,9 +67,10 @@ def normalize_alarm_type(kind, record):
         result[field] = value
     for field, default, maximum in (("tone_seconds", 5, 15), ("speech_seconds", 8, 12)):
         value = record.get(field, None if builtin else default)
-        if builtin:
-            if value is not None:
-                raise ValueError("Systemalarme verwenden die Gerätezeit: " + field)
+        if builtin and value is None:
+            pass  # Old profiles retain each device's existing times until explicitly changed.
+        elif mode == "message":
+            raise ValueError("Einmalige Meldungen verwenden keine Ablaufzeit: " + field)
         else:
             value = _seconds(value, field, maximum)
         result[field] = value
