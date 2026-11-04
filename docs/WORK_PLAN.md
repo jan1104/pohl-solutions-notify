@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 04.11.2026 · Entwicklungsstand 0.5.7 · zur Veröffentlichung vorbereitet / kein HA-Deployment.
+Stand: 04.11.2026 · Entwicklungsstand 0.5.7 · als GitHub-Release veröffentlicht / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -331,3 +331,5 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - Testen-Button pro Melder in der Liste Melder & Alarme. Öffnet die vorhandene Ausgabenprobe mit dem tatsächlichen Melder vorausgewählt; Gerätewahl und Ausgabe folgen im Dialog.
 - Keine echten Sensorwechsel, keine zusätzliche Alarmregel oder Basistestfreigabe. Deaktivierte/falsche Zuordnungen sowie laufende Alarme weiterhin abweisen.
 - 50 Frontendtests erfolgreich, drei zusätzliche Fälle für Feuer/Info/Warnung, echte Melderkennung im Testauftrag und ungültige Vorauswahl. Python-Transport unverändert; letzte Gesamtprüfung 216 Tests in 0.5.5. Keine native Geräteprüfung behauptet.
+
+- Vor dem automatischen Lauf bereits begonnener Nutzerauftrag abgeschlossen: Melder-Testeinstieg 0.5.7 veröffentlicht; HACS-Datei remote und ZIP-Dateien gegen Tag geprüft. Keine weitere Produktänderung oder Veröffentlichung aus dem automatischen Prüfauftrag. Dokumentation dieses Abschlusses lokal committet; Gerätetests beim Benutzer weiterhin offen.

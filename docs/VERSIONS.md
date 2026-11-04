@@ -1,10 +1,11 @@
 # Gesicherte Versionen und Rückkehr
 
-Stand: 03.11.2026. Neuer Stand 0.5.6 veröffentlicht; kein Deployment.
+Stand: 03.11.2026. Neuer Stand 0.5.7 veröffentlicht; kein Deployment.
 Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerauftrag zu GitHub gepusht; 0.4.0 noch nicht.
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.5.7 | `v0.5.7` | über Tag auflösbar | Ausgabenprobe direkt bei jedem Melder; HACS-Release veröffentlicht |
 | 0.5.6 | `v0.5.6` | über Tag auflösbar | Kompakter Alarmarten-Dialog; HACS-Release veröffentlicht |
 | 0.5.5 | `v0.5.5` | über Tag auflösbar | Parallele Empfangsdiagnose und lesbarer Detailverlauf; HACS-Release veröffentlicht |
 | 0.5.4 | `v0.5.4` | über Tag auflösbar | Zeiten bei Alarmarten, bisherige Gerätewerte erhalten; HACS-Release veröffentlicht |
