@@ -31,3 +31,7 @@ Am 03.11.2026 wurde zusätzlich [v0.4.2](https://github.com/jan1104/pohl-solutio
 ## Ausgabetests und Empfängerübersicht 0.5.0
 
 [Release v0.5.0](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.5.0) ergänzt Einzeltests und die Vorschau wirksamer Ausgaben. Dieses Release in HACS auswählen, nach Installation HA neu starten. Anleitung: [OUTPUT_TESTS.md](OUTPUT_TESTS.md).
+
+## Korrekturstand für Gerätetests 0.5.3
+
+[Release v0.5.3](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.5.3) am 04.11.2026 nach Freigabe veröffentlicht. In HACS diese Version auswählen und HA nach Installation neu starten. Zuerst einzelne Ausgaben, dann vollständige Geräteprüfung durchführen; Ergebnisse anhand [HA_TEST_PROTOCOL.md](HA_TEST_PROTOCOL.md) erfassen.

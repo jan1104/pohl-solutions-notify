@@ -50,3 +50,7 @@ Mit fortgeltender Nutzerfreigabe develop und v0.4.2 gepusht, [Release v0.4.2](ht
 ## Veröffentlichung 0.5.0 am 03.11.2026
 
 Nach Nutzerauftrag und fortgeltender Push-Freigabe develop und v0.5.0 übertragen sowie GitHub-Release veröffentlicht. Release und HACS-Datei remote geprüft; ZIP-Inhalte byteweise gegen den Tag geprüft. Hauptbranch und frühere Tags unverändert. Kein HA-Deployment und keine native Geräteprüfung.
+
+## Veröffentlichung 0.5.3 am 04.11.2026
+
+Benutzer gab Push für anschließende Gerätetests frei. develop und Tags v0.5.1/v0.5.2/v0.5.3 übertragen, [Release v0.5.3](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.5.3) veröffentlicht. HACS-Datei und Manifestversion am Release remote geprüft. main und frühere Tags unverändert. Benutzerseitige Gerätetests sind angekündigt, noch nicht als bestanden bestätigt.

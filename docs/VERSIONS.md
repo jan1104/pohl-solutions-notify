@@ -1,11 +1,11 @@
 # Gesicherte Versionen und Rückkehr
 
-Stand: 03.11.2026. Neuer Stand 0.5.0 veröffentlicht; kein Deployment.
+Stand: 03.11.2026. Neuer Stand 0.5.3 veröffentlicht; kein Deployment.
 Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerauftrag zu GitHub gepusht; 0.4.0 noch nicht.
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
-| 0.5.3 | `v0.5.3` | über Tag auflösbar | Entladebereinigung nach Fehlern wiederholbar; nur lokal, kein HACS-Release |
+| 0.5.3 | `v0.5.3` | über Tag auflösbar | Entladebereinigung nach Fehlern wiederholbar; HACS-Release veröffentlicht |
 | 0.5.2 | `v0.5.2` | über Tag auflösbar | Mehrdeutige Importschalter abgewiesen; nur lokal, kein HACS-Release |
 | 0.5.1 | `v0.5.1` | über Tag auflösbar | Bestätigungskennungen korrigiert; nur lokaler Checkpoint, kein HACS-Release |
 | 0.5.0 | `v0.5.0` | über Tag auflösbar | Einzeltests und Empfängerübersicht; HACS-Release veröffentlicht |
@@ -102,3 +102,5 @@ ein anderes Laufwerk oder ein vorhandenes Sicherungsziel kopieren. Es wurde daf�
 kein neues externes Konto oder Cloudspeicher eingerichtet.
 
 Am 04.11.2026 zusätzlich v0.5.1 nur lokal für die Bestätigungsfehlerkorrektur gesichert; letztes veröffentlichtes HACS-Release bleibt v0.5.0.
+
+Am 04.11.2026 nach Nutzerauftrag develop und Tags v0.5.1–v0.5.3 gepusht und Release v0.5.3 erstellt. v0.5.1/v0.5.2 sind darin enthalten, haben keine separaten GitHub-Releases. Frühere lokale Einordnungen sind historisch.

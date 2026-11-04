@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 04.11.2026 · lokaler Entwicklungsstand 0.5.3 · nur lokal; letztes veröffentlichtes Release 0.5.0 / kein HA-Deployment.
+Stand: 04.11.2026 · Entwicklungsstand 0.5.3 · als GitHub-Release veröffentlicht / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -294,3 +294,7 @@ Prüfstand Morgenlauf: 199 Python- und 41 Frontendtests bestanden; Syntax/Metada
 - Start- und Entladebereinigung verwenden denselben Ressourcenhelfer. Kein Push, Release, Deployment oder Lizenzwechsel; echte HA-Prüfung offen.
 
 Prüfstand Nachmittagslauf: 205 Python- und 41 Frontendtests bestanden; sechs neue Entlade-Regressionsfälle. Syntax/Versionen/Metadaten und Whitespace sauber.
+
+## Freigabe und Veröffentlichung 04.11.2026
+
+Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sowie GitHub-Release v0.5.3 veröffentlicht. HACS-Datei und Manifestversion am Release-Tag remote geprüft. Benutzer beginnt jetzt eigene Gerätetests; deren Ergebnisse noch offen. Kein HA-Deployment durch den Agenten. Frühere Angaben zum lokalen Stand dokumentieren den Zustand vor dieser Freigabe.
