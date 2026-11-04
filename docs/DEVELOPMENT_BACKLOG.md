@@ -209,6 +209,12 @@ Eine Änderung des bestehenden Standardverhaltens ausdrücklich festlegen.
 
 ### C3 [P0/P1, M] Import und Datensicherung weiter absichern
 
+**Teilfortschritt 0.5.2, nur lokal:** Aktivierungs- und Stummschalter akzeptieren
+beim Import nur echte JSON-Booleans. Zuvor aktivierte z. B. der Text "false"
+Benutzer/Melder oder machte sie stumm. Sechs Regressionstests prüfen beide
+Schemas, mehrdeutige Werte, atomare Ablehnung und unveränderte Legacy-Vorgaben.
+Weitere verschachtelte Importtypen bleiben ein gesonderter Prüfauftrag.
+
 - [ ] Verschachtelte Datentypen, Zahlen, doppelte IDs und fremde/alte Gerätesitzungen testen.
 - [ ] Änderungen zunächst vollständig prüfen und erst danach den Zustand austauschen.
 - [ ] Nicht unterstützte Sicherungsversionen verständlich abweisen.

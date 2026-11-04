@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 04.11.2026 · lokaler Entwicklungsstand 0.5.1 · nur lokal; letztes veröffentlichtes Release 0.5.0 / kein HA-Deployment.
+Stand: 04.11.2026 · lokaler Entwicklungsstand 0.5.2 · nur lokal; letztes veröffentlichtes Release 0.5.0 / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -274,3 +274,13 @@ ununterbrochene Arbeit bei ausgeschaltetem Rechner.
 - 0.5.1 wird als lokaler Checkpoint gesichert. Kein Push, Release, Deployment oder Lizenzwechsel in diesem automatischen Lauf. Native HA-/Android-Prüfungen bleiben offen.
 
 Prüfstand dieses Laufs: 193 Python- und 41 Frontendtests bestanden; Syntax, Versionsmetadaten und Whitespace sauber.
+
+## Automatischer Morgenlauf 04.11.2026: C3 Importschalter
+
+- Ausgangsstand sauber auf develop bei 947a089, lokaler Checkpoint 0.5.1 bleibt erhalten.
+- Konkret nachgestellt: Benutzer/Melder mit enabled="false" wurden aktiviert, silent="false" stellte Meldungen stumm, und device.enabled blieb als wahrer Text erhalten.
+- Import prüft Aktivierungs- und Stummschalter strikt auf echte JSON-Booleans. Keine Änderung gültiger Konfigurationen oder der bisherigen Vorgaben bei fehlenden Legacy-Feldern.
+- Ungültige Sicherung bleibt atomar abgewiesen; Originaldokument und laufende Konfiguration unverändert. Beide Sicherungsschemas mit sechs Regressionstests geprüft.
+- Nur lokaler Stand 0.5.2; kein Push, Release, Deployment oder Lizenzwechsel. Keine echte HA-/Android-Prüfung.
+
+Prüfstand Morgenlauf: 199 Python- und 41 Frontendtests bestanden; Syntax/Metadaten/Versionen und Whitespace sauber.

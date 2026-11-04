@@ -4,6 +4,14 @@ from math import isfinite
 from .model import AlarmModel
 from .alarm_types import normalize_alarm_types
 
+
+def import_switch(record, field, default):
+    """Reject ambiguous JSON values instead of turning strings into active flags."""
+    value = record.get(field, default)
+    if not isinstance(value, bool):
+        raise ValueError('Schalter muss true oder false sein: ' + field)
+    return value
+
 def device_outputs(payload, platform):
     """Normalize supported output switches, rejecting ambiguous string booleans."""
     defaults = {"push": True, "popup": True,
@@ -53,12 +61,14 @@ def prepare_import(current, document, accounts, states, notify_actions):
         types = record.get('types', [])
         if not isinstance(types, list) or any(not isinstance(t, str) or t not in staged.type_ids() for t in types):
             raise ValueError('Ungültige Alarmarten für ein Konto')
-        staged.data['users'][uid] = {'id': uid, 'name': accounts[uid], 'types': list(dict.fromkeys(types)), 'enabled': bool(record.get('enabled', True))}
+        staged.data['users'][uid] = {'id': uid, 'name': accounts[uid], 'types': list(dict.fromkeys(types)), 'enabled': import_switch(record, 'enabled', True)}
     phones, browsers = set(), set()
     for did, record in document['devices'].items():
         if not isinstance(record, dict) or record.get('id') != did or record.get('user_id') not in staged.data['users']:
             raise ValueError('Ungültige Geräte-/Benutzerzuordnung')
         device = deepcopy(record)
+        if 'enabled' in device:
+            device['enabled'] = import_switch(device, 'enabled', False)
         if device.get('platform') not in ('android', 'ios', 'browser'):
             raise ValueError('Ungültige Geräteplattform')
         device.update(device_outputs(device, device['platform']))
@@ -86,7 +96,9 @@ def prepare_import(current, document, accounts, states, notify_actions):
     for sid, record in document['sources'].items():
         if not isinstance(record, dict) or record.get('id') != sid or record.get('entity_id') not in states:
             raise ValueError('Binary-Sensor fehlt oder Melder-ID ungültig: ' + str(sid))
-        staged.register_source(record, states[record['entity_id']])
+        source = {**record, 'enabled': import_switch(record, 'enabled', True),
+                  'silent': import_switch(record, 'silent', False)}
+        staged.register_source(source, states[record['entity_id']])
     # No imported state, history, recovery leases or credentials can enter here.
     return staged.snapshot()
 

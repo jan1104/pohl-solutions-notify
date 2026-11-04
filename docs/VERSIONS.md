@@ -5,6 +5,7 @@ Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerau
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.5.2 | `v0.5.2` | über Tag auflösbar | Mehrdeutige Importschalter abgewiesen; nur lokal, kein HACS-Release |
 | 0.5.1 | `v0.5.1` | über Tag auflösbar | Bestätigungskennungen korrigiert; nur lokaler Checkpoint, kein HACS-Release |
 | 0.5.0 | `v0.5.0` | über Tag auflösbar | Einzeltests und Empfängerübersicht; HACS-Release veröffentlicht |
 | 0.4.5 | `v0.4.5` | über Tag auflösbar | Kompakter zugeklappter Alarmverlauf; HACS-Release veröffentlicht |

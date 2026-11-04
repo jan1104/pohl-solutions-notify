@@ -1,5 +1,12 @@
 # Prüfprotokoll
 
+## Importschalter 0.5.2 – 04.11.2026, automatischer Morgenlauf
+
+- Vorher realen Import mit enabled="false" für Benutzer/Gerät/Melder und silent="false" ausgeführt: alle Werte waren anschließend wahr bzw. wahr ausgewertet.
+- Separater Testagent reproduzierte 56 fehlschlagende Unterfälle: vier Schalter, sieben mehrdeutige Datentypwerte, zwei Sicherungsschemas.
+- Nach Korrektur bestehen alle sechs neuen Testmethoden einschließlich echter Booleans, fehlender älterer Felder und Unveränderlichkeit von Eingabedokument/laufender Konfiguration.
+- Keine native HA-/Android-Prüfung; kein Push, Release oder Deployment.
+
 ## Bestätigungskennungen 0.5.1 – 04.11.2026, automatischer Lauf
 
 - Vor der Änderung reproduziert: Abbruch mit falschem Benutzer entfernt fremde gültige Kennung; abgelaufene Kennung bleibt nach neuer Anfrage vorhanden. Unabhängiger Testagent reproduzierte zusätzliche falsche Ereigniszuordnung und Ablaufgrenzen.
@@ -198,3 +205,5 @@ Es wurde keine Softwareversion veröffentlicht und nichts zu GitHub gepusht.
 29 Frontendtests erfolgreich. Neue Prüfungen für standardmäßig geschlossene Details mit vollständiger Kurzzeile, sichere Namen/Texte, erhaltenen Detailinhalt, stabilen Aufklappzustand anhand Ereignis-ID und unverändert offen dargestellte aktive Alarme mit Bedienaktionen. Informationseinträge unterscheiden Auslösung von Empfang. Syntax/Versionsmetadaten geprüft; unabhängiger Subagent fand keine blockierenden Befunde. Python-Verhaltenscode unverändert, dessen letzte Gesamtprüfung war 156 Tests in 0.4.4. Keine native Browser-/HA-/Android-Prüfung.
 
 Prüfstand dieses Laufs: 193 Python- und 41 Frontendtests bestanden; Syntax, Versionsmetadaten und Whitespace sauber.
+
+Prüfstand Morgenlauf: 199 Python- und 41 Frontendtests bestanden; Syntax/Metadaten/Versionen und Whitespace sauber.

@@ -1,5 +1,12 @@
 # Änderungen
 
+## 0.5.2 – Importschalter eindeutig prüfen, nur lokal
+
+- Fehler reproduziert: Der JSON-Text "false" wurde bei Benutzer-/Melderaktivierung und Stummschaltung als wahr ausgewertet; ein Geräteaktivierungsschalter konnte als wahrer Text stehenbleiben.
+- Import akzeptiert für diese Schalter nur echte JSON-Werte true/false. Mehrdeutige Texte, Zahlen und Container werden vor dem Austausch der Einstellungen abgewiesen.
+- Fehlende ältere Schalter behalten ihr bisheriges Verhalten; ein fehlender Geräteaktivierungsschalter wird nicht automatisch eingeschaltet. Eingabedokument und laufende Einstellungen bleiben bei Fehlern unverändert.
+- Sechs neue Regressionstests mit beiden unterstützten Sicherungsschemas. Kein Push, Release oder Deployment.
+
 ## 0.5.1 – Fehlalarm-Bestätigungen abgesichert, nur lokal
 
 - Fehler nachgestellt: Eine falsch zugeordnete Abbruch-/Bestätigungsanfrage verbrauchte zuvor eine noch gültige fremde Bestätigungskennung. Kennungen erst nach passender Benutzer-/Ereignisprüfung entfernen.

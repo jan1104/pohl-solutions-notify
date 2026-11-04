@@ -76,6 +76,8 @@ Eine frei angegebene Benutzer-ID ersetzt keine Anmeldung.
 
 ## Sicherung und Verlauf
 
+Ab lokalem Stand 0.5.2 müssen Aktivierungs- und Stummschalter in importierten JSON-Sicherungen echte Werte `true` oder `false` sein. Texte wie `"false"` und Zahlen werden mit einem Fehler abgewiesen, bevor Einstellungen ersetzt werden. Reguläre JSON-Exporte enthalten diese Schalter bereits im richtigen Format.
+
 Die JSON-Sicherung enthält Einstellungen und Zuordnungen, keine Ereignisse und keinen
 Alarmverlauf. Ein Import muss zum Standort passen, setzt vorhandene HA-Konten, Sensoren
 und Notify-Dienste voraus und verlangt erneute Geräteprüfung. Seit 0.3.26 werden dafür auch importierte
