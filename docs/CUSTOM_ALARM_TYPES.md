@@ -123,6 +123,8 @@ Keine internen Speicherdateien auf Verdacht löschen. Siehe auch [VERSIONS.md](V
 
 ## Ton- und Sprachzeiten ab 0.5.4
 
+Ab 0.5.6 ist der Bearbeitungsdialog kompakter: Die Standardansage bleibt direkt sichtbar, eine zweite Vorschau erscheint erst bei eigenem Text. Längere Erklärungen stehen zugeklappt unter **Weitere Hinweise**. Einstellungen und bisherige Vorlagen bleiben erhalten.
+
 Unter **Alarmarten → Bearbeiten** stehen bei Feuer, Einbruch und eigenen Alarmarten die Tonphase (1–15 Sekunden) und die Zeit für die Sprachphase (1–12 Sekunden). Eine eingegebene Zeit gilt für alle Geräte dieser Alarmart. Die Geräteschalter bleiben zusätzlich wirksam; eine Alarmart schaltet ein am Gerät ausgeschaltetes Audio nicht ein. Informationen und Warnungen bleiben einmalige Meldungen ohne diese Ablaufzeiten.
 
 Bei älteren Feuer-/Einbruchprofilen ist noch kein gemeinsamer Wert festgelegt. Leere Felder verwenden weiterhin die bisher gespeicherten Gerätezeiten; diese stehen im aufklappbaren Abschnitt **Bisherige Zeiten**. So werden unterschiedliche bisherige Einstellungen nicht beim Update überschrieben. Ein gemeinsamer Zahlenwert vereinheitlicht die gewählte Phase; erneutes Leeren schaltet wieder auf die bisherigen Gerätewerte zurück. Diese Altwerte bleiben beim Bearbeiten eines Geräts erhalten, auch wenn der vereinfachte Editor sie nicht mehr mitsendet.

@@ -1,5 +1,9 @@
 # Prüfprotokoll
 
+## Kompakter Alarmarten-Dialog 0.5.6 – 04.11.2026
+
+47 Frontendtests erfolgreich; bestehende Vorschauprüfungen sichern weiterhin sichtbaren Standardtext, bei leerem Feld versteckte zusätzliche Vorschau und Aktualisierung beim Schreiben ab. Hinweise standardmäßig zugeklappt. Syntax/Metadaten und Versionen konsistent. Kein Python-Verhalten geändert; letzte Gesamtprüfung 216 Tests in 0.5.5. Keine native Browser-/HA-/Android-Prüfung.
+
 ## Ton-/Empfangsablauf und Detailverlauf 0.5.5 – 04.11.2026
 
 - 216 Python- und 47 Frontendtests erfolgreich. Sechs neue Audiofälle: ausstehende Bestätigung verzögert TTS nicht um zehn Sekunden, bestätigter Empfang, diagnostischer Timeout, „Ich komme“ während Tonphase, neuere Empfangsgeneration und abgebrochener Worker ohne verbleibenden Beobachter.

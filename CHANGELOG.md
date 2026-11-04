@@ -1,5 +1,11 @@
 # Änderungen
 
+## 0.5.6 – kürzerer Alarmarten-Dialog
+
+- Lange Erklärungstexte unter Weitere Hinweise einklappen, Beschriftungen und Zeit-Hinweise kürzen.
+- Standard-Sprachtext bleibt immer sichtbar. Zusätzliche eigene Vorschau nur bei einem eingegebenen eigenen Text anzeigen; Einfügeschaltflächen bleiben vorhanden.
+- Einstellungen, Validierung und Alarmablauf unverändert. 47 Frontendtests sowie Syntax-/Versionsprüfung erfolgreich; keine native Browserprüfung.
+
 ## 0.5.5 – keine zusätzliche Empfangspause, verständlicher Detailverlauf
 
 - Reproduzierbaren Ablauf korrigiert: Empfangsbestätigung wird parallel beobachtet. Vor Sprache wird nur die konfigurierte Tonphase abgewartet, nicht zusätzlich bis zu zehn Sekunden auf eine Bestätigung.

@@ -313,13 +313,15 @@ test('standard speech is hidden behind plain instructions and an escaped concret
   const p = panel({site_id: 'Werkstatt <Ost>'});
   const html = p.alarmTypeFields(custom);
   assert.match(html, /<textarea[^>]*><\/textarea>/);
-  assert.match(html, /Standard-Sprachtext – wenn das Feld leer bleibt/);
+  assert.match(html, /Standard-Sprachtext/);
+  assert.match(html, /id="custom-speech-preview" hidden/);
+  assert.match(html, /<details class="alarm-type-help"><summary>Weitere Hinweise<\/summary>/);
   const customHtml = p.alarmTypeFields({...custom, speech_template: 'Bitte zum Eingang.'});
   assert.match(customHtml, /id="standard-speech-preview">Achtung\. Wasser &lt;Keller&gt;/);
   assert.match(customHtml, /id="speech-preview"[^>]*>Bitte zum Eingang\./);
   assert.match(html, /Alarmname einfügen/);
   assert.match(html, /Standort einfügen/);
-  assert.match(html, /Betroffene Bereiche einfügen/);
+  assert.match(html, /Bereiche einfügen/);
   assert.match(html, /Achtung. Wasser &lt;Keller&gt;. Standort Werkstatt &lt;Ost&gt;. Erdgeschoss, Küche./);
   assert.doesNotMatch(html, /<Keller>|<Ost>/);
   assert.equal(p.speechPreview({...custom, speech_template: 'Bitte am Eingang melden.'}), 'Bitte am Eingang melden.');
@@ -338,6 +340,7 @@ test('speech preview updates with typing and labelled buttons insert at the curs
   speech.value = 'Bitte prüfen.';
   speech.oninput();
   assert.equal(nodes.get('#speech-preview').textContent, 'Bitte prüfen.');
+  assert.equal(nodes.get('#custom-speech-preview').hidden, false);
   assert.equal(nodes.get('#standard-speech-preview').textContent, 'Achtung. Hausalarm. Standort Haus. Erdgeschoss, Küche.');
   speech.value = 'Meldung: Ende';speech.selectionStart = 9;speech.selectionEnd = 13;
   insert.onclick();
