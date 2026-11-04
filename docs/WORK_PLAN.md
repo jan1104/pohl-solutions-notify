@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 03.11.2026 · lokaler Entwicklungsstand 0.5.0 · 0.5.0 gepusht und als GitHub-Release veröffentlicht / kein HA-Deployment.
+Stand: 04.11.2026 · lokaler Entwicklungsstand 0.5.1 · nur lokal; letztes veröffentlichtes Release 0.5.0 / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -265,3 +265,12 @@ ununterbrochene Arbeit bei ausgeschaltetem Rechner.
 - Anleitung und Grenzen: [OUTPUT_TESTS.md](OUTPUT_TESTS.md). Nur diese zwei Vorschläge beauftragt; weitere Ideen bleiben Optionen.
 
 - 0.5.0 mit fortgeltender Nutzerfreigabe gepusht und veröffentlicht. Release/HACS-Datei remote und ZIP-Inhalte gegen Git-Tag geprüft; kein HA-Deployment.
+
+## Automatischer Lauf 04.11.2026: B6 Bestätigungskennungen
+
+- Ausgangsstand sauber auf develop bei 671b0a4. Konkrete Fehler lokal nachgestellt: fremd zugeordnete Anfragen verbrauchen gültige Bestätigungen; abgelaufene Kennungen bleiben ohne weitere Bereinigung im Speicher.
+- Erst Benutzer-/Ereigniszuordnung prüfen, danach gültige Kennung verbrauchen. Offene und abgeschlossene Kennungen beim Rückmelden und regelmäßigen Tick zeitgerecht bereinigen.
+- Acht Regressionen für falsche Benutzer/Ereignisse, gültige Wiederholungen, Ablaufgrenze und Bereinigung. Keine geänderte Alarmregel, keine neue Produktfunktion.
+- 0.5.1 wird als lokaler Checkpoint gesichert. Kein Push, Release, Deployment oder Lizenzwechsel in diesem automatischen Lauf. Native HA-/Android-Prüfungen bleiben offen.
+
+Prüfstand dieses Laufs: 193 Python- und 41 Frontendtests bestanden; Syntax, Versionsmetadaten und Whitespace sauber.

@@ -1,5 +1,12 @@
 # Änderungen
 
+## 0.5.1 – Fehlalarm-Bestätigungen abgesichert, nur lokal
+
+- Fehler nachgestellt: Eine falsch zugeordnete Abbruch-/Bestätigungsanfrage verbrauchte zuvor eine noch gültige fremde Bestätigungskennung. Kennungen erst nach passender Benutzer-/Ereignisprüfung entfernen.
+- Abgelaufene offene und bereits verwendete Bestätigungen werden bei Rückmeldungen sowie im regelmäßigen Lauf aus dem Arbeitsspeicher entfernt; Ablaufgrenze konsequent beachten.
+- Gültige Wiederholungen bleiben innerhalb ihres Zeitfensters ohne weitere Zustandsänderung. Keine Änderung der Alarmprioritäten oder Ausgaben.
+- Acht neue Regressionstests; echte HA-/Android-Prüfung weiterhin offen. Nicht gepusht oder veröffentlicht.
+
 ## 0.5.0 – gezielte Ausgabetests und Empfängerübersicht
 
 - Unter Alarmarten einzelne Push-, Ton-, Sprach- oder Fensterproben für ein zugeordnetes Gerät anfordern; optional echte Melderdaten statt Beispielen verwenden.

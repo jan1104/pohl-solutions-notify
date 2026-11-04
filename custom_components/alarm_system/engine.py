@@ -185,12 +185,21 @@ class AlarmEngine:
         elif result == "source_added":
             self.spawn(self.status(incident, f'Zusätzliche Meldung: {data.get("source_name", data["source_id"])}', popup=True))
 
+    def prune_confirmations(self):
+        """Expire only in-memory confirmation tokens, without changing alarm state."""
+        now = time()
+        for registry in (self.confirmations, self.completed_confirmations):
+            for key, confirmation in list(registry.items()):
+                if confirmation[2] <= now:
+                    registry.pop(key, None)
+
     async def respond(self, incident_id, action, user_id, source_id=None, token=None, background=False):
         async with self.lock:
             i = self.model.data["incidents"].get(incident_id)
             if not i:
                 raise HomeAssistantError("Alarm nicht gefunden")
             user = await self.actor(user_id, i)
+            self.prune_confirmations()
             if action == 'seen':
                 if self.model.view(incident_id, user.id, user.name):
                     self.model.log('viewed', incident=i, user_id=user.id, user_name=user.name)
@@ -219,20 +228,21 @@ class AlarmEngine:
                 self.defer_transport_save()
                 return token
             if action == "cancel_false":
-                confirmation = self.confirmations.pop(token, None)
+                confirmation = self.confirmations.get(token)
                 if not confirmation or confirmation[:2] != (user.id, incident_id):
                     await self.save()
                     raise HomeAssistantError("Bestätigung gehört nicht zu diesem Benutzer und Ereignis")
+                self.confirmations.pop(token)
                 self.model.audit(i, "false_alarm_cancelled", user.id)
                 self.model.log("false_alarm_cancelled", incident=i, user_id=user.id, user_name=user.name)
                 self.defer_transport_save()
                 return None
             if action == "false_alarm":
-                confirmation = self.confirmations.pop(token, None)
+                confirmation = self.confirmations.get(token)
                 if not confirmation or confirmation[:2] != (user.id, incident_id) or confirmation[2] < time():
                     await self.save()
                     raise HomeAssistantError("Fehlalarm muss erneut bestätigt werden")
-                self.completed_confirmations = {k: v for k, v in self.completed_confirmations.items() if v[2] > time()}
+                self.confirmations.pop(token)
                 self.completed_confirmations[token] = (user.id, incident_id, time()+300)
                 self.model.false_alarm(incident_id, user.id)
                 i["ended_by_name"] = user.name or user.id
@@ -305,6 +315,7 @@ class AlarmEngine:
     async def tick(self, _now):
         if self.recovering or self.stopping:
             return
+        self.prune_confirmations()
         if time()-self._last_purge > 3600:
             self._last_purge = time()
             async with self.lock:

@@ -5,6 +5,7 @@ Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerau
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.5.1 | `v0.5.1` | über Tag auflösbar | Bestätigungskennungen korrigiert; nur lokaler Checkpoint, kein HACS-Release |
 | 0.5.0 | `v0.5.0` | über Tag auflösbar | Einzeltests und Empfängerübersicht; HACS-Release veröffentlicht |
 | 0.4.5 | `v0.4.5` | über Tag auflösbar | Kompakter zugeklappter Alarmverlauf; HACS-Release veröffentlicht |
 | 0.4.4 | `v0.4.4` | über Tag auflösbar | Eine Meldungsart pro Melder, automatische Gruppen; HACS-Release veröffentlicht |
@@ -97,3 +98,5 @@ ZIPs und Bundle auf demselben Rechner schützen vor versehentlichen Codeänderun
 aber nicht vor Ausfall dieses Rechners. Für eine unabhängige Kopie diese Dateien auf
 ein anderes Laufwerk oder ein vorhandenes Sicherungsziel kopieren. Es wurde dafür
 kein neues externes Konto oder Cloudspeicher eingerichtet.
+
+Am 04.11.2026 zusätzlich v0.5.1 nur lokal für die Bestätigungsfehlerkorrektur gesichert; letztes veröffentlichtes HACS-Release bleibt v0.5.0.

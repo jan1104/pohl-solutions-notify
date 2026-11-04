@@ -1,5 +1,11 @@
 # Prüfprotokoll
 
+## Bestätigungskennungen 0.5.1 – 04.11.2026, automatischer Lauf
+
+- Vor der Änderung reproduziert: Abbruch mit falschem Benutzer entfernt fremde gültige Kennung; abgelaufene Kennung bleibt nach neuer Anfrage vorhanden. Unabhängiger Testagent reproduzierte zusätzliche falsche Ereigniszuordnung und Ablaufgrenzen.
+- Acht neue Tests verwenden die echten respond-/tick-Methoden mit ersetzten Konto-, Speicher- und Transportgrenzen. Nach Korrektur bestehen Benutzer-/Ereignisbindung, Ablaufbereinigung, Wiederverwendung aktueller Anfragen sowie idempotente bestätigte Wiederholungen.
+- Keine native HA-/Android-Prüfung; kein Push und kein Deployment.
+
 ## Einzeltests und Empfängerübersicht 0.5.0 – 03.11.2026
 
 - 185 Python- und 41 Frontendtests erfolgreich; Syntax, Versionen und Metadaten konsistent.
@@ -190,3 +196,5 @@ Es wurde keine Softwareversion veröffentlicht und nichts zu GitHub gepusht.
 ## Kompakter Verlauf 0.4.5 – 03.11.2026
 
 29 Frontendtests erfolgreich. Neue Prüfungen für standardmäßig geschlossene Details mit vollständiger Kurzzeile, sichere Namen/Texte, erhaltenen Detailinhalt, stabilen Aufklappzustand anhand Ereignis-ID und unverändert offen dargestellte aktive Alarme mit Bedienaktionen. Informationseinträge unterscheiden Auslösung von Empfang. Syntax/Versionsmetadaten geprüft; unabhängiger Subagent fand keine blockierenden Befunde. Python-Verhaltenscode unverändert, dessen letzte Gesamtprüfung war 156 Tests in 0.4.4. Keine native Browser-/HA-/Android-Prüfung.
+
+Prüfstand dieses Laufs: 193 Python- und 41 Frontendtests bestanden; Syntax, Versionsmetadaten und Whitespace sauber.

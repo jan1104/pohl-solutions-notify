@@ -169,6 +169,12 @@ Auslösung beim Wiederverbinden nicht stillschweigend ändern.
 
 ### B6 [P1, S/M] Rückmeldungen und Bestätigungstoken begrenzen
 
+**Teilfortschritt 0.5.1, nur lokal:** Fremd zugeordnete Abbruch-/Bestätigungsversuche
+verbrauchen gültige Kennungen nicht mehr. Abgelaufene offene und abgeschlossene
+Kennungen werden bei Rückmeldungen und im Tick bereinigt; Ablaufgrenzen und
+wiederholte gültige Bestätigungen mit acht Regressionstests geprüft. Veraltete
+andere Benachrichtigungsaktionen bleiben ein gesonderter Prüfauftrag.
+
 - [ ] Abgelaufene Fehlalarm-Bestätigung, erneuten Versuch und doppelte Aktionen testen.
 - [ ] Wiederholte abgelaufene Anfragen auf anwachsende Tokenbestände prüfen.
 - [ ] Veraltete Benachrichtigungsaktionen für bereits beendete Ereignisse abweisen oder

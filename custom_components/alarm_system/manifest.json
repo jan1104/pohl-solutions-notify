@@ -1,7 +1,7 @@
 {
   "domain": "alarm_system",
   "name": "Pohl Solutions Alarm Notify",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "config_flow": true,
   "documentation": "https://github.com/jan1104/pohl-solutions-notify",
   "codeowners": [
