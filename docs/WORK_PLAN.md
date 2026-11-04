@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 04.11.2026 · Entwicklungsstand 0.5.6 · zur Veröffentlichung vorbereitet / kein HA-Deployment.
+Stand: 04.11.2026 · Entwicklungsstand 0.5.6 · als GitHub-Release veröffentlicht / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -323,3 +323,5 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - Erklärungstexte kürzen und unter Weitere Hinweise einklappen. Standard-Sprachtext weiterhin direkt anzeigen; zusätzliche eigene Vorschau nur bei eigenem Text.
 - 47 Frontendtests sowie Syntax-/Metadatenprüfung erfolgreich. Python-Verhalten unverändert; letzte Gesamtprüfung 216 Tests in 0.5.5.
 - Nutzeransicht zeigt weiterhin 0.4.5. Tatsächlicher Installations-/Cachezustand unbekannt; nach HACS-Update, HA-Neustart und vollständigem Neuladen die angezeigte Version prüfen. Keine native Browserprüfung behauptet.
+
+- 0.5.6 gepusht und veröffentlicht; HACS-Datei remote und ZIP-Dateien gegen Tag geprüft. Kein HA-Deployment durch den Agenten.
