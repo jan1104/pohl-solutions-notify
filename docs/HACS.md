@@ -39,3 +39,7 @@ Am 03.11.2026 wurde zusätzlich [v0.4.2](https://github.com/jan1104/pohl-solutio
 ## Profilzeiten 0.5.4
 
 [Release v0.5.4](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.5.4) enthält die Zeitfelder bei Alarmarten. Nach Installation HA neu starten und Browser bzw. Companion-Webansicht vollständig neu laden; oben im Panel muss 0.5.4 stehen. Zeigt HACS bereits 0.5.4, das Panel aber noch 0.4.5, zunächst die geladene Ansicht prüfen; die Ursache wurde hier nicht auf dem Gerät bestätigt.
+
+## Sprachbeginn und Detailverlauf 0.5.5
+
+[Release v0.5.5](https://github.com/jan1104/pohl-solutions-notify/releases/tag/v0.5.5) entfernt die zusätzliche Empfangswartezeit vor der Tonphase und zeigt einen deutschen Detailverlauf. Nach Update HA neu starten und Panel neu laden. Ein kurzer Android-Klang wird nicht verlängert; Tonwahl und Phasenzeit anhand [USAGE.md](USAGE.md) erneut prüfen.
