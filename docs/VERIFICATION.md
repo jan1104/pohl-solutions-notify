@@ -1,5 +1,11 @@
 # Prüfprotokoll
 
+## Reguläres Entladen 0.5.3 – 04.11.2026, automatischer Nachmittagslauf
+
+- Vorher echten async_unload_entry mit ersetzter HA-Ressourcenverwaltung ausgeführt: Dienstfehler nach einem Aufräumversuch, Sensorbereinigung ausgelassen, Engine verworfen, anschließender Versuch meldete fälschlich Erfolg.
+- Nach Korrektur alle Ressourcenentfernungen versuchen, ersten Fehler erhalten und gestoppte Engine erst nach vollständigem Erfolg entfernen. Fehlgeschlagener Stopp bewahrt Engine und Ressourcen.
+- Keine native HA-/Android-Prüfung, kein Push, Release oder Deployment.
+
 ## Importschalter 0.5.2 – 04.11.2026, automatischer Morgenlauf
 
 - Vorher realen Import mit enabled="false" für Benutzer/Gerät/Melder und silent="false" ausgeführt: alle Werte waren anschließend wahr bzw. wahr ausgewertet.
@@ -207,3 +213,5 @@ Es wurde keine Softwareversion veröffentlicht und nichts zu GitHub gepusht.
 Prüfstand dieses Laufs: 193 Python- und 41 Frontendtests bestanden; Syntax, Versionsmetadaten und Whitespace sauber.
 
 Prüfstand Morgenlauf: 199 Python- und 41 Frontendtests bestanden; Syntax/Metadaten/Versionen und Whitespace sauber.
+
+Prüfstand Nachmittagslauf: 205 Python- und 41 Frontendtests bestanden; sechs neue Entlade-Regressionsfälle. Syntax/Versionen/Metadaten und Whitespace sauber.

@@ -112,6 +112,11 @@ async def async_setup_entry(hass, entry):
 
 def cleanup_failed_setup(hass, *, panel_attempted, js_added):
     """Attempt every cleanup step without replacing the original setup exception."""
+    cleanup_resources(hass, panel_attempted=panel_attempted, js_added=js_added)
+
+
+def cleanup_resources(hass, *, panel_attempted, js_added):
+    """Attempt every resource removal and return the first failure for a retry."""
     actions = [partial(hass.services.async_remove, DOMAIN, name)
                for name in ("raise_alarm", "source_normal", "respond", "confirm_false_alarm")]
     if panel_attempted:
@@ -119,11 +124,15 @@ def cleanup_failed_setup(hass, *, panel_attempted, js_added):
     if js_added:
         actions.append(partial(frontend.remove_extra_js_url, hass, JS_URL))
     actions.append(partial(hass.states.async_remove, "sensor.alarm_system_active"))
+    first_error = None
     for cleanup in actions:
         try:
             cleanup()
-        except Exception:
-            _LOGGER.exception("Alarm-Ressource nach fehlgeschlagenem Start nicht vollständig entfernt")
+        except Exception as err:
+            if first_error is None:
+                first_error = err
+            _LOGGER.exception("Alarm-Ressource nicht vollständig entfernt")
+    return first_error
 
 
 async def async_unload_entry(hass, entry):
@@ -131,12 +140,12 @@ async def async_unload_entry(hass, entry):
     if engine is None:
         return True
     await engine.stop()
+    failure = cleanup_resources(hass, panel_attempted=True, js_added=True)
+    if failure is not None:
+        # Retain the stopped engine so another unload retries unfinished cleanup.
+        # Its stop flag rejects new requests while resources are partly removed.
+        raise failure
     hass.data.pop(DOMAIN, None)
-    for name in ("raise_alarm", "source_normal", "respond", "confirm_false_alarm"):
-        hass.services.async_remove(DOMAIN, name)
-    frontend.async_remove_panel(hass, "alarm-system")
-    frontend.remove_extra_js_url(hass, JS_URL)
-    hass.states.async_remove("sensor.alarm_system_active")
     return True
 
 

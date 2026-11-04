@@ -1,5 +1,12 @@
 # Änderungen
 
+## 0.5.3 – Entladen nach Aufräumfehlern wiederholbar, nur lokal
+
+- Reproduziert: Ein Fehler beim Entfernen eines Dienstes brach alle weiteren Aufräumschritte ab; die Engine war bereits entfernt und ein erneuter Entladeversuch meldete fälschlich Erfolg.
+- Nach erfolgreichem Stoppen alle Ressourcenentfernungen versuchen und den ersten Fehler erhalten. Bei einem Fehler die gestoppte Engine für einen erneuten Versuch behalten; erst nach vollständigem Aufräumen entfernen.
+- Fehlgeschlagener Engine-Stopp bewahrt weiterhin Engine und Wiederherstellungsdaten. Bestehende Startfehlerbehandlung verwendet dieselbe Ressourcenbereinigung, ohne ihren ursprünglichen Fehler zu verdecken.
+- Nur lokal vorbereitet, kein Push, Release oder Deployment. Echte HA-Prüfung weiterhin offen.
+
 ## 0.5.2 – Importschalter eindeutig prüfen, nur lokal
 
 - Fehler reproduziert: Der JSON-Text "false" wurde bei Benutzer-/Melderaktivierung und Stummschaltung als wahr ausgewertet; ein Geräteaktivierungsschalter konnte als wahrer Text stehenbleiben.

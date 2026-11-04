@@ -131,6 +131,12 @@ werden und die gewollte ereignisbezogene Rückmeldung erhalten bleibt.
 
 ### B3 [P0, M] Fehler beim Stoppen und Speichern behandeln
 
+**Teilfortschritt 0.5.3, nur lokal:** Reguläres Entladen versucht trotz einzelner
+Ressourcenfehler die übrigen Aufräumschritte, erhält den ersten Fehler und behält
+die gestoppte Engine für einen echten Wiederholungsversuch. Ein fehlgeschlagener
+Engine-Stopp bewahrt Engine/Ressourcen. Weitere Transport-/Speichergrenzen sowie
+native HA-Entladeprüfungen bleiben offen.
+
 **Teilfortschritt 0.3.28:** Einzelner Listener-Abmeldefehler verhindert übriges
 Aufräumen/Gerätewiederherstellung nicht mehr; nach Stopbeginn eintreffende Ereignisse
 werden abgefangen. In 0.3.29 wurden zusätzlich einzelne Fehler beim Aufräumen nach

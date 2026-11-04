@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 04.11.2026 · lokaler Entwicklungsstand 0.5.2 · nur lokal; letztes veröffentlichtes Release 0.5.0 / kein HA-Deployment.
+Stand: 04.11.2026 · lokaler Entwicklungsstand 0.5.3 · nur lokal; letztes veröffentlichtes Release 0.5.0 / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -284,3 +284,13 @@ Prüfstand dieses Laufs: 193 Python- und 41 Frontendtests bestanden; Syntax, Ver
 - Nur lokaler Stand 0.5.2; kein Push, Release, Deployment oder Lizenzwechsel. Keine echte HA-/Android-Prüfung.
 
 Prüfstand Morgenlauf: 199 Python- und 41 Frontendtests bestanden; Syntax/Metadaten/Versionen und Whitespace sauber.
+
+## Automatischer Nachmittagslauf 04.11.2026: B3 reguläres Entladen
+
+- Ausgangsstand sauber auf develop bei 4956c62, lokale Checkpoints 0.5.1/0.5.2 erhalten.
+- Konkret nachgestellt: Dienstentfernungsfehler verhindert verbleibende Dienste, Panel-, JavaScript- und Sensorbereinigung. Engine wurde vorzeitig entfernt, sodass ein erneuter Versuch fälschlich Erfolg meldete.
+- Ressourcenbereinigung versucht alle Schritte; erster Fehler bleibt erhalten. Gestoppte Engine bis zur vollständigen Entfernung behalten, damit ein erneutes Entladen wirklich aufräumt.
+- Scheitert bereits der Engine-Stopp, bleiben Engine und Ressourcen wie bisher für Wiederherstellungs-/Speicherwiederholung erhalten. Keine Alarmregel geändert.
+- Start- und Entladebereinigung verwenden denselben Ressourcenhelfer. Kein Push, Release, Deployment oder Lizenzwechsel; echte HA-Prüfung offen.
+
+Prüfstand Nachmittagslauf: 205 Python- und 41 Frontendtests bestanden; sechs neue Entlade-Regressionsfälle. Syntax/Versionen/Metadaten und Whitespace sauber.
