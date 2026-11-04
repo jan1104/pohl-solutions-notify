@@ -20,6 +20,7 @@ from .model import AlarmModel, stamp
 from .charts import cleanup_history_images
 
 _LOGGER = logging.getLogger(__name__)
+_PLAYBACK_RECEIPT_TIMEOUT = 10
 
 
 class AlarmEngine:
@@ -648,17 +649,25 @@ class AlarmEngine:
         if d["platform"] == "android" and (d.get("sound") or speech):
             return self.spawn(self.finish_android_cycle(d, i, self.model.data["leases"][d["id"]]["playback_id"], receipt))
 
+    async def observe_playback_receipt(self, d, i, playback_id, receipt):
+        """Observe receipt independently; a missing callback must not delay speech."""
+        try:
+            await asyncio.wait_for(asyncio.shield(receipt), timeout=_PLAYBACK_RECEIPT_TIMEOUT)
+            state = "notification_received"
+            detail = "Handy bestätigt Empfang; kein Wiedergabenachweis"
+        except asyncio.TimeoutError:
+            state = "receipt_timeout"
+            detail = "Keine Empfangsbestätigung; Ton- und Sprachablauf warten nicht auf diese Rückmeldung"
+        if self.stopping or self.model.data["leases"].get(d["id"], {}).get("playback_id") != playback_id:
+            return
+        self.delivery(i, d, state, detail)
+        self.model.log(state, incident=i, device=d, details={"playback_id": playback_id})
+        self.defer_transport_save()
+
     async def finish_android_cycle(self, d, i, playback_id, receipt=None):
         completed = False
+        observer = self.spawn(self.observe_playback_receipt(d, i, playback_id, receipt)) if receipt is not None else None
         try:
-            if receipt is not None:
-                try:
-                    await asyncio.wait_for(asyncio.shield(receipt), timeout=10)
-                    self.delivery(i, d, "notification_received", "Handy bestätigt Empfang; kein Wiedergabenachweis")
-                    self.model.log("notification_received", incident=i, device=d, details={"playback_id": playback_id})
-                except asyncio.TimeoutError:
-                    self.delivery(i, d, "receipt_timeout", "Keine Empfangsbestätigung nach 10 s; Tonfrist beginnt jetzt")
-                    self.model.log("receipt_timeout", incident=i, device=d, details={"playback_id": playback_id})
             if i["status"] != "open" or self.model.data["leases"].get(d["id"], {}).get("playback_id") != playback_id:
                 return
             if d.get("sound"):
@@ -678,12 +687,18 @@ class AlarmEngine:
                 await asyncio.sleep(self.speech_seconds(d, i['type']))
             completed = True
         finally:
+            if observer is not None:
+                if not observer.done():
+                    observer.cancel()
+                await asyncio.gather(observer, return_exceptions=True)
             tag = self.notification_tag(d, i)
             pending = self.playback_receipts.get(tag)
             if pending and pending[0] == playback_id:
                 self.playback_receipts.pop(tag, None)
                 if not pending[1].done():
                     pending[1].cancel()
+            if receipt is not None and not receipt.done():
+                receipt.cancel()  # Retire this worker's callback, never a newer generation's.
             async with self.transport:
                 # A completed tone/TTS round is not the end of the alarm.
                 # Keep the original baseline and loud mode across repeats.

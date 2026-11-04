@@ -1,5 +1,13 @@
 # Änderungen
 
+## 0.5.5 – keine zusätzliche Empfangspause, verständlicher Detailverlauf
+
+- Reproduzierbaren Ablauf korrigiert: Empfangsbestätigung wird parallel beobachtet. Vor Sprache wird nur die konfigurierte Tonphase abgewartet, nicht zusätzlich bis zu zehn Sekunden auf eine Bestätigung.
+- Abbruch, „Ich komme“, Geräte-/Prioritätswechsel und neuere Wiedergabeaufträge behalten ihre Schutzprüfungen. Empfang bleibt vom tatsächlichen Abspielen unterschieden.
+- Detailverlauf mit deutschen Ereignisnamen, Melder-/Gerätenamen und getrennten Abschnitten für Ereignisse sowie Geräte/Zustellung. Nahe identische Versandanforderungen zusammenfassen; Rohdaten unter Technische Details.
+- Die tatsächliche Länge eines Android-Benachrichtigungsklangs wird dadurch nicht verlängert. Keine zusätzlichen Push-Wiederholungen innerhalb der Tonphase.
+- 216 Python- und 47 Frontendtests erfolgreich. Erneute echte Android-Prüfung erforderlich.
+
 ## 0.5.4 – Ton- und Sprachzeiten bei der Alarmart
 
 - Im Geräteassistenten entfallen Feuer-/Einbruch-/Sprachzeitfelder. Geräte behalten ihre Schalter für erlaubte Ausgaben; Zeiten werden unter Alarmarten bearbeitet.

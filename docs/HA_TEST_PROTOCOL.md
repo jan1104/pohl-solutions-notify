@@ -87,6 +87,8 @@ nicht löschen können. Rückkehr nur mit passender vollständiger HA-Sicherung 
 
 ## Abschluss
 
+Zusatzprüfung ab 0.5.5: Feueralarm mit Ton und Sprache auf dem S22 auslösen, eingestellte Tonphase und gewählten Klang notieren. Mit und ohne Empfangsrückmeldung darf das lokale Warten auf die Sprachphase nicht um zusätzliche zehn Sekunden wachsen. Tatsächliche Klanglänge und Push-Laufzeit separat erfassen. „Ich komme“ während der Tonphase muss spätere lokale TTS-Anforderungen unterbinden; bereits ans Handy übergebene Befehle gesondert beurteilen. Deutsche Ereignis-/Zustellliste und technische Rohdaten vergleichen. Diese Prüfungen sind noch nicht als bestanden bestätigt.
+
 Laden/Entladen, erneutes Laden, normale INFO/WARNING, Kameras, Import/Export und
 CSV-Verlauf prüfen. Ergebnis pro Schritt als bestanden, fehlgeschlagen oder nicht
 getestet protokollieren. Erst nach tatsächlichen Ergebnissen unterstützte Versionsmatrix

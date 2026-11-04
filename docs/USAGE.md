@@ -121,3 +121,7 @@ Jeder abgeschlossene Alarm steht zunächst zugeklappt im Verlauf. Datum/Uhrzeit,
 Ab 0.5.0: Unter **Alarmarten → Ausgaben testen** einzelne Ausgaben prüfen. Die Melderzuordnung zeigt **Wer bekommt was?** einschließlich Geräteschaltern und offenen Prüfungen. Siehe [OUTPUT_TESTS.md](OUTPUT_TESTS.md).
 
 Ab 0.5.4 stehen Ton-/Sprachzeiten unter **Alarmarten → Bearbeiten**, auch bei Feuer/Einbruch. Beim Gerät bleiben die erlaubten Ausgaben. Bisherige abweichende Gerätezeiten bleiben erhalten, bis ein zentraler Wert gewählt wird; siehe [CUSTOM_ALARM_TYPES.md](CUSTOM_ALARM_TYPES.md).
+
+Ab 0.5.5 zeigt **Verlauf und Transport** eine deutsche Ereignisliste und **Geräte & Zustellung**. Melder und Geräte stehen mit Namen dort; nahe identische Anforderungen werden mit Anzahl zusammengefasst. Technische Kennungen und ursprüngliche Angaben bleiben unter **Technische Details** erhalten. Eine Empfangsbestätigung bestätigt keine Tonwiedergabe.
+
+Die Tonphase ist die vorgesehene Wartezeit vor der Sprachphase ab abgeschlossener Versandanforderung. Sie verlängert keinen kurzen Android-Benachrichtigungsklang. Für längeres Klingeln in Android einen entsprechend längeren Klang für die Alarmkategorie wählen oder die Tonphase bewusst passend zum kurzen Klang einstellen. Ab 0.5.5 fügt eine fehlende Empfangsbestätigung keine zusätzliche Zehn-Sekunden-Pause hinzu. Tatsächlicher Empfang, Reihenfolge und Wiedergabe am Handy müssen praktisch geprüft werden.

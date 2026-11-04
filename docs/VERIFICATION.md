@@ -1,5 +1,13 @@
 # Prüfprotokoll
 
+## Ton-/Empfangsablauf und Detailverlauf 0.5.5 – 04.11.2026
+
+- 216 Python- und 47 Frontendtests erfolgreich. Sechs neue Audiofälle: ausstehende Bestätigung verzögert TTS nicht um zehn Sekunden, bestätigter Empfang, diagnostischer Timeout, „Ich komme“ während Tonphase, neuere Empfangsgeneration und abgebrochener Worker ohne verbleibenden Beobachter.
+- Vorhandene Geräte-/Prioritäts-/Wiederherstellungsregressionen bestehen. Unabhängiger Reviewer fand keine blockierenden Befunde.
+- Drei neue Frontendfälle prüfen deutsche Namen/Aktionen, sichere Inhalte, gezielte Zusammenfassung gleicher Anforderungen und erhaltene technische Details. Vorhandene Begrenzung auf die letzten 30 Transporteinträge bleibt sichtbar erklärt.
+- Offizielle Schnittstelle abgeglichen: https://companion.home-assistant.io/docs/notifications/notification-received/ und https://companion.home-assistant.io/docs/notifications/notifications-basic/ . Empfangsbestätigung ist kein Abspielnachweis.
+- Keine kontinuierliche Tonwiedergabe implementiert oder am Android bestätigt. Ein kurzer Klang wird nicht durch Warten verlängert. Kurze abgeschlossene Durchläufe beenden ihren Beobachter und erzeugen danach keine eigene Zehn-Sekunden-Timeoutzeile.
+
 ## Profilzeiten 0.5.4 – 04.11.2026
 
 - 210 Python- und 44 Frontendtests erfolgreich. Neue Modell-/Engine-/Importfälle prüfen zentrale Systemprofilzeiten, feste Prioritäten, gültige Bereiche, unveränderte individuelle Altwerte und erneute Geräteprüfung.

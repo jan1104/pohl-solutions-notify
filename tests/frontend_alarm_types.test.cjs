@@ -593,3 +593,59 @@ test('source assignment refreshes only its delivery summary after a field change
   assert.equal(root.innerHTML, before);
   assert.match(root.querySelector('#source-delivery-preview').innerHTML, /Neu/);
 });
+
+
+test('incident timeline uses names and German events while technical identifiers stay folded away', () => {
+  const p = panel({users: {user: {id: 'user', name: 'Jan Pohl'}}, devices: {phone: {id: 'phone', name: 'Jan S22'}}});
+  const i = {id: 'event-id', sources: {rawsource: {id: 'rawsource', name: 'Testmelder <Tür>'}},
+    audit: [{at: '2026-11-04T18:29:22Z', action: 'source_added', source_id: 'rawsource'},
+      {at: '2026-11-04T18:29:33Z', action: 'sound_stopped_by_response', user_id: 'user'},
+      {at: '2026-11-04T18:29:40Z', action: 'false_alarm', user_id: 'user'}],
+    delivery: [{at: '2026-11-04T18:29:22Z', device_id: 'phone', state: 'requested', detail: 'notify.mobile_app_sm_s908b_jan'}]};
+  const html = p.incidentTimeline(i);
+  const human = html.split('<details class="timeline-technical"')[0];
+  assert.match(human, /Melder hinzugefügt/);
+  assert.match(human, /Testmelder &lt;Tür&gt;/);
+  assert.match(human, /Alarmierung gestoppt/);
+  assert.match(human, /Fehlalarm bestätigt/);
+  assert.match(human, /Jan Pohl/);
+  assert.match(human, /Jan S22/);
+  assert.doesNotMatch(human, /source_added|sound_stopped_by_response|rawsource|notify\.mobile_app/);
+  assert.match(html, /data-disclosure-key="incident-log:event-id"/);
+  assert.match(html, /data-disclosure-key="incident-tech:event-id"/);
+  assert.match(html, /<summary>Technische Details<\/summary>/);
+  assert.match(html, /source_added/);
+  assert.match(html, /notify\.mobile_app_sm_s908b_jan/);
+  assert.doesNotMatch(html, /<Tür>/);
+});
+
+test('transport timeline groups only nearby identical requests and retains meaningful warnings', () => {
+  const p = panel({devices: {phone: {name: 'Handy'}}});
+  const request = at => ({at, device_id: 'phone', state: 'requested', detail: 'notify.mobile_app_phone'});
+  const i = {id: 'event', sources: {}, audit: [], delivery: [request('2026-11-04T18:29:22Z'), request('2026-11-04T18:29:23Z'),
+    {at: '2026-11-04T18:29:33Z', device_id: 'phone', state: 'receipt_timeout', detail: 'No receipt rawdetail'},
+    request('2026-11-04T18:29:34Z'), request('2026-11-04T18:29:40Z'),
+    {at: '2026-11-04T18:29:41Z', device_id: 'phone', state: 'notification_received', detail: 'received'}]};
+  const html = p.incidentTimeline(i).split('<details class="timeline-technical"')[0];
+  assert.match(html, /2 Anfragen zusammengefasst/);
+  assert.equal((html.match(/Ausgabe angefordert/g) || []).length, 3);
+  assert.match(html, /timeline-row warning/);
+  assert.match(html, /Empfangsbestätigung fehlt/);
+  assert.match(html, /Empfang vom Handy bestätigt/);
+  assert.match(html, /nicht die Ton- oder Sprachwiedergabe/);
+  assert.doesNotMatch(html, /receipt_timeout|No receipt rawdetail/);
+});
+
+test('timeline handles missing names and unknown actions without exposing raw identifiers', () => {
+  const p = panel();
+  const rows = Array.from({length: 31}, (_, n) => ({at: '2026-11-04T18:29:22Z', device_id: 'hidden-device', state: 'new_state', detail: '<script>unsafe</script>'}));
+  const html = p.incidentTimeline({id: 'x', sources: {}, audit: [{at: '2026-11-04T18:29:22Z', action: 'raw_new_action', source_id: 'hidden-source'}], delivery: rows});
+  const human = html.split('<details class="timeline-technical"')[0];
+  assert.match(human, /Melder nicht mehr zugeordnet/);
+  assert.match(human, /Gerät nicht mehr zugeordnet/);
+  assert.match(human, /Weiterer Ereigniseintrag/);
+  assert.match(human, /letzten 30 von 31 Transporteinträgen/);
+  assert.doesNotMatch(human, /hidden-device|hidden-source|raw_new_action|new_state|unsafe/);
+  assert.match(html, /&lt;script&gt;unsafe&lt;\/script&gt;/);
+  assert.doesNotMatch(html, /<script>/);
+});

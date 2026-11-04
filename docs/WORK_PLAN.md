@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 04.11.2026 · Entwicklungsstand 0.5.4 · als GitHub-Release veröffentlicht / kein HA-Deployment.
+Stand: 04.11.2026 · Entwicklungsstand 0.5.5 · zur Veröffentlichung vorbereitet / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -307,3 +307,11 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - 210 Python- und 44 Frontendtests erfolgreich. Nutzertext zeigte noch Frontend 0.4.5; tatsächliche installierte HA-Version unbekannt. Nach Update HACS-Version, HA-Neustart und vollständiges Neuladen des Panels prüfen. Keine native Geräteprüfung behauptet.
 
 - 0.5.4 gepusht und veröffentlicht; HACS-Datei/Manifest remote sowie ZIP-Dateien gegen den Tag geprüft. Nutzer muss nach Update das Panel vollständig neu laden und die angezeigte Version prüfen. Kein HA-Deployment durch den Agenten.
+
+## Nutzerbefund 0.5.5: kurzer Ton, Pause und unlesbarer Detailverlauf
+
+- Nutzer berichtet vom Jan S22: Ton etwa eine Sekunde, danach Pause bis Sprache; Protokoll enthält Empfangstimeout nach zehn Sekunden und „Ich komme“ zeitgleich. Das Protokoll allein belegt keine TTS-Ausgabe nach dieser Rückmeldung.
+- Code wartete seriell auf Empfang (bis zehn Sekunden) und danach die Tonphase. Empfangsdiagnose läuft nun parallel; vorhandene Abbruch-/Prioritäts-/Playback-Prüfungen bleiben erhalten.
+- Die Länge eines Android-Benachrichtigungsklangs bleibt eine Endgeräte-/Tondateieigenschaft. Keine erfundene Dauersteuerung oder Push-Flut eingebaut; längeren Klang wählen bzw. Phase anpassen und neu testen.
+- Deutsche Verlaufseinträge mit Melder-/Gerätenamen, Zusammenfassung gleicher Anforderungen und separaten technischen Rohdaten.
+- 216 Python-/47 Frontendtests bestanden. Externe Grundlage: offizielle Companion-Dokumentation zu Notification Received und Benachrichtigungsklängen; keine erneute native Geräteprüfung durch den Agenten.
