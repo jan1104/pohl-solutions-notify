@@ -10,6 +10,8 @@ Die Ansagevorschau nutzt den konkreten Meldertext und Bereich, soweit vorhanden.
 
 ## Einzelne Ausgabe prüfen
 
+Ab 0.5.7 geht es auch direkt unter **Melder & Alarme → Testen** in der gewünschten Zeile. Der Melder mit seinem Bereich und Text ist dann schon gewählt. Anschließend Gerät und einzelne Ausgabe wählen. Dies ist dieselbe Ausgabenprobe, kein Umschalten des Binary-Sensors und kein vollständiger quittierungspflichtiger Alarm.
+
 1. Als Administrator **Alarmarten → Ausgaben testen** öffnen.
 2. Ein zugeordnetes aktives Gerät wählen. Ein noch nicht vollständig freigegebenes Gerät kann geprüft werden; die Probe erteilt keine Gerätefreigabe.
 3. Optional einen echten Melder derselben Art auswählen. Die Probe nutzt dessen Text und Bereich ohne Sensoränderung. Ohne Auswahl werden ausdrücklich Beispieldaten verwendet.

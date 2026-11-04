@@ -1,5 +1,9 @@
 # Prüfprotokoll
 
+## Melder-Testeinstieg 0.5.7 – 04.11.2026
+
+50 Frontendtests erfolgreich. Neue Fälle öffnen aus der tatsächlichen Listenaktion die Probe für Feuer/Info/Warnung mit gewähltem Melder, prüfen den Testauftrag mit echter source_id und das Ablehnen deaktivierter/falscher/fehlender Melder. Kein Sensorumschalten beim Öffnen oder Ausgabenprüfen. Syntax/Versionsmetadaten geprüft. Keine Python-Verhaltensänderung; letzte Gesamtprüfung 216 Tests in 0.5.5. Kein echter Browser-/HA-/Android-Test.
+
 ## Kompakter Alarmarten-Dialog 0.5.6 – 04.11.2026
 
 47 Frontendtests erfolgreich; bestehende Vorschauprüfungen sichern weiterhin sichtbaren Standardtext, bei leerem Feld versteckte zusätzliche Vorschau und Aktualisierung beim Schreiben ab. Hinweise standardmäßig zugeklappt. Syntax/Metadaten und Versionen konsistent. Kein Python-Verhalten geändert; letzte Gesamtprüfung 216 Tests in 0.5.5. Keine native Browser-/HA-/Android-Prüfung.

@@ -1,5 +1,11 @@
 # Änderungen
 
+## 0.5.7 – Ausgaben direkt beim Melder testen
+
+- Jeder Melder erhält unter Melder & Alarme einen Testen-Button. Die bestehende Ausgabenprobe öffnet mit genau diesem Melder vorausgewählt.
+- Geräteauswahl und getrennte Push-/Ton-/Sprach-/Fensterprobe wie bei Alarmarten; keine Sensorumschaltung und keine Gerätefreigabe.
+- Deaktivierte/falsche Melder und laufende Alarme bleiben gesperrt. 50 Frontendtests und Syntax-/Versionsprüfung erfolgreich.
+
 ## 0.5.6 – kürzerer Alarmarten-Dialog
 
 - Lange Erklärungstexte unter Weitere Hinweise einklappen, Beschriftungen und Zeit-Hinweise kürzen.

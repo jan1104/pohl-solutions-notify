@@ -4,7 +4,7 @@ Benachrichtigungen und Alarmverwaltung für **Home Assistant**, entwickelt unter
 der Marke **Pohl Solutions**. Die Anwendung wird als Custom-Integration innerhalb
 von Home Assistant betrieben; sie ist keine eigenständige Smartphone-App.
 
-**Softwarestand:** 0.5.6 · **Integration-Domain:** `alarm_system`
+**Softwarestand:** 0.5.7 · **Integration-Domain:** `alarm_system`
 
 ## Funktionen
 
@@ -49,7 +49,7 @@ Details, Voraussetzungen und Aktualisierung: [Installationsanleitung](docs/INSTA
 
 ## Entwicklungsstand
 
-Der Ausgangsstand 0.3.24 stammt aus der bereitgestellten ZIP. Der lokale Stand 0.5.6
+Der Ausgangsstand 0.3.24 stammt aus der bereitgestellten ZIP. Der lokale Stand 0.5.7
 enthält Korrekturen für parallele Alarmzustellung, ereignisbezogene Rückmeldungen,
 Android-Wiederherstellung sowie Konten- und Bildzugriffe. Zusätzlich werden
 Startfehler aufgeräumt, Verwaltungskennungen geprüft und importierte Testsitzungen zurückgesetzt.

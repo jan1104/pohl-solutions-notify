@@ -423,6 +423,49 @@ function deliveryPanel(extra = {}) {
       browsers: [{id: 'browser'}]}}, ...extra});
 }
 
+test('source list opens the output probe with its selected fire info or warning source', async () => {
+  const p = deliveryPanel();
+  const sources = Object.fromEntries(['FIRE', 'INFO', 'WARNING'].map(type => [type, {
+    id: type, type, name: type + ' Melder', area: 'Küche', entity_id: 'binary_sensor.' + type.toLowerCase(),
+    enabled: true, message: type + ' Testtext'}]));
+  p.data.sources = sources;
+  p.data.users.u.types = ['FIRE', 'INFO', 'WARNING'];
+  const {root} = mount(p);
+  p.rememberDetails = p.restoreDetails = p.bindMenus = () => {};
+  p.manage = async () => {throw Error('Opening a dialog must not send a test');};
+  for (const type of ['FIRE', 'INFO', 'WARNING']) {
+    p.renderSourceAdmin();
+    assert.match(root.innerHTML, new RegExp('data-go="test-source" data-id="'+type+'"'));
+    await root.onclick({target: {closest: () => ({dataset: {go: 'test-source', id: type}})}});
+    assert.equal(p.outputTestDialog.kind, type);
+    assert.equal(p.outputTestDialog.sourceId, type);
+    assert.match(root.innerHTML, new RegExp('value="'+type+'" selected'));
+    assert.doesNotMatch(root.innerHTML, /\(Beispiel ohne Melder\)/);
+  }
+});
+
+test('source shortcut sends its real source identity and does not toggle the sensor', async () => {
+  const p = deliveryPanel();
+  p.data.sources = {door: {id: 'door', type: custom.id, name: 'Tür', area: 'Eingang', enabled: true}};
+  mount(p);
+  p.openOutputTest(custom.id, 'door');
+  const calls = [];
+  p.manage = async (action, data) => {calls.push({action, data: plain(data)});return {test_id: 'ours'};};
+  await p.requestOutputTest(p.outputTestDialog, 'sound');
+  assert.deepEqual(calls, [{action: 'output_test', data: {id: 'phone', alarm_type: custom.id, output: 'sound', source_id: 'door'}}]);
+});
+
+test('source test shortcut rejects deactivated missing or mismatched sources', () => {
+  const p = deliveryPanel();
+  p.showError = () => {};
+  mount(p);
+  p.data.sources = {off: {id: 'off', type: custom.id, enabled: false}, wrong: {id: 'wrong', type: 'INFO', enabled: true}};
+  for (const id of ['off', 'wrong', 'missing']) {
+    p.openOutputTest(custom.id, id);
+    assert.equal(p.outputTestDialog, undefined);
+  }
+});
+
 test('delivery preview intersects profile and device switches and reports readiness honestly', () => {
   const p = deliveryPanel();
   const source = {type: custom.id, name: 'Tür <Ost>', area: 'Eingang', enabled: true};
