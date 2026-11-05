@@ -221,6 +221,12 @@ Eine Änderung des bestehenden Standardverhaltens ausdrücklich festlegen.
 
 ### C3 [P0/P1, M] Import und Datensicherung weiter absichern
 
+**Teilfortschritt 0.5.9, nur lokal:** Gerätezeiten nehmen keine Booleans als
+Sekunden mehr an; ungültige Typen und Zahlen werden mit verständlichem Fehler
+vor dem Zustandsaustausch abgewiesen. Zwei Regressionstests für beide Schemas,
+atomare Ablehnung und kompatible Legacy-Zahlen/Standardwerte. Weitere
+verschachtelte Importfelder und reale HA-Imports bleiben offen.
+
 **Teilfortschritt 0.5.2, nur lokal:** Aktivierungs- und Stummschalter akzeptieren
 beim Import nur echte JSON-Booleans. Zuvor aktivierte z. B. der Text "false"
 Benutzer/Melder oder machte sie stumm. Sechs Regressionstests prüfen beide

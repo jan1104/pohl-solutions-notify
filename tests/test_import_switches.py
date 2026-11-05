@@ -97,3 +97,27 @@ class ImportSwitchTests(unittest.TestCase):
                 self.assertFalse(result["sources"]["smoke"]["silent"])
                 self.assertNotIn("enabled", result["devices"]["browser"])
                 self.assertEqual(document, before)
+
+    def test_invalid_device_durations_are_rejected_atomically(self):
+        for schema in (1, 2):
+            for field in ("fire_seconds", "intrusion_seconds", "speech_seconds"):
+                for value in (True, False, None, [], {}, "invalid", "nan", "inf", 0, -1, 16):
+                    with self.subTest(schema=schema, field=field, value=value):
+                        document = self.document(schema)
+                        document["devices"]["browser"][field] = value
+                        before_document, before_current = deepcopy(document), deepcopy(self.current)
+                        with self.assertRaisesRegex(ValueError, "Ton-/Sprachdauer"):
+                            self.prepare(document)
+                        self.assertEqual(document, before_document)
+                        self.assertEqual(self.current, before_current)
+
+    def test_legacy_numeric_durations_and_defaults_remain_compatible(self):
+        for schema in (1, 2):
+            for value in (1, 2.5, "3.5"):
+                with self.subTest(schema=schema, value=value):
+                    document = self.document(schema)
+                    document["devices"]["browser"]["fire_seconds"] = value
+                    result = self.prepare(document)["devices"]["browser"]
+                    self.assertEqual(result["fire_seconds"], float(value))
+                    self.assertEqual(result["intrusion_seconds"], 5)
+                    self.assertEqual(result["speech_seconds"], 8)

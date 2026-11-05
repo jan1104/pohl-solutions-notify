@@ -1,5 +1,11 @@
 # Änderungen
 
+## 0.5.9 – ungültige importierte Zeitwerte abweisen, nur lokal
+
+- Gerätezeiten in Sicherungen akzeptieren keine JSON-Booleans mehr: true wurde bisher still zu einer Sekunde. Ungültige Typen, nicht endliche Werte und Werte außerhalb der bisherigen Grenzen werden kontrolliert abgewiesen.
+- Bestehende Zahlen, numerische Legacy-Texte und Standardwerte bleiben kompatibel; abgewiesene Importe ändern weder Sicherung noch aktuelle Einrichtung.
+- 224 Python- und 50 Frontendtests erfolgreich. Nur lokaler Checkpoint; kein Push, Release oder Deployment.
+
 ## 0.5.8 – veraltete Rückmeldungen abweisen, nur lokal
 
 - Fehler nachgestellt: Für bereits beendete Ereignisse ließen sich neue Fehlalarm-Bestätigungen erzeugen. Spätere Bestätigung konnte die Kennung verbrauchen und als abgeschlossen vormerken, bevor das Modell den Vorgang ablehnte.

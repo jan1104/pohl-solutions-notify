@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 05.11.2026 · lokaler Entwicklungsstand 0.5.8 · letztes veröffentlichtes Release 0.5.7 / kein HA-Deployment.
+Stand: 05.11.2026 · lokaler Entwicklungsstand 0.5.9 · letztes veröffentlichtes Release 0.5.7 / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -341,3 +341,11 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - Abschlussprüfung vor neuen Token-/Journaländerungen; kontrollierte Fehlermeldung „Dieses Ereignis ist bereits beendet“. Bereits legitime Wiederholungen bleiben idempotent: gesehen, bestehendes „Ich komme“, bereits beendeter Melder und gültig wiederholte Fehlalarm-Bestätigung.
 - Sechs neue Regressionen einschließlich ended/false_alarm und noch offener Kennungen. 222 Python-/50 Frontendtests, Syntax/Metadaten/Versionen und Whitespace erfolgreich.
 - Lokaler Checkpoint 0.5.8; kein Push, Release, Deployment oder Lizenzwechsel. Echte Geräte-/HA-Prüfungen weiterhin offen.
+
+## Automatischer Abendlauf 05.11.2026: C3 importierte Gerätezeiten
+
+- Sauberen Ausgangsstand und beide vorhandenen lokalen Commits erhalten. Fehler reproduziert: JSON-true für Gerätezeiten wurde in Schema 1/2 still zu einer Sekunde.
+- Booleans sowie ungültige Typen/Zahlen kontrolliert vor dem Zustandsaustausch abgewiesen. Bestehende numerische Legacy-Texte, Zahlen und Standardwerte bleiben erhalten.
+- Zwei zusätzliche Regressionstests, insgesamt 224 Python-/50 Frontendtests sowie Syntax/Metadaten/Whitespace erfolgreich.
+- Lesende Subagent-Gegenprüfung zu B3 ohne belastbaren neuen Routinefehler; keine spekulative Änderung. Weitere Import-/Parallelitätsfälle und echte HA-/Android-Gerätetests bleiben offen.
+- Lokaler Checkpoint 0.5.9; kein Push, Release, Deployment oder Lizenzwechsel. Veröffentlicht bleibt 0.5.7.

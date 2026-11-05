@@ -83,7 +83,13 @@ def prepare_import(current, document, accounts, states, notify_actions):
                 raise ValueError('Ungültige oder doppelte Browser-ID')
             browsers.add(b['id'])
         for field, default, maximum in (('fire_seconds', 5, 15), ('intrusion_seconds', 5, 15), ('speech_seconds', 8, 12)):
-            value = float(device.get(field, default))
+            raw = device.get(field, default)
+            if isinstance(raw, bool):
+                raise ValueError('Ungültige Ton-/Sprachdauer')
+            try:
+                value = float(raw)
+            except (TypeError, ValueError, OverflowError) as error:
+                raise ValueError('Ungültige Ton-/Sprachdauer') from error
             if not isfinite(value) or not 1 <= value <= maximum: raise ValueError('Ungültige Ton-/Sprachdauer')
             device[field] = value
         device.update(tested=False, category_setup={})

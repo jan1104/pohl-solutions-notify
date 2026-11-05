@@ -1,5 +1,12 @@
 # Prüfprotokoll
 
+## Importierte Gerätezeiten 0.5.9 – 05.11.2026, automatischer Lauf
+
+- Vor Änderung in Schema 1 und 2 nachgestellt: true für fire_seconds, intrusion_seconds oder speech_seconds wird als 1.0 übernommen (sechs fehlgeschlagene Teilfälle).
+- Zwei zusätzliche Regressionstests: 66 ungültige Kombinationen aus Schema/Feld/Wert werden vor Zustandsänderung abgewiesen; gültige Zahlen, numerische Legacy-Texte und ausgelassene Standardwerte bleiben erhalten. Bool, null, Listen, Objekte, ungültiger Text, NaN/Unendlich und Bereichsgrenzen berücksichtigt.
+- 224 Python- und 50 Frontendtests, Syntax-/Versions-/Metadatenprüfung und Whitespace erfolgreich. Keine echte HA-/Android-Prüfung, kein Push oder Deployment.
+- Unabhängige lesende B3-Gegenprüfung mit Subagent: kein weiterer belastbarer Fehler beim regulären Stoppen/Transport/Speichern; acht bestehende Recovery-/Shutdown-Tests erfolgreich. Keine spekulative Änderung daraus abgeleitet.
+
 ## Veraltete Rückmeldungen 0.5.8 – 05.11.2026, automatischer Nachtlauf
 
 - Vor Änderung mit echtem respond nachgestellt: request_false an beendetem Ereignis erzeugt Kennung; coming wirft ValueError; anschließendes false_alarm verbraucht die Kennung und schreibt sie trotz abgewiesener Modellaktion in completed_confirmations.
