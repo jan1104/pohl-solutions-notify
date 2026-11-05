@@ -1,5 +1,11 @@
 # Prüfprotokoll
 
+## Veraltete Rückmeldungen 0.5.8 – 05.11.2026, automatischer Nachtlauf
+
+- Vor Änderung mit echtem respond nachgestellt: request_false an beendetem Ereignis erzeugt Kennung; coming wirft ValueError; anschließendes false_alarm verbraucht die Kennung und schreibt sie trotz abgewiesener Modellaktion in completed_confirmations.
+- Sechs neue Tests prüfen kontrollierte Ablehnung vor Modell-/Journal-/Tokenänderungen für ended/false_alarm sowie erhaltene Idempotenz bereits erfolgreicher Aktionen. Konto-, Speicher- und Versandgrenzen ersetzt; keine HA-Schema-/Geräteprüfung.
+- 222 Python- und 50 Frontendtests erfolgreich, Syntax/Versionsmetadaten/Whitespace sauber. Kein Push oder Deployment.
+
 ## Melder-Testeinstieg 0.5.7 – 04.11.2026
 
 50 Frontendtests erfolgreich. Neue Fälle öffnen aus der tatsächlichen Listenaktion die Probe für Feuer/Info/Warnung mit gewähltem Melder, prüfen den Testauftrag mit echter source_id und das Ablehnen deaktivierter/falscher/fehlender Melder. Kein Sensorumschalten beim Öffnen oder Ausgabenprüfen. Syntax/Versionsmetadaten geprüft. Keine Python-Verhaltensänderung; letzte Gesamtprüfung 216 Tests in 0.5.5. Kein echter Browser-/HA-/Android-Test.

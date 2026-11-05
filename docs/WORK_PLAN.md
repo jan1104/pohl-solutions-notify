@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 04.11.2026 · Entwicklungsstand 0.5.7 · als GitHub-Release veröffentlicht / kein HA-Deployment.
+Stand: 05.11.2026 · lokaler Entwicklungsstand 0.5.8 · letztes veröffentlichtes Release 0.5.7 / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -333,3 +333,11 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - 50 Frontendtests erfolgreich, drei zusätzliche Fälle für Feuer/Info/Warnung, echte Melderkennung im Testauftrag und ungültige Vorauswahl. Python-Transport unverändert; letzte Gesamtprüfung 216 Tests in 0.5.5. Keine native Geräteprüfung behauptet.
 
 - Vor dem automatischen Lauf bereits begonnener Nutzerauftrag abgeschlossen: Melder-Testeinstieg 0.5.7 veröffentlicht; HACS-Datei remote und ZIP-Dateien gegen Tag geprüft. Keine weitere Produktänderung oder Veröffentlichung aus dem automatischen Prüfauftrag. Dokumentation dieses Abschlusses lokal committet; Gerätetests beim Benutzer weiterhin offen.
+
+## Automatischer Nachtlauf 05.11.2026: B6 veraltete Rückmeldungen
+
+- Ausgangsstand auf develop bei 82dc06f sauber; vorhandenen lokalen Dokumentationscommit erhalten. Keine Änderung am veröffentlichten Gerätesteststand 0.5.7.
+- Nachgestellt: Fehlalarm-Anfrage für beendetes Ereignis erzeugt neue Kennung; „Ich komme“ liefert ungefangenen Modellfehler; abgewiesene Bestätigung verbraucht trotzdem Kennung und trägt sie als erfolgreich abgeschlossen ein.
+- Abschlussprüfung vor neuen Token-/Journaländerungen; kontrollierte Fehlermeldung „Dieses Ereignis ist bereits beendet“. Bereits legitime Wiederholungen bleiben idempotent: gesehen, bestehendes „Ich komme“, bereits beendeter Melder und gültig wiederholte Fehlalarm-Bestätigung.
+- Sechs neue Regressionen einschließlich ended/false_alarm und noch offener Kennungen. 222 Python-/50 Frontendtests, Syntax/Metadaten/Versionen und Whitespace erfolgreich.
+- Lokaler Checkpoint 0.5.8; kein Push, Release, Deployment oder Lizenzwechsel. Echte Geräte-/HA-Prüfungen weiterhin offen.

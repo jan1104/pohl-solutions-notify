@@ -175,6 +175,12 @@ Auslösung beim Wiederverbinden nicht stillschweigend ändern.
 
 ### B6 [P1, S/M] Rückmeldungen und Bestätigungstoken begrenzen
 
+**Teilfortschritt 0.5.8, nur lokal:** Neue/veraltete Rückmeldeaktionen auf bereits
+abgeschlossene Ereignisse werden vor Token-/Journaländerungen abgewiesen. Gültige
+Wiederholungen bleiben idempotent. Sechs Regressionstests für beide Abschlussarten,
+offene Kennungen und Wiederholungen ergänzt; native Benachrichtigungsaktionen
+weiterhin auf Zielgeräten zu prüfen.
+
 **Teilfortschritt 0.5.1, nur lokal:** Fremd zugeordnete Abbruch-/Bestätigungsversuche
 verbrauchen gültige Kennungen nicht mehr. Abgelaufene offene und abgeschlossene
 Kennungen werden bei Rückmeldungen und im Tick bereinigt; Ablaufgrenzen und

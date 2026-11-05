@@ -5,6 +5,7 @@ Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerau
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.5.8 | `v0.5.8` | über Tag auflösbar | Veraltete Rückmeldungen kontrolliert abgewiesen; nur lokal, kein HACS-Release |
 | 0.5.7 | `v0.5.7` | über Tag auflösbar | Ausgabenprobe direkt bei jedem Melder; HACS-Release veröffentlicht |
 | 0.5.6 | `v0.5.6` | über Tag auflösbar | Kompakter Alarmarten-Dialog; HACS-Release veröffentlicht |
 | 0.5.5 | `v0.5.5` | über Tag auflösbar | Parallele Empfangsdiagnose und lesbarer Detailverlauf; HACS-Release veröffentlicht |

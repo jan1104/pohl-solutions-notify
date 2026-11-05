@@ -1,5 +1,11 @@
 # Änderungen
 
+## 0.5.8 – veraltete Rückmeldungen abweisen, nur lokal
+
+- Fehler nachgestellt: Für bereits beendete Ereignisse ließen sich neue Fehlalarm-Bestätigungen erzeugen. Spätere Bestätigung konnte die Kennung verbrauchen und als abgeschlossen vormerken, bevor das Modell den Vorgang ablehnte.
+- Neue Rückmeldungen an abgeschlossene Ereignisse vor Protokoll-/Tokenänderungen kontrolliert abweisen. Gültige wiederholte Rückmeldungen bleiben ohne weitere Nebenwirkung.
+- 222 Python- und 50 Frontendtests erfolgreich. Nur lokaler Checkpoint; kein Push, Release oder Deployment.
+
 ## 0.5.7 – Ausgaben direkt beim Melder testen
 
 - Jeder Melder erhält unter Melder & Alarme einen Testen-Button. Die bestehende Ausgabenprobe öffnet mit genau diesem Melder vorausgewählt.

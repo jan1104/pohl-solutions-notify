@@ -211,12 +211,14 @@ class AlarmEngine:
                 return None
             if action == "end_source" and source_id in i["sources"] and not i["sources"][source_id]["active"]:
                 return None
+            if action == "false_alarm" and i["status"] == "false_alarm" and self.completed_confirmations.get(token, ())[:2] == (user.id, incident_id) and self.completed_confirmations[token][2] > time():
+                return None
+            if i['status'] not in ('open', 'claimed'):
+                raise HomeAssistantError("Dieses Ereignis ist bereits beendet")
             if action == "request_false":
                 for existing, confirmation in self.confirmations.items():
                     if confirmation[:2] == (user.id, incident_id) and confirmation[2] > time():
                         return existing
-            if action == "false_alarm" and i["status"] == "false_alarm" and self.completed_confirmations.get(token, ())[:2] == (user.id, incident_id) and self.completed_confirmations[token][2] > time():
-                return None
             self.model.log("response_requested", incident=i, user_id=user.id, user_name=user.name,
                 source=i["sources"].get(source_id, {}), details={"requested_action": action})
             if action == "request_false":
