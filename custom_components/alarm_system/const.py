@@ -1,6 +1,6 @@
 """Local alarm system constants."""
 DOMAIN = "alarm_system"
-VERSION = "0.5.10"
+VERSION = "0.5.11"
 TYPES = ("INFO", "WARNING", "FIRE", "INTRUSION")
 CHANNELS = {"INFO": "Info", "WARNING": "Warnung", "FIRE": "Feueralarm", "INTRUSION": "Einbruchalarm"}
 LABELS = {"INFO": "Information", "WARNING": "Warnung", "FIRE": "Feueralarm", "INTRUSION": "Einbruchalarm"}

@@ -1,5 +1,11 @@
 # Änderungen
 
+## 0.5.11 – ungültige Sensorzuordnungen beim Import abweisen, nur lokal
+
+- Klingelmodus-, Lautstärke- und Browser-Sichtbarkeitssensoren in Sicherungen dürfen keine Listen, Objekte oder Zahlen sein. Solche Werte konnten später Ton- oder Popup-Verarbeitung mit einem Typfehler abbrechen.
+- Import wird vor dem Zustandsaustausch verständlich abgewiesen. Fehlende, leere, null und vorübergehend nicht verfügbare Sensorzuordnungen bleiben kompatibel; Geräte müssen weiterhin neu getestet werden.
+- Vier zusätzliche Regressionen; 236 Python- und 52 Frontendtests erfolgreich. Nur lokaler Checkpoint; kein Push, Release oder Deployment.
+
 ## 0.5.10 – Sensorverfügbarkeit korrekt protokollieren, nur lokal
 
 - Wiederholtes unknown/unavailable nicht mehr als wiederholten Zustandswechsel speichern. Übergänge nennen den zuletzt beobachteten Zustand statt der letzten gültigen Ein-/Aus-Flanke.

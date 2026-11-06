@@ -12,6 +12,13 @@ def import_switch(record, field, default):
         raise ValueError('Schalter muss true oder false sein: ' + field)
     return value
 
+
+def validate_sensor_reference(record, field):
+    """Allow unset/offline sensors, but never pass containers to HA state lookup."""
+    value = record.get(field)
+    if value is not None and not isinstance(value, str):
+        raise ValueError('Ungültige Sensorzuordnung: ' + field)
+
 def device_outputs(payload, platform):
     """Normalize supported output switches, rejecting ambiguous string booleans."""
     defaults = {"push": True, "popup": True,
@@ -71,6 +78,8 @@ def prepare_import(current, document, accounts, states, notify_actions):
             device['enabled'] = import_switch(device, 'enabled', False)
         if device.get('platform') not in ('android', 'ios', 'browser'):
             raise ValueError('Ungültige Geräteplattform')
+        for field in ('ringer_sensor', 'volume_sensor'):
+            validate_sensor_reference(device, field)
         device.update(device_outputs(device, device['platform']))
         action = device.get('notify_action', '')
         if device['platform'] != 'browser' and action not in notify_actions:
@@ -81,6 +90,7 @@ def prepare_import(current, document, accounts, states, notify_actions):
         for b in device.get('browsers', []):
             if not isinstance(b, dict) or not isinstance(b.get('id'), str) or not b['id'] or b['id'] in browsers:
                 raise ValueError('Ungültige oder doppelte Browser-ID')
+            validate_sensor_reference(b, 'visibility_sensor')
             browsers.add(b['id'])
         for field, default, maximum in (('fire_seconds', 5, 15), ('intrusion_seconds', 5, 15), ('speech_seconds', 8, 12)):
             raw = device.get(field, default)

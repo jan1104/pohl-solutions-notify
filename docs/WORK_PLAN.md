@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 06.11.2026 · lokaler Entwicklungsstand 0.5.10 · letztes veröffentlichtes Release 0.5.7 / kein HA-Deployment.
+Stand: 06.11.2026 · lokaler Entwicklungsstand 0.5.11 · letztes veröffentlichtes Release 0.5.7 / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -364,3 +364,10 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - 232 Python-/52 Frontendtests, Syntax/Metadaten/Whitespace erfolgreich. Keine echte Excel-/HA-/Android-Prüfung. Kein Produktfehler gefunden; Version 0.5.10 und bestehendes Installationspaket bleiben unverändert.
 - Nächste externe Prüfung: HACS auf veröffentlichten Stand 0.5.7 aktualisieren, HA neu starten, Panel vollständig neu laden und tatsächlich angezeigte Version festhalten. Danach auf Jan S22 Melder-Testen, Ton-/Sprachfolge und Rückmeldung während der Ausgabe protokollieren; HA-/Companion-/Android-Version dazu notieren. Lokale 0.5.8 bis 0.5.10 erst nach gesonderter Veröffentlichungsfreigabe über HACS verfügbar.
 - Weitere lokale Planprüfungen bleiben offen. Nur Tests/Dokumentation lokal committet; kein Push, Release, Deployment oder Lizenzwechsel.
+
+## Automatischer Mittagslauf 06.11.2026: C3 Sensorreferenzen im Import
+
+- Sauberen Ausgangsstand und fünf lokale Commits erhalten. Subagent reproduziert mit vorherigem Import und echten Engine-Methoden: Listen statt Sensor-IDs werden übernommen und brechen später play_device/show_popup beim State-Lookup ab.
+- Gerätefelder ringer_sensor/volume_sensor und Browser visibility_sensor vor dem Austausch validiert. Fehlend, leer, null oder aktuell offline bleiben erlaubt; keine neue Verfügbarkeitsregel.
+- Vier neue Regressionen, 236 Python-/52 Frontendtests sowie Syntax/Metadaten/Whitespace erfolgreich. Keine echte HA-/Android-/Browserprüfung.
+- Lokaler Checkpoint 0.5.11; kein Push, Release, Deployment oder Lizenzwechsel. Weitere Import-/Parallelitätsfälle und bereits dokumentierte externe Gerätetests bleiben offen; veröffentlicht bleibt 0.5.7.

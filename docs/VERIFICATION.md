@@ -1,5 +1,11 @@
 # Prüfprotokoll
 
+## Sensorzuordnungen im Import 0.5.11 – 06.11.2026, automatischer Mittagslauf
+
+- Mit vorherigem prepare_import reproduziert: visibility_sensor als Liste wird übernommen; echte Engine.show_popup bricht beim HA-State-Lookup mit TypeError ab. ringer_sensor/volume_sensor als Liste werden ebenfalls übernommen; echte Engine.play_device bricht beim anschließenden Gerätetest ab. HA-Grenzen durch lokale Adapter ersetzt.
+- Vier neue Regressionen: 24 ungültige Feld-/Schema-/Typkombinationen werden ohne Änderung an aktueller Einrichtung oder Eingabedokument abgewiesen. Fehlend, leer, null und derzeit nicht vorhandene Sensorstrings bleiben kompatibel; tested bleibt False.
+- 236 Python- und 52 Frontendtests, Syntax/Metadaten/Whitespace erfolgreich. Keine echte HA-/Android-/Browserprüfung. Kein Push oder Deployment.
+
 ## CSV und Aufbewahrung – 06.11.2026, unveränderte Produktversion 0.5.10
 
 - Zwei neue Tests des echten Frontendexports mit unabhängigem CSV-Leser: BOM, Spaltenzuordnung, Semikolon/Anführungszeichen/Umlaute, mehrzeilige Inhalte und JSON-Details bleiben erhalten; Formelanfänge =/+/-/@ auch nach Leerraum werden in Benutzer-, Melder- und Textfeldern entschärft.

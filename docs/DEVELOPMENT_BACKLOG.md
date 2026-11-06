@@ -228,6 +228,12 @@ Eine Änderung des bestehenden Standardverhaltens ausdrücklich festlegen.
 
 ### C3 [P0/P1, M] Import und Datensicherung weiter absichern
 
+**Teilfortschritt 0.5.11, nur lokal:** Importierte Geräte-/Browser-Sensorreferenzen
+werden vor dem Austausch geprüft. Listen/Objekte konnten zuvor später die echte
+Ton-/Popup-Verarbeitung beim State-Lookup abbrechen. Vier Regressionen für beide
+Schemas, atomare Ablehnung und erlaubte fehlende/leere/offline Zuordnungen.
+Weitere verschachtelte Felder und native HA-Imports bleiben offen.
+
 **Teilfortschritt 0.5.9, nur lokal:** Gerätezeiten nehmen keine Booleans als
 Sekunden mehr an; ungültige Typen und Zahlen werden mit verständlichem Fehler
 vor dem Zustandsaustausch abgewiesen. Zwei Regressionstests für beide Schemas,
