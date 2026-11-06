@@ -132,6 +132,54 @@ test('configuration export includes registry schema 2 and custom history retains
   assert.equal(backup.alarm_types.FIRE.tone_seconds, null);
   assert.match(vm.runInContext('journalCSV(exportData)', context), /Wasser <Keller>/);
 });
+
+// Read the exported document independently, including quoted multiline fields.
+function readCSV(text) {
+  const rows = []; let row = [], cell = '', quoted = false;
+  for (let i = 1; i < text.length; i++) { // UTF-8 BOM is part of the export contract.
+    const c = text[i];
+    if (c === '"') {
+      if (quoted && text[i + 1] === '"') { cell += '"'; i++; }
+      else quoted = !quoted;
+    } else if (!quoted && (c === ';' || c === '\r')) {
+      row.push(cell); cell = '';
+      if (c === '\r') { assert.equal(text[++i], '\n'); rows.push(row); row = []; }
+    } else cell += c;
+  }
+  assert.equal(quoted, false);
+  row.push(cell); rows.push(row);
+  return rows;
+}
+
+test('CSV preserves umlauts, separators, quotation marks and multiline alarm text', () => {
+  const data = panel().data;
+  const text = 'Küche; Tür "Nord"\r\nNächste Zeile\nGrüße';
+  data.journal = [{id: 'special', at: '2026-11-06T06:00:00Z', type: 'FIRE',
+    action: 'alarm_raised', source_name: 'Melder "Küche"', text, details: {message: text}}];
+  context.exportData = data;
+  const csv = vm.runInContext('journalCSV(exportData)', context);
+  assert.equal(csv.charCodeAt(0), 0xfeff);
+  const [headers, values, ...extra] = readCSV(csv);
+  assert.equal(extra.length, 0);
+  assert.equal(values.length, headers.length);
+  const record = Object.fromEntries(headers.map((header, index) => [header, values[index]]));
+  assert.equal(record.Text, text);
+  assert.equal(record.Melder, 'Melder "Küche"');
+  assert.deepEqual(JSON.parse(record.Details), {message: text});
+});
+
+test('CSV neutralizes spreadsheet formula prefixes in names and messages', () => {
+  for (const dangerous of ['=1+1', '+SUM(A1:A2)', '-1+2', '@SUM(A1)', ' \t=1', '\r\n+1']) {
+    const data = panel().data;
+    data.journal = [{id: 'formula', at: '2026-11-06T06:00:00Z', type: 'FIRE',
+      action: 'alarm_raised', source_name: dangerous, user_name: dangerous, text: dangerous}];
+    context.exportData = data;
+    const [headers, values] = readCSV(vm.runInContext('journalCSV(exportData)', context));
+    for (const field of ['Melder', 'Benutzer', 'Text']) {
+      assert.equal(values[headers.indexOf(field)], "'" + dangerous);
+    }
+  }
+});
 test('custom profile capture preserves stable ID/channel and accepts independent switches', () => {
   const p = panel();
   p.alarmTypeDraft = {...custom};

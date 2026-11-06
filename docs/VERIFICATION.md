@@ -1,5 +1,12 @@
 # Prüfprotokoll
 
+## CSV und Aufbewahrung – 06.11.2026, unveränderte Produktversion 0.5.10
+
+- Zwei neue Tests des echten Frontendexports mit unabhängigem CSV-Leser: BOM, Spaltenzuordnung, Semikolon/Anführungszeichen/Umlaute, mehrzeilige Inhalte und JSON-Details bleiben erhalten; Formelanfänge =/+/-/@ auch nach Leerraum werden in Benutzer-, Melder- und Textfeldern entschärft.
+- Drei neue Modelltests für alle fünf begrenzten Aufbewahrungsmodi: offene/angenommene Ereignisse samt alten Journalzeilen erhalten, abgelaufene abgeschlossene/alleinstehende Einträge entfernen, neuere behalten. 31. Mai → 28./29. Februar sowie unbegrenzte Aufbewahrung geprüft.
+- 232 Python- und 52 Frontendtests erfolgreich; Syntax/Metadaten/Whitespace geprüft. Lokale Adapter/VM, keine echte Excel-/HA-/Geräteprüfung. Kein Produktfehler in diesen Fällen gefunden; deshalb keine neue Version oder neues Installationspaket.
+- Lesende Subagent-Prüfung des Bildzugriffs ohne belegten neuen Rechtefehler; verschwundene Bilddateien werden kontrolliert als 404 behandelt. Ein künstlicher Bereiniger-Rennfall ohne nachgewiesenen regulären Ablauf führte zu keiner spekulativen Korrektur.
+
 ## Sensorverfügbarkeit 0.5.10 – 06.11.2026, automatischer Lauf
 
 - Vor Änderung nachgestellt: off als letzte gültige Flanke, zweimal unavailable ergibt zwei identische signal_changed-Einträge off→unavailable und zwei Speicherungen.

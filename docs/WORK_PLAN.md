@@ -356,3 +356,11 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - Laufzeitbeobachtungen getrennt von gültigen on/off-Flanken geführt. Tatsächlichen vorigen Beobachtungszustand protokollieren; gleiche Beobachtung ohne neue Flanke nicht erneut speichern. Neue Entitätszuordnung bei gleicher Melder-ID berücksichtigt.
 - Fünf neue Regressionen einschließlich Wiederkehr ohne erneute Auslösung und Unterdrückung bis echtem OFF. 229 Python-/50 Frontendtests, Syntax/Metadaten erfolgreich.
 - Lokaler Checkpoint 0.5.10; kein Push, Release, Deployment oder Lizenzwechsel. Native HA-Zustandsereignisse und Gerätetests weiterhin offen; veröffentlicht bleibt 0.5.7.
+
+## Automatischer Morgenlauf 06.11.2026: E4 CSV und Aufbewahrung
+
+- Sauberen Ausgangsstand und vier lokale Commits erhalten. Lesende Prüfung des geschützten Bildzugriffs ohne belegten neuen Fehler; keine spekulative Produktänderung.
+- Offene lokale Regressionen ergänzt: CSV-Sonderzeichen/mehrzeilige Texte und Formelschutz mit unabhängigem CSV-Leser; alle begrenzten Aufbewahrungsmodi erhalten offene/angenommene Alarme samt Journal. Kalendergrenzen inklusive Schaltjahr und unbegrenzte Aufbewahrung geprüft.
+- 232 Python-/52 Frontendtests, Syntax/Metadaten/Whitespace erfolgreich. Keine echte Excel-/HA-/Android-Prüfung. Kein Produktfehler gefunden; Version 0.5.10 und bestehendes Installationspaket bleiben unverändert.
+- Nächste externe Prüfung: HACS auf veröffentlichten Stand 0.5.7 aktualisieren, HA neu starten, Panel vollständig neu laden und tatsächlich angezeigte Version festhalten. Danach auf Jan S22 Melder-Testen, Ton-/Sprachfolge und Rückmeldung während der Ausgabe protokollieren; HA-/Companion-/Android-Version dazu notieren. Lokale 0.5.8 bis 0.5.10 erst nach gesonderter Veröffentlichungsfreigabe über HACS verfügbar.
+- Weitere lokale Planprüfungen bleiben offen. Nur Tests/Dokumentation lokal committet; kein Push, Release, Deployment oder Lizenzwechsel.

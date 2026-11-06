@@ -341,10 +341,18 @@ Kein visuelles „bestanden“ ohne echte Browserprüfung.
 
 ### E4 [P2, M, Funktionsvorschlag] Verlauf gezielt nutzbar machen
 
+**Lokale Prüfungen 06.11.2026, unverändert 0.5.10:** Zwei zusätzliche
+Frontendtests lesen den echten CSV-Export mit einem unabhängigen CSV-Leser:
+Formelanfänge einschließlich führender Leerzeichen/Zeilenumbrüche werden
+entschärft; Semikolon, Anführungszeichen, Umlaute und mehrzeilige Texte bleiben
+erhalten. Drei Modelltests decken alle begrenzten Aufbewahrungsmodi, alte offene
+und angenommene Alarme samt Journal sowie Kalendergrenzen in Schaltjahren ab.
+Keine Produktänderung; echte Excel-/HA-Prüfungen und neue Filter bleiben offen.
+
 - [ ] Filter nach Alarmart, Zeitraum, Melder und Status entwerfen.
 - [ ] Ereignisaktionen von reinen Transportmeldungen verständlich unterscheiden.
 - [ ] Filter für Anzeige und CSV nachvollziehbar aufeinander abstimmen.
-- [ ] Unabhängig von neuen Filtern den bestehenden CSV-Export mit Formelanfängen,
+- [x] Lokal unabhängig von neuen Filtern den bestehenden CSV-Export mit Formelanfängen,
   Anführungszeichen, Zeilenumbrüchen und Umlauten prüfen; aktive Ereignisse müssen
   bei Aufbewahrungsbereinigung erhalten bleiben.
 
