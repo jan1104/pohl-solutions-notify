@@ -40,6 +40,7 @@ class AlarmEngine:
         self.output_tests = {}
         self.setup_receipts = {}
         self.playback_receipts = {}
+        self.signal_observations = {}  # Runtime diagnostics; signal_values retains valid on/off edges.
         self.recovering = False
         self.stopping = False
         self.open_popups = {}
@@ -1003,6 +1004,11 @@ class AlarmEngine:
         async with self.lock:
             binding = next((s for s in self.model.data["sources"].values() if s["entity_id"] == entity_id), None)
             previous = self.model.data["signal_values"].get(binding["id"]) if binding else None
+            if binding:
+                observed_entity, observed_state = self.signal_observations.get(binding['id'], (entity_id, previous))
+                if observed_entity == entity_id:
+                    previous = observed_state
+                self.signal_observations[binding['id']] = (entity_id, state)
             payload = self.model.signal_update(entity_id, state)
             if binding and previous != state:
                 self.model.log("signal_changed", kind=binding["type"], source=binding,

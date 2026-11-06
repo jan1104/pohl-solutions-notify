@@ -1,5 +1,11 @@
 # Änderungen
 
+## 0.5.10 – Sensorverfügbarkeit korrekt protokollieren, nur lokal
+
+- Wiederholtes unknown/unavailable nicht mehr als wiederholten Zustandswechsel speichern. Übergänge nennen den zuletzt beobachteten Zustand statt der letzten gültigen Ein-/Aus-Flanke.
+- Beobachtungen nur im Arbeitsspeicher; Alarmflanken und Unterdrückung bleiben unverändert. Verfügbarkeit allein beendet oder entsperrt keinen Alarm.
+- Fünf neue Regressionen; 229 Python- und 50 Frontendtests erfolgreich. Nur lokaler Checkpoint; kein Push, Release oder Deployment.
+
 ## 0.5.9 – ungültige importierte Zeitwerte abweisen, nur lokal
 
 - Gerätezeiten in Sicherungen akzeptieren keine JSON-Booleans mehr: true wurde bisher still zu einer Sekunde. Ungültige Typen, nicht endliche Werte und Werte außerhalb der bisherigen Grenzen werden kontrolliert abgewiesen.

@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 05.11.2026 · lokaler Entwicklungsstand 0.5.9 · letztes veröffentlichtes Release 0.5.7 / kein HA-Deployment.
+Stand: 06.11.2026 · lokaler Entwicklungsstand 0.5.10 · letztes veröffentlichtes Release 0.5.7 / kein HA-Deployment.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -349,3 +349,10 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - Zwei zusätzliche Regressionstests, insgesamt 224 Python-/50 Frontendtests sowie Syntax/Metadaten/Whitespace erfolgreich.
 - Lesende Subagent-Gegenprüfung zu B3 ohne belastbaren neuen Routinefehler; keine spekulative Änderung. Weitere Import-/Parallelitätsfälle und echte HA-/Android-Gerätetests bleiben offen.
 - Lokaler Checkpoint 0.5.9; kein Push, Release, Deployment oder Lizenzwechsel. Veröffentlicht bleibt 0.5.7.
+
+## Automatischer Nachtlauf 06.11.2026: B5 Sensorverfügbarkeit
+
+- Sauberen Ausgangsstand und die drei vorhandenen lokalen Commits erhalten. Mit Subagent reproduziert: zweimal unavailable bei letzter gültiger Flanke off führte zu zwei identischen Zustandswechseln und Speicherungen.
+- Laufzeitbeobachtungen getrennt von gültigen on/off-Flanken geführt. Tatsächlichen vorigen Beobachtungszustand protokollieren; gleiche Beobachtung ohne neue Flanke nicht erneut speichern. Neue Entitätszuordnung bei gleicher Melder-ID berücksichtigt.
+- Fünf neue Regressionen einschließlich Wiederkehr ohne erneute Auslösung und Unterdrückung bis echtem OFF. 229 Python-/50 Frontendtests, Syntax/Metadaten erfolgreich.
+- Lokaler Checkpoint 0.5.10; kein Push, Release, Deployment oder Lizenzwechsel. Native HA-Zustandsereignisse und Gerätetests weiterhin offen; veröffentlicht bleibt 0.5.7.

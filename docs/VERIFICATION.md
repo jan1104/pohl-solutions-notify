@@ -1,5 +1,11 @@
 # Prüfprotokoll
 
+## Sensorverfügbarkeit 0.5.10 – 06.11.2026, automatischer Lauf
+
+- Vor Änderung nachgestellt: off als letzte gültige Flanke, zweimal unavailable ergibt zwei identische signal_changed-Einträge off→unavailable und zwei Speicherungen.
+- Laufzeitbeobachtung von der gültigen Flanke getrennt. Fünf neue Regressionen: wiederholter Ausfall ohne Doppelprotokoll/Speicherung, korrekter Folgezustand unavailable→unknown, Rückkehr ohne erneute Auslösung, Unterdrückung bis echtem OFF und neue Entitätszuordnung bei gleicher Melder-ID.
+- 229 Python- und 50 Frontendtests, Syntax und Metadaten erfolgreich. Grenzen durch lokale Adapter ersetzt; keine echte HA-/Android-/Browserprüfung. Kein Push oder Deployment.
+
 ## Importierte Gerätezeiten 0.5.9 – 05.11.2026, automatischer Lauf
 
 - Vor Änderung in Schema 1 und 2 nachgestellt: true für fire_seconds, intrusion_seconds oder speech_seconds wird als 1.0 übernommen (sechs fehlgeschlagene Teilfälle).

@@ -165,6 +165,13 @@ Konkrete Zeitgrenzen erst anhand der Schnittstelle und gemessenen Abläufe festl
 
 ### B5 [P0/P1, M] Sensorzustände und Melderflattern prüfen
 
+**Teilfortschritt 0.5.10, nur lokal:** Wiederholte unknown/unavailable-Werte
+erzeugen keine doppelten Zustandswechsel und Speicherungen mehr. Die Diagnose
+verwendet eine getrennte Laufzeitbeobachtung; gültige Alarmflanken und Sperren
+bleiben erhalten. Fünf Regressionen für Ausfall, Wiederkehr, Unterdrückung und
+neue Entitätszuordnung. Entfernte Entitäten, hohe Wechselraten und native
+HA-Zustandsereignisse bleiben als weitere Prüfungen offen.
+
 - [ ] `off`, `on`, `unknown`, `unavailable`, entfernte Entität und Wiederkehr systematisch testen.
 - [ ] Sehr häufige Wechsel und wiederholte gleiche Meldungen testen.
 - [ ] Alarmunterdrückung nach Beenden und Entsperrung durch Normalzustand nachvollziehen.
