@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 08.11.2026 · lokaler Entwicklungsstand 0.5.12 · letztes dokumentiertes HACS-Release 0.5.7.
+Stand: 08.11.2026 · lokaler Entwicklungsstand 0.5.13 · letztes dokumentiertes HACS-Release 0.5.7.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -378,3 +378,9 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - Öffnen und Schließen verwenden dieselbe Sperre. Der Schließauftrag überspringt Browser, die bereits einem anderen Ereignis zugeordnet sind.
 - Drei Regressionen prüfen den Fensterwechsel, einen verzögerten Schließauftrag und den bisherigen Umgang mit eigenen und ungetrackten Fenstern. 239 Python- und 52 Frontendtests bestanden.
 - Lokaler Checkpoint 0.5.12. Die praktische Prüfung mit Browser Mod steht im Abschnitt Parallele Alarme und Rückmeldungen des HA_TEST_PROTOCOL.md.
+
+## Automatischer Abendlauf 08.11.2026 – B2 wartende Alarmfenster
+
+- Ein wartender Feuerauftrag konnte nach einem Prioritätswechsel noch das Fenster für Feuer öffnen. Die Engine prüft den aktuellen Vorrang und die bestehenden Rechte am Gerät innerhalb der Fenstersperre vor dem Senden.
+- Eine neue Regression prüft den gemeinsamen Browser und einen getrennten Feuerempfänger. 240 Python- und 52 Frontendtests bestanden.
+- Lokaler Checkpoint 0.5.13. Für die praktische Prüfung mit Browser Mod Feuer und Einbruch kurz hintereinander auslösen und die Fenster am gemeinsamen und am getrennten Browser vergleichen.

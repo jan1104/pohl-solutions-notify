@@ -1,5 +1,9 @@
 # Änderungen
 
+## 0.5.13 – Vorrang beim Öffnen eines wartenden Alarmfensters prüfen
+
+- Nach der Wartezeit prüft die Engine, welcher Alarm am jeweiligen Gerät Vorrang hat. Ein überholter Feuerauftrag öffnet am gemeinsamen Browser kein Fenster, wenn Einbruch inzwischen Vorrang hat.
+
 ## 0.5.12 – neueres Alarmfenster beim Beenden eines älteren Alarms erhalten
 
 - Die Integration prüft vor dem Schließen, welches Ereignis das Fenster am Browser belegt. Ein Fenster für einen anderen Alarm bleibt offen.

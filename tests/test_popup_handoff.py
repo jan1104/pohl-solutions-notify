@@ -22,7 +22,6 @@ class PopupHandoffTests(unittest.IsolatedAsyncioTestCase):
         self.engine.save = AsyncMock()
         self.engine.defer_transport_save = lambda: None
         self.fire = self.alarm("FIRE", "smoke")
-        self.door = self.alarm("INTRUSION", "door")
 
     def alarm(self, kind, source):
         return self.engine.model.raise_alarm({
@@ -56,15 +55,16 @@ class PopupHandoffTests(unittest.IsolatedAsyncioTestCase):
     async def test_ending_old_alarm_keeps_newer_popup_on_shared_browser(self):
         device = self.browser("shared", ["FIRE", "INTRUSION"])
         await self.engine.show_popup(device, self.fire, launch=False)
-        await self.engine.show_popup(device, self.door, launch=False)
-        self.assertEqual(self.windows[("shared", "alarm_system")], self.door["id"])
+        door = self.alarm("INTRUSION", "door")
+        await self.engine.show_popup(device, door, launch=False)
+        self.assertEqual(self.windows[("shared", "alarm_system")], door["id"])
 
         self.engine.model.end_source(self.fire["id"], "smoke", "shared")
         await self.engine.close_popups(self.fire)
         await self.drain()
 
-        self.assertEqual(self.windows.get(("shared", "alarm_system")), self.door["id"])
-        self.assertEqual(self.engine.open_popups["shared"], self.door["id"])
+        self.assertEqual(self.windows.get(("shared", "alarm_system")), door["id"])
+        self.assertEqual(self.engine.open_popups["shared"], door["id"])
         self.assertEqual([call.args[1] for call in self.service.await_args_list], ["popup", "popup"])
 
     async def test_close_ends_own_and_untracked_popups_except_excluded_user(self):
@@ -86,6 +86,7 @@ class PopupHandoffTests(unittest.IsolatedAsyncioTestCase):
         device = self.browser("shared", ["FIRE", "INTRUSION"])
         await self.engine.show_popup(device, self.fire, launch=False)
         self.engine.model.end_source(self.fire["id"], "smoke", "shared")
+        door = self.alarm("INTRUSION", "door")
         close_started = asyncio.Event()
         finish_close = asyncio.Event()
         open_attempted = asyncio.Event()
@@ -98,7 +99,7 @@ class PopupHandoffTests(unittest.IsolatedAsyncioTestCase):
 
         async def open_new_popup():
             open_attempted.set()
-            await self.engine.show_popup(device, self.door, launch=False)
+            await self.engine.show_popup(device, door, launch=False)
 
         self.service.side_effect = delayed_service
         close_task = asyncio.create_task(self.engine.close_popups(self.fire))
@@ -112,5 +113,32 @@ class PopupHandoffTests(unittest.IsolatedAsyncioTestCase):
         await open_task
         await self.drain()
 
-        self.assertEqual(self.windows.get(("shared", "alarm_system")), self.door["id"])
-        self.assertEqual(self.engine.open_popups["shared"], self.door["id"])
+        self.assertEqual(self.windows.get(("shared", "alarm_system")), door["id"])
+        self.assertEqual(self.engine.open_popups["shared"], door["id"])
+
+    async def test_waiting_popup_rechecks_priority_for_each_device(self):
+        shared = self.browser("shared", ["FIRE", "INTRUSION"])
+        fire_only = self.browser("fire-only", ["FIRE"])
+        shared_attempted = asyncio.Event()
+        fire_only_attempted = asyncio.Event()
+
+        async def open_fire_popup(device, attempted):
+            attempted.set()
+            await self.engine.show_popup(device, self.fire, launch=False)
+
+        async with self.engine.popup_lock:
+            shared_task = asyncio.create_task(open_fire_popup(shared, shared_attempted))
+            fire_only_task = asyncio.create_task(open_fire_popup(fire_only, fire_only_attempted))
+            await asyncio.wait_for(shared_attempted.wait(), timeout=1)
+            await asyncio.wait_for(fire_only_attempted.wait(), timeout=1)
+            door = self.alarm("INTRUSION", "door")
+
+        await asyncio.gather(shared_task, fire_only_task)
+
+        self.assertEqual(self.windows, {("fire-only", "alarm_system"): self.fire["id"]})
+        self.assertEqual(self.engine.open_popups, {"fire-only": self.fire["id"]})
+        self.service.assert_awaited_once()
+
+        await self.engine.show_popup(shared, door, launch=False)
+
+        self.assertEqual(self.windows[("shared", "alarm_system")], door["id"])

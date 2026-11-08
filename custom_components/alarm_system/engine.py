@@ -908,16 +908,18 @@ class AlarmEngine:
                     return  # Reopened by the visibility transition when the browser connects.
             else:
                 await asyncio.sleep(0.5)
-        if i["status"] not in ("open", "claimed") or not self.device_active(d, i) or not (self.model.authorized(d["user_id"], i) or self.model.owns_test(d['user_id'], i)):
-            return
         changed = False
         async with self.popup_lock:
             for browser in browsers:
                 bid = browser['id']
                 if self.open_popups.get(bid) == i['id']:
                     continue
-                if i['status'] not in ('open', 'claimed'):
-                    return
+                # Another incident can take priority while this request is queued.
+                primary = self.primary_for_device(d)
+                if not primary or primary['id'] != i['id'] or not self.device_active(d, i):
+                    break
+                if not (self.model.authorized(d['user_id'], i) or self.model.owns_test(d['user_id'], i)):
+                    break
                 data = {"browser_id": [bid], "tag": "alarm_system",
                         "title": f'{self.model.label(i['type'])} · {i["site_id"]}',
                         "initial_style": "fullscreen", "dismissable": False,

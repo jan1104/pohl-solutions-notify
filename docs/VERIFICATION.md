@@ -1,5 +1,11 @@
 # Prüfprotokoll
 
+## Wartende Alarmfenster 0.5.13 – 08.11.2026
+
+- Vor der Korrektur öffnete ein wartender Feuerauftrag ein Fenster, obwohl während der Wartezeit Einbruch am selben Browser Vorrang erhalten hatte.
+- Die Regression hält die Fenstersperre, löst Einbruch aus und prüft anschließend die Aufträge für einen gemeinsamen und einen separaten Browser. Der gemeinsame Browser erhält das Einbruchfenster. Der separate Browser erhält das Feuerfenster.
+- 240 Python- und 52 Frontendtests bestanden. Der Browserdienst wurde lokal simuliert. Die praktische Prüfung mit Browser Mod steht aus.
+
 ## Alarmfenster bei parallelen Ereignissen 0.5.12 – 08.11.2026
 
 - Vor der Korrektur sendete die Engine beim Beenden des älteren Alarms `close_popup` an denselben Browser, obwohl dort bereits der neuere Alarm eingetragen war. Die Engine hielt das neuere Fenster danach weiter für geöffnet.

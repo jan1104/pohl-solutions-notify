@@ -113,6 +113,10 @@ zurückbleiben und ein Test nicht unbemerkt als regulärer Alarm fortgesetzt wir
 
 ### B2 [P0, M] Parallelität und Prioritätswechsel prüfen
 
+**Teilfortschritt 0.5.13:** Wartende Fensteraufträge prüfen den Vorrang direkt
+vor dem Öffnen erneut pro Gerät. Die lokale Regression prüft einen gemeinsamen
+Browser und einen Browser, der nur Feuer empfängt.
+
 **Teilfortschritt 0.5.12:** Beim Schließen eines beendeten Alarms schützt die
 Integration Fenster anderer Ereignisse am selben Browser. Öffnen und Schließen
 verwenden dieselbe Sperre. Der Test auf einem Browser mit Browser Mod steht aus.
