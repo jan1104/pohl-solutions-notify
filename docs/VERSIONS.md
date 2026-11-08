@@ -5,6 +5,7 @@ Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerau
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.5.12 | `v0.5.12` | über Tag auflösbar | Alarmfenster beim Wechsel zwischen Ereignissen geschützt. Lokaler Checkpoint. |
 | 0.5.11 | `v0.5.11` | über Tag auflösbar | Ungültige importierte Sensorreferenzen vor Ton-/Popup-Fehlern abweisen; nur lokal, kein HACS-Release |
 | 0.5.10 | `v0.5.10` | über Tag auflösbar | Sensorverfügbarkeit ohne doppelte Verlaufseinträge/Speicherungen; nur lokal, kein HACS-Release |
 | 0.5.9 | `v0.5.9` | über Tag auflösbar | Ungültige importierte Gerätezeiten kontrolliert abgewiesen; nur lokal, kein HACS-Release |

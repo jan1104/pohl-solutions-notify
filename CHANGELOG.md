@@ -1,5 +1,10 @@
 # Änderungen
 
+## 0.5.12 – neueres Alarmfenster beim Beenden eines älteren Alarms erhalten
+
+- Die Integration prüft vor dem Schließen, welches Ereignis das Fenster am Browser belegt. Ein Fenster für einen anderen Alarm bleibt offen.
+- Öffnen und Schließen verwenden dieselbe Sperre. Eine verzögerte Schließanfrage kann dadurch innerhalb der Integration kein gleichzeitig angefordertes neueres Fenster schließen.
+
 ## 0.5.11 – ungültige Sensorzuordnungen beim Import abweisen, nur lokal
 
 - Klingelmodus-, Lautstärke- und Browser-Sichtbarkeitssensoren in Sicherungen dürfen keine Listen, Objekte oder Zahlen sein. Solche Werte konnten später Ton- oder Popup-Verarbeitung mit einem Typfehler abbrechen.

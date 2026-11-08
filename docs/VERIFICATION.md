@@ -1,5 +1,11 @@
 # Prüfprotokoll
 
+## Alarmfenster bei parallelen Ereignissen 0.5.12 – 08.11.2026
+
+- Vor der Korrektur sendete die Engine beim Beenden des älteren Alarms `close_popup` an denselben Browser, obwohl dort bereits der neuere Alarm eingetragen war. Die Engine hielt das neuere Fenster danach weiter für geöffnet.
+- Drei Regressionen prüfen den bereits erfolgten Fensterwechsel, das Öffnen während einer verzögerten Schließanfrage sowie das Schließen eigener und nicht zugeordneter Fenster mit der bestehenden Benutzerausnahme.
+- 239 Python- und 52 Frontendtests bestanden. Die Regressionen verwenden die echte Engine mit lokalem Browser-Mod-Adapter. Die Prüfung auf einem Browser mit Browser Mod steht aus.
+
 ## Sensorzuordnungen im Import 0.5.11 – 06.11.2026, automatischer Mittagslauf
 
 - Mit vorherigem prepare_import reproduziert: visibility_sensor als Liste wird übernommen; echte Engine.show_popup bricht beim HA-State-Lookup mit TypeError ab. ringer_sensor/volume_sensor als Liste werden ebenfalls übernommen; echte Engine.play_device bricht beim anschließenden Gerätetest ab. HA-Grenzen durch lokale Adapter ersetzt.

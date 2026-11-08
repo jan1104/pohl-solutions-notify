@@ -113,6 +113,10 @@ zurückbleiben und ein Test nicht unbemerkt als regulärer Alarm fortgesetzt wir
 
 ### B2 [P0, M] Parallelität und Prioritätswechsel prüfen
 
+**Teilfortschritt 0.5.12:** Beim Schließen eines beendeten Alarms schützt die
+Integration Fenster anderer Ereignisse am selben Browser. Öffnen und Schließen
+verwenden dieselbe Sperre. Der Test auf einem Browser mit Browser Mod steht aus.
+
 **Teilfortschritt 0.3.29:** Wechsel von Feuer zu Einbruch während der Tonwartezeit
 nachgestellt und erneute Prioritätsprüfung vor TTS ergänzt. Getrennte Geräte sowie
 Schutz neuerer Playback-Leases durch Regressionstests geprüft. Weitere parallele

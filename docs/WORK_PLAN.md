@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 06.11.2026 · lokaler Entwicklungsstand 0.5.11 · letztes veröffentlichtes Release 0.5.7 / kein HA-Deployment.
+Stand: 08.11.2026 · lokaler Entwicklungsstand 0.5.12 · letztes dokumentiertes HACS-Release 0.5.7.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -371,3 +371,10 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - Gerätefelder ringer_sensor/volume_sensor und Browser visibility_sensor vor dem Austausch validiert. Fehlend, leer, null oder aktuell offline bleiben erlaubt; keine neue Verfügbarkeitsregel.
 - Vier neue Regressionen, 236 Python-/52 Frontendtests sowie Syntax/Metadaten/Whitespace erfolgreich. Keine echte HA-/Android-/Browserprüfung.
 - Lokaler Checkpoint 0.5.11; kein Push, Release, Deployment oder Lizenzwechsel. Weitere Import-/Parallelitätsfälle und bereits dokumentierte externe Gerätetests bleiben offen; veröffentlicht bleibt 0.5.7.
+
+## Automatischer Lauf 08.11.2026 – B2 Alarmfenster
+
+- Belegt mit lokaler Service-Simulation: Nach dem Wechsel zum neueren Alarm schloss das Beenden des älteren Alarms das gemeinsame Fenster. Der neuere Alarm blieb intern als angezeigt vermerkt.
+- Öffnen und Schließen verwenden dieselbe Sperre. Der Schließauftrag überspringt Browser, die bereits einem anderen Ereignis zugeordnet sind.
+- Drei Regressionen prüfen den Fensterwechsel, einen verzögerten Schließauftrag und den bisherigen Umgang mit eigenen und ungetrackten Fenstern. 239 Python- und 52 Frontendtests bestanden.
+- Lokaler Checkpoint 0.5.12. Die praktische Prüfung mit Browser Mod steht im Abschnitt Parallele Alarme und Rückmeldungen des HA_TEST_PROTOCOL.md.

@@ -27,6 +27,9 @@ Nur bereinigte Protokolle speichern; keine Zugangsdaten oder personenbezogenen E
 2. Bei Feuer „Ich komme“ drücken: Nur Feuer wird `claimed`; Einbruch bleibt offen.
 3. Priorisierten Alarm bestätigen/beenden: Der nächste offene Alarm muss am gemeinsamen
    Gerät wieder verarbeitet werden. Auch umgekehrte Auslösereihenfolge prüfen.
+   Für die Fensterprüfung mit 0.5.12 zuerst Feuer auslösen, dann Einbruch. Sobald
+   das Einbruchfenster sichtbar ist, Feuer in einer zweiten Admin-Ansicht beenden.
+   Am gemeinsamen Browser muss das Einbruchfenster sichtbar bleiben.
 4. Feuer mit Ton und Sprache auslösen; während der Tonwartezeit Einbruch an dasselbe
    Gerät auslösen. Die folgende Sprachstufe darf nicht mehr den nachrangigen Feueralarm ansagen.
    Mit Einbruch an einem anderen Gerät wiederholen: Feueransage bleibt dort unabhängig.

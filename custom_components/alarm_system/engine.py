@@ -974,15 +974,19 @@ class AlarmEngine:
         }, blocking=True)
 
     async def close_popups(self, i, exclude_user=None):
-        self.open_popups = {bid: iid for bid, iid in self.open_popups.items() if iid != i['id']}
-        for d in self.recipients(i):
-            if exclude_user is not None and d.get("user_id") == exclude_user:
-                continue
-            for b in d.get("browsers", []):
-                try:
-                    await self.hass.services.async_call("browser_mod", "close_popup", {"browser_id": [b["id"]], "tag": "alarm_system"}, blocking=True)
-                except Exception:
-                    pass
+        # All alarm windows share a tag, so serialize closing with show_popup.
+        async with self.popup_lock:
+            self.open_popups = {bid: iid for bid, iid in self.open_popups.items() if iid != i['id']}
+            for d in self.recipients(i):
+                if exclude_user is not None and d.get("user_id") == exclude_user:
+                    continue
+                for b in d.get("browsers", []):
+                    if b["id"] in self.open_popups:
+                        continue  # This browser already displays another incident.
+                    try:
+                        await self.hass.services.async_call("browser_mod", "close_popup", {"browser_id": [b["id"]], "tag": "alarm_system"}, blocking=True)
+                    except Exception:
+                        pass
         for d in list(self.model.data["devices"].values()):
             visible = self.primary_for_device(d)
             if visible and d.get("popup"):
