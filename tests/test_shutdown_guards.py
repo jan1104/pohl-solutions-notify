@@ -56,6 +56,65 @@ class ShutdownGuards(unittest.IsolatedAsyncioTestCase):
         self.engine.receive_signal.assert_not_awaited()
         self.engine.save.assert_not_awaited()
 
+    def smoke_alarm_event(self):
+        entity_id = "binary_sensor.smoke"
+        self.engine.model.register_source({
+            "id": "smoke", "entity_id": entity_id, "name": "Rauchmelder", "type": "FIRE",
+        }, "off")
+        return types.SimpleNamespace(data={
+            "old_state": types.SimpleNamespace(state="off", entity_id=entity_id),
+            "new_state": types.SimpleNamespace(state="on", entity_id=entity_id),
+        })
+
+    async def test_sensor_event_waiting_for_model_lock_does_not_raise_alarm_during_stop(self):
+        event = self.smoke_alarm_event()
+        before = self.engine.model.snapshot()
+        self.engine.cycle = AsyncMock()
+        started = asyncio.Event()
+
+        async def process_event():
+            started.set()
+            await self.engine.state_changed(event)
+
+        async with self.engine.lock:
+            listener = asyncio.create_task(process_event())
+            await asyncio.wait_for(started.wait(), timeout=1)
+            self.assertFalse(listener.done())
+            await self.engine.cancel_workers()
+        await listener
+
+        self.assertEqual(self.engine.model.snapshot(), before)
+        self.engine.save.assert_not_awaited()
+        self.engine.cycle.assert_not_called()
+
+    async def test_sensor_event_finishing_save_does_not_start_dispatch_during_stop(self):
+        event = self.smoke_alarm_event()
+        self.engine.cycle = AsyncMock()
+        save_started = asyncio.Event()
+        release_save = asyncio.Event()
+        saved = []
+
+        async def save():
+            snapshot = self.engine.model.snapshot()
+            save_started.set()
+            await release_save.wait()
+            saved.append(snapshot)
+
+        self.engine.save.side_effect = save
+        listener = asyncio.create_task(self.engine.state_changed(event))
+        try:
+            await asyncio.wait_for(save_started.wait(), timeout=1)
+            await self.engine.cancel_workers()
+        finally:
+            release_save.set()
+            await listener
+
+        self.engine.save.assert_awaited_once()
+        self.assertEqual(self.engine.model.snapshot(), saved[0])
+        self.assertEqual(saved[0]["signal_values"]["smoke"], "on")
+        self.assertEqual(len(saved[0]["incidents"]), 1)
+        self.engine.cycle.assert_not_called()
+
     async def test_tick_resuming_after_cleanup_does_not_start_workers_during_stop(self):
         incident, _ = self.engine.model.raise_alarm({
             "type": "FIRE", "alarm_key": "fire", "source_id": "smoke",

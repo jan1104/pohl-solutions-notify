@@ -1,5 +1,9 @@
 # Änderungen
 
+## 0.5.15 – Wartende Melderereignisse beim Entladen anhalten
+
+- Ein bereits wartendes Melderereignis prüft den Stoppzustand, sobald es die Modellsperre erhält. Ist die Auslösung schon gespeichert, übernimmt die nächste Instanz den Alarm. Die alte Instanz startet nach dem Speichern keinen neuen Versandauftrag.
+
 ## 0.5.14 – Laufende Timer beim Entladen anhalten
 
 - Der Timer prüft nach dem Warten auf die Sperre, das Speichern und die Bildbereinigung, ob die Integration gerade entladen wird. So kann ein bereits laufender Timer nach Beginn des Entladens keine neuen Alarm- oder Wiederherstellungsaufträge starten.

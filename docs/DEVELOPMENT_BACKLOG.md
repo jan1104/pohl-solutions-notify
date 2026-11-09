@@ -139,6 +139,10 @@ werden und die gewollte ereignisbezogene Rückmeldung erhalten bleibt.
 
 ### B3 [P0, M] Fehler beim Stoppen und Speichern behandeln
 
+**Teilfortschritt 0.5.15:** Bereits eingetretene Melderereignisse prüfen nach
+der Modellsperre und nach dem Speichern erneut den Stoppzustand. Die lokale
+Regression prüft beide Zeitpunkte. Der Entladetest in Home Assistant steht aus.
+
 **Teilfortschritt 0.5.14:** Bereits laufende Timer beenden sich nach einer
 Wartephase, wenn das Entladen begonnen hat. Dadurch startet der Timer nach
 dem Abbruch der Hintergrundaufgaben keine neuen Wiederherstellungsversuche.

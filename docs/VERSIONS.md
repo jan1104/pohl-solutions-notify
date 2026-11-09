@@ -5,6 +5,7 @@ Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerau
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.5.15 | `v0.5.15` | über Tag auflösbar | Wartende Melderereignisse beim Entladen angehalten. Lokaler Checkpoint. |
 | 0.5.14 | `v0.5.14` | über Tag auflösbar | Laufende Timer beim Entladen angehalten. Lokaler Checkpoint. |
 | 0.5.13 | `v0.5.13` | über Tag auflösbar | Vorrang wartender Fensteraufträge erneut geprüft. Lokaler Checkpoint. |
 | 0.5.12 | `v0.5.12` | über Tag auflösbar | Alarmfenster beim Wechsel zwischen Ereignissen geschützt. Lokaler Checkpoint. |

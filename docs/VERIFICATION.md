@@ -1,5 +1,10 @@
 # Prüfprotokoll
 
+## Wartende Melderereignisse beim Entladen 0.5.15 – 09.11.2026
+
+- Zwei Regressionen vergleichen den vorherigen Stand und die Korrektur. Beginnt das Entladen während der Wartezeit auf die Modellsperre, bleiben Modell und Speicher unverändert. Beginnt es beim Speichern, bleiben der Alarm und die zugehörige Melderflanke im gespeicherten Stand. Die alte Instanz startet anschließend keinen Versandauftrag.
+- 244 Python- und 52 Frontendtests bestanden. Die neuen Tests verwenden lokale Adapter. Das Entladen in Home Assistant und die Übernahme des Alarms nach dem Neuladen stehen zur praktischen Prüfung aus.
+
 ## Laufende Timer beim Entladen 0.5.14 – 09.11.2026
 
 - Zwei Regressionen reproduzieren den Fehler mit dem vorherigen Timer. Nach dem Warten auf die Bildbereinigung konnte er neue Aufgaben starten. Nach dem Warten auf die Modellsperre konnte er trotz Stoppbeginn den Verlauf bereinigen und speichern.

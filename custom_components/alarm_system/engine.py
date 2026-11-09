@@ -1015,6 +1015,8 @@ class AlarmEngine:
     async def receive_signal(self, entity_id, state):
         incident, result, message = None, None, None
         async with self.lock:
+            if self.stopping:
+                return
             binding = next((s for s in self.model.data["sources"].values() if s["entity_id"] == entity_id), None)
             previous = self.model.data["signal_values"].get(binding["id"]) if binding else None
             if binding:
@@ -1035,6 +1037,8 @@ class AlarmEngine:
             # Signal edge and created incident are persisted in the same snapshot.
             if binding and (previous != state or payload):
                 await self.save()
+        if self.stopping:
+            return
         if result == "new":
             self.spawn(self.cycle(incident["id"]))
         elif result == "source_added":
@@ -1049,6 +1053,8 @@ class AlarmEngine:
         if not state:
             return
         async with self.lock:
+            if self.stopping:
+                return
             dirty = False
             if state.state == "off":
                 for i in self.model.data["incidents"].values():
@@ -1060,6 +1066,8 @@ class AlarmEngine:
                 await self.save()
         if state.entity_id.startswith("binary_sensor."):
             await self.receive_signal(state.entity_id, state.state)
+            if self.stopping:
+                return
             if state.state not in ("on", "off") and any(s["entity_id"] == state.entity_id for s in self.model.data["sources"].values()):
                 self.publish()
         old_state = event.data.get('old_state')
