@@ -1,5 +1,10 @@
 # Prüfprotokoll
 
+## Laufende Timer beim Entladen 0.5.14 – 09.11.2026
+
+- Zwei Regressionen reproduzieren den Fehler mit dem vorherigen Timer. Nach dem Warten auf die Bildbereinigung konnte er neue Aufgaben starten. Nach dem Warten auf die Modellsperre konnte er trotz Stoppbeginn den Verlauf bereinigen und speichern.
+- 242 Python- und 52 Frontendtests bestanden. Die Timerprüfungen verwenden lokale Adapter. Der Entladeablauf in Home Assistant steht zur praktischen Prüfung aus.
+
 ## Wartende Alarmfenster 0.5.13 – 08.11.2026
 
 - Vor der Korrektur öffnete ein wartender Feuerauftrag ein Fenster, obwohl während der Wartezeit Einbruch am selben Browser Vorrang erhalten hatte.

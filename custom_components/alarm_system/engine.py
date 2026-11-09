@@ -323,9 +323,16 @@ class AlarmEngine:
         if time()-self._last_purge > 3600:
             self._last_purge = time()
             async with self.lock:
+                if self.stopping:
+                    return
                 self.model.purge()
                 await self.save()
+            if self.stopping:
+                return
             await cleanup_history_images(self.hass)
+            # HA owns the timer callback, so cancel_workers may not cancel it.
+            if self.stopping:
+                return
         for i in self.model.active():
             if i["status"] == "open" and i["id"] not in self.running_cycles and time() >= i["next_due"]:
                 i["next_due"] = time()+30

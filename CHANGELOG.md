@@ -1,5 +1,9 @@
 # Änderungen
 
+## 0.5.14 – Laufende Timer beim Entladen anhalten
+
+- Der Timer prüft nach dem Warten auf die Sperre, das Speichern und die Bildbereinigung, ob die Integration gerade entladen wird. So kann ein bereits laufender Timer nach Beginn des Entladens keine neuen Alarm- oder Wiederherstellungsaufträge starten.
+
 ## 0.5.13 – Vorrang beim Öffnen eines wartenden Alarmfensters prüfen
 
 - Nach der Wartezeit prüft die Engine, welcher Alarm am jeweiligen Gerät Vorrang hat. Ein überholter Feuerauftrag öffnet am gemeinsamen Browser kein Fenster, wenn Einbruch inzwischen Vorrang hat.

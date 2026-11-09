@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 08.11.2026 · lokaler Entwicklungsstand 0.5.13 · letztes dokumentiertes HACS-Release 0.5.7.
+Stand: 09.11.2026 · lokaler Entwicklungsstand 0.5.14 · letztes dokumentiertes HACS-Release 0.5.7.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -384,3 +384,9 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - Ein wartender Feuerauftrag konnte nach einem Prioritätswechsel noch das Fenster für Feuer öffnen. Die Engine prüft den aktuellen Vorrang und die bestehenden Rechte am Gerät innerhalb der Fenstersperre vor dem Senden.
 - Eine neue Regression prüft den gemeinsamen Browser und einen getrennten Feuerempfänger. 240 Python- und 52 Frontendtests bestanden.
 - Lokaler Checkpoint 0.5.13. Für die praktische Prüfung mit Browser Mod Feuer und Einbruch kurz hintereinander auslösen und die Fenster am gemeinsamen und am getrennten Browser vergleichen.
+
+## Automatischer Lauf 09.11.2026 – B3 Timer beim Entladen
+
+- Der laufende Timer konnte nach Stoppbeginn eine neue Handy-Wiederherstellung starten oder beim Freigeben der Modellsperre die Aufbewahrungsbereinigung beginnen. Der Timer prüft den Stoppzustand jetzt nach jeder Wartephase.
+- Zwei Regressionen prüfen das Warten auf Bildbereinigung und Modellsperre. 242 Python- und 52 Frontendtests bestanden.
+- Lokaler Checkpoint 0.5.14. Für die praktische Prüfung die Integration auf einem HA-Testsystem mit einer ausstehenden Gerätewiederherstellung entladen und neu laden. Prüfen, dass nach dem Entladen keine zusätzlichen Wiederholungsaufträge der alten Instanz erscheinen und die neue Instanz den gespeicherten Auftrag übernimmt.

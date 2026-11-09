@@ -2,7 +2,7 @@
 import asyncio
 import types
 import unittest
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 from ha_test_support import load_runtime_modules
 
@@ -55,6 +55,54 @@ class ShutdownGuards(unittest.IsolatedAsyncioTestCase):
         await self.engine.state_changed(event)
         self.engine.receive_signal.assert_not_awaited()
         self.engine.save.assert_not_awaited()
+
+    async def test_tick_resuming_after_cleanup_does_not_start_workers_during_stop(self):
+        incident, _ = self.engine.model.raise_alarm({
+            "type": "FIRE", "alarm_key": "fire", "source_id": "smoke",
+        })
+        incident["next_due"] = 0
+        self.engine.model.data["leases"]["phone"] = {"incident_id": incident["id"]}
+        self.engine.cycle = AsyncMock()
+        self.engine.retry_restorations = AsyncMock()
+        cleanup_started = asyncio.Event()
+        release_cleanup = asyncio.Event()
+
+        async def cleanup(_hass):
+            cleanup_started.set()
+            await release_cleanup.wait()
+
+        with patch.object(runtime, "cleanup_history_images", new=cleanup):
+            # The timer callback belongs to HA rather than the engine's worker set.
+            tick = asyncio.create_task(self.engine.tick(None))
+            try:
+                await asyncio.wait_for(cleanup_started.wait(), timeout=1)
+                await self.engine.cancel_workers()
+            finally:
+                release_cleanup.set()
+                await tick
+
+        self.engine.cycle.assert_not_called()
+        self.engine.retry_restorations.assert_not_called()
+        self.assertEqual(incident["next_due"], 0)
+
+    async def test_tick_waiting_for_model_lock_does_not_purge_during_stop(self):
+        self.engine.model.purge = Mock(wraps=self.engine.model.purge)
+        started = asyncio.Event()
+
+        async def run_tick():
+            started.set()
+            await self.engine.tick(None)
+
+        with patch.object(runtime, "cleanup_history_images", new_callable=AsyncMock) as cleanup:
+            async with self.engine.lock:
+                tick = asyncio.create_task(run_tick())
+                await asyncio.wait_for(started.wait(), timeout=1)
+                await self.engine.cancel_workers()
+            await tick
+
+        self.engine.model.purge.assert_not_called()
+        self.engine.save.assert_not_awaited()
+        cleanup.assert_not_awaited()
 
     async def test_late_notification_receipt_does_not_complete_pending_future(self):
         self.engine.stopping = True

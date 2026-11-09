@@ -139,6 +139,11 @@ werden und die gewollte ereignisbezogene Rückmeldung erhalten bleibt.
 
 ### B3 [P0, M] Fehler beim Stoppen und Speichern behandeln
 
+**Teilfortschritt 0.5.14:** Bereits laufende Timer beenden sich nach einer
+Wartephase, wenn das Entladen begonnen hat. Dadurch startet der Timer nach
+dem Abbruch der Hintergrundaufgaben keine neuen Wiederherstellungsversuche.
+Die Prüfung des Entladeablaufs in Home Assistant steht aus.
+
 **Teilfortschritt 0.5.3, nur lokal:** Reguläres Entladen versucht trotz einzelner
 Ressourcenfehler die übrigen Aufräumschritte, erhält den ersten Fehler und behält
 die gestoppte Engine für einen echten Wiederholungsversuch. Ein fehlgeschlagener
