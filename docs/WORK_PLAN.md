@@ -1,6 +1,6 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 09.11.2026 · lokaler Entwicklungsstand 0.5.15 · letztes dokumentiertes HACS-Release 0.5.7.
+Stand: 10.11.2026 · lokaler Entwicklungsstand 0.5.16 · letztes dokumentiertes HACS-Release 0.5.7.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
@@ -396,3 +396,9 @@ Auf ausdrücklichen Nutzerauftrag develop und Tags 0.5.1/0.5.2/0.5.3 gepusht sow
 - Ein wartender Melder konnte nach Stoppbeginn einen Alarm anlegen oder nach dem Speichern noch einen Versandauftrag starten. Die Engine prüft den Stoppzustand erneut, sobald sie die Modellsperre erhält und das Speichern abgeschlossen ist.
 - Zwei Regressionen prüfen Modell, Speicher und Versand. 244 Python- und 52 Frontendtests bestanden.
 - Lokaler Checkpoint 0.5.15. Auf einer HA-Testinstanz einen Melder auslösen und die Integration während des Speicherns entladen. Beim Neuladen prüfen, dass die neue Instanz einen bereits gespeicherten Alarm weiterverarbeitet und die alte Instanz keine weiteren Versandaufträge startet.
+
+## Automatischer Lauf 10.11.2026 – B3 Rückmeldungen beim Entladen
+
+- Zwei Regressionen bestätigen den Fehler im vorherigen Stand. Die Engine konnte nach Stoppbeginn noch eine Rückmeldung annehmen oder nach dem Speichern einen Statusversand starten.
+- Die Engine prüft den Stoppzustand nach Modellsperre, Kontoprüfung und Speichern. Eine bereits gespeicherte Zusage bleibt beim Neuladen im Alarm erhalten. 246 Python- und 52 Frontendtests bestanden.
+- Lokaler Checkpoint 0.5.16. In einer HA-Testinstanz während einer laufenden Rückmeldung entladen und neu laden. Im Verlauf prüfen, ob die Zusage vor dem Entladen gespeichert wurde und ob die alte Instanz danach weitere Statusmeldungen angefordert hat.

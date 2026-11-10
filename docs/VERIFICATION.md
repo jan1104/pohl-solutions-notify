@@ -1,5 +1,11 @@
 # Prüfprotokoll
 
+## Wartende Rückmeldungen beim Entladen 0.5.16 – 10.11.2026
+
+- Beide Regressionen schlagen mit `respond` aus 0.5.15 fehl. Nach der Kontoprüfung nahm die alte Instanz die Rückmeldung trotz Stoppbeginn an. Nach Abschluss des Speicherns startete sie noch den Statusversand.
+- Die Korrektur meldet im ersten Fall, dass die Integration gerade entladen wird. Im zweiten Fall bleibt die Zusage im gespeicherten Alarm und der Statusversand entfällt.
+- 246 Python- und 52 Frontendtests bestanden. Die Ablaufprüfungen verwenden lokale Adapter. Der Entladetest in Home Assistant steht aus.
+
 ## Wartende Melderereignisse beim Entladen 0.5.15 – 09.11.2026
 
 - Zwei Regressionen vergleichen den vorherigen Stand und die Korrektur. Beginnt das Entladen während der Wartezeit auf die Modellsperre, bleiben Modell und Speicher unverändert. Beginnt es beim Speichern, bleiben der Alarm und die zugehörige Melderflanke im gespeicherten Stand. Die alte Instanz startet anschließend keinen Versandauftrag.

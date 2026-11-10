@@ -197,10 +197,14 @@ class AlarmEngine:
 
     async def respond(self, incident_id, action, user_id, source_id=None, token=None, background=False):
         async with self.lock:
+            if self.stopping:
+                raise HomeAssistantError("Die Alarm-Integration wird gerade entladen")
             i = self.model.data["incidents"].get(incident_id)
             if not i:
                 raise HomeAssistantError("Alarm nicht gefunden")
             user = await self.actor(user_id, i)
+            if self.stopping:
+                raise HomeAssistantError("Die Alarm-Integration wird gerade entladen")
             self.prune_confirmations()
             if action == 'seen':
                 if self.model.view(incident_id, user.id, user.name):
@@ -269,6 +273,8 @@ class AlarmEngine:
                     if current["status"] == "open":
                         current["next_due"] = 0
             await self.save()
+        if self.stopping:
+            return None  # The reply is stored; unload owns device restoration now.
         target_ids = [i['id']]
         if background:
             self.spawn(self.finish_response(i, action, text, target_ids))

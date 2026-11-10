@@ -178,3 +178,58 @@ class ShutdownGuards(unittest.IsolatedAsyncioTestCase):
                                       context=types.SimpleNamespace(user_id="user"))
         await self.engine.mobile_response(event)
         self.engine.respond.assert_not_awaited()
+
+    async def test_reply_waiting_for_account_does_not_change_alarm_during_stop(self):
+        incident, _ = self.engine.model.raise_alarm({
+            "type": "FIRE", "alarm_key": "fire", "source_id": "smoke",
+        })
+        before = self.engine.model.snapshot()
+        checking_account = asyncio.Event()
+        release_account = asyncio.Event()
+
+        async def actor(*_args):
+            checking_account.set()
+            await release_account.wait()
+            return types.SimpleNamespace(id="user", name="User")
+
+        self.engine.actor = actor
+        self.engine.finish_response = AsyncMock()
+        reply = asyncio.create_task(self.engine.respond(incident["id"], "coming", "user"))
+        try:
+            await asyncio.wait_for(checking_account.wait(), timeout=1)
+            await self.engine.cancel_workers()
+        finally:
+            release_account.set()
+        with self.assertRaisesRegex(runtime.HomeAssistantError, "entladen"):
+            await reply
+        self.assertEqual(self.engine.model.snapshot(), before)
+        self.engine.save.assert_not_awaited()
+        self.engine.finish_response.assert_not_called()
+
+    async def test_saved_reply_does_not_start_transport_during_stop(self):
+        incident, _ = self.engine.model.raise_alarm({
+            "type": "FIRE", "alarm_key": "fire", "source_id": "smoke",
+        })
+        self.engine.actor = AsyncMock(return_value=types.SimpleNamespace(id="user", name="User"))
+        self.engine.finish_response = AsyncMock()
+        saving_reply = asyncio.Event()
+        release_save = asyncio.Event()
+        saved = []
+
+        async def save():
+            saving_reply.set()
+            await release_save.wait()
+            saved.append(self.engine.model.snapshot())
+
+        self.engine.save.side_effect = save
+        reply = asyncio.create_task(self.engine.respond(incident["id"], "coming", "user", background=True))
+        try:
+            await asyncio.wait_for(saving_reply.wait(), timeout=1)
+            await self.engine.cancel_workers()
+        finally:
+            release_save.set()
+            await reply
+
+        self.assertEqual(saved[0]["incidents"][incident["id"]]["responses"]["user"]["answer"], "coming")
+        self.assertEqual(incident["status"], "claimed")
+        self.engine.finish_response.assert_not_called()

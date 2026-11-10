@@ -1,5 +1,9 @@
 # Änderungen
 
+## 0.5.16 – Wartende Rückmeldungen beim Entladen absichern
+
+- Wartende Rückmeldungen werden abgewiesen, wenn das Entladen vor der Verarbeitung beginnt. Eine bereits gespeicherte Rückmeldung bleibt erhalten. Die alte Instanz startet dafür keinen Statusversand mehr.
+
 ## 0.5.15 – Wartende Melderereignisse beim Entladen anhalten
 
 - Ein bereits wartendes Melderereignis prüft den Stoppzustand, sobald es die Modellsperre erhält. Ist die Auslösung schon gespeichert, übernimmt die nächste Instanz den Alarm. Die alte Instanz startet nach dem Speichern keinen neuen Versandauftrag.

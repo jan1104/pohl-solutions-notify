@@ -139,6 +139,11 @@ werden und die gewollte ereignisbezogene Rückmeldung erhalten bleibt.
 
 ### B3 [P0, M] Fehler beim Stoppen und Speichern behandeln
 
+**Teilfortschritt 0.5.16:** Rückmeldungen prüfen den Stoppzustand nach
+der Modellsperre und Kontoprüfung. Nach Stoppbeginn bleibt eine bereits
+gespeicherte Rückmeldung erhalten und der Statusversand entfällt. Zwei lokale
+Regressionen decken Kontoprüfung und Speichern ab.
+
 **Teilfortschritt 0.5.15:** Bereits eingetretene Melderereignisse prüfen nach
 der Modellsperre und nach dem Speichern erneut den Stoppzustand. Die lokale
 Regression prüft beide Zeitpunkte. Der Entladetest in Home Assistant steht aus.
