@@ -35,8 +35,11 @@ config/
 
 Nur den Integrationsordner kopieren; `.git`, Dokumentation, Tests und
 `__pycache__` gehören nicht zur Installation. Danach Home Assistant neu starten.
-Es wird kein Eintrag in `configuration.yaml` benötigt. HACS-Verteilung und
-HACS-Validierung sind in diesem Projekt noch nicht eingerichtet.
+Es wird kein Eintrag in `configuration.yaml` benötigt. Für die Aktualisierung
+über HACS das GitHub-Repository als benutzerdefinierte Integration hinzufügen
+und das veröffentlichte Release auswählen. Die Schritte stehen in [HACS.md](HACS.md).
+Nach dem Update Home Assistant neu starten und die Alarmansicht vollständig
+neu laden. Die angezeigte Version muss 0.5.17 sein.
 
 ## Ersteinrichtung
 

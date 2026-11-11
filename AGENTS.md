@@ -1,5 +1,12 @@
 # Project instructions
 
+## Current user handoff
+
+On 11 November 2026 the user authorized publishing the checked 0.5.17 checkpoint
+and then waiting. The recurring development automation is paused. After this
+release, wait for new user instructions or device-test results before further
+development. Preserve the documented open plan and all existing checkpoints.
+
 Work in `D:\depot\pohl-solutions-notify` and read `docs/WORK_PLAN.md` first.
 User preferences: communicate in plain German, make cohesive local commits,
 use subagents for suitable isolated programming tasks to save the main agent context.

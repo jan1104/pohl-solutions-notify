@@ -1,10 +1,11 @@
 # Gesicherte Versionen und Rückkehr
 
-Stand: 03.11.2026. Neuer Stand 0.5.7 veröffentlicht; kein Deployment.
-Die älteren Branches und Tags wurden am 03.11.2026 auf ausdrücklichen Nutzerauftrag zu GitHub gepusht; 0.4.0 noch nicht.
+Stand: 11.11.2026. Freigabestand 0.5.17 für die praktische Geräteprüfung.
+Frühere Angaben zum lokalen Veröffentlichungsstatus beschreiben den damaligen Stand.
 
 | Stand | Fester Git-Tag | Quellcommit | Einordnung |
 | --- | --- | --- | --- |
+| 0.5.17 | `v0.5.17` | über Tag auflösbar | Zusammengefasste Stabilisierung und Neustartprüfungen. Nutzerfreigabe zur Veröffentlichung. |
 | 0.5.16 | `v0.5.16` | über Tag auflösbar | Wartende Rückmeldungen beim Entladen abgesichert. Lokaler Checkpoint. |
 | 0.5.15 | `v0.5.15` | über Tag auflösbar | Wartende Melderereignisse beim Entladen angehalten. Lokaler Checkpoint. |
 | 0.5.14 | `v0.5.14` | über Tag auflösbar | Laufende Timer beim Entladen angehalten. Lokaler Checkpoint. |

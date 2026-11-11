@@ -1,5 +1,12 @@
 # Prüfprotokoll
 
+## Freigabeprüfung 0.5.17 – 11.11.2026
+
+- 249 Python- und 52 Frontendtests bestanden. Syntax, Metadaten und Versionsabgleich geprüft.
+- Drei zusätzliche Prüfungen rekonstruieren die Engine aus gespeicherten Modellständen. Reguläre Alarme bleiben erhalten, alte Gerätetests werden beendet, sprachbezogene Wiederherstellungsdaten bleiben bei fehlgeschlagenem Stopp erhalten und die Melderunterdrückung wird erst durch AUS aufgehoben.
+- Eine unabhängige lesende Gegenprüfung der Korrekturen seit 0.5.7 fand keine blockierende Regression. Die Tests verwenden lokale Adapter und eine Frontend-VM. Die praktische HA-/Android-/Browser-Mod-Prüfung steht aus.
+- Der Nutzer hat die Veröffentlichung und anschließendes Warten beauftragt. Der sechsstündige Entwicklungsauftrag ist pausiert.
+
 ## Wartende Rückmeldungen beim Entladen 0.5.16 – 10.11.2026
 
 - Beide Regressionen schlagen mit `respond` aus 0.5.15 fehl. Nach der Kontoprüfung nahm die alte Instanz die Rückmeldung trotz Stoppbeginn an. Nach Abschluss des Speicherns startete sie noch den Statusversand.

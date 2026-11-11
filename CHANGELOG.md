@@ -1,5 +1,10 @@
 # Änderungen
 
+## 0.5.17 – geprüfter Stand für die praktische Geräteprüfung
+
+- Fasst die Korrekturen seit 0.5.7 für Alarmfenster, Rückmeldungen, Sensorverfügbarkeit, Imports und Entladen zusammen.
+- Ergänzt Wiederherstellungsprüfungen und aktualisiert die Versions- und Installationsangaben. Die praktische HA-/Android-/Browser-Mod-Prüfung steht aus.
+
 ## 0.5.16 – Wartende Rückmeldungen beim Entladen absichern
 
 - Wartende Rückmeldungen werden abgewiesen, wenn das Entladen vor der Verarbeitung beginnt. Eine bereits gespeicherte Rückmeldung bleibt erhalten. Die alte Instanz startet dafür keinen Statusversand mehr.

@@ -1,6 +1,11 @@
 # Arbeitsplan: Pohl Solutions Alarm Notify
 
-Stand: 10.11.2026 · lokaler Entwicklungsstand 0.5.16 · letztes dokumentiertes HACS-Release 0.5.7.
+Stand: 11.11.2026 · Freigabestand 0.5.17 für die praktische Geräteprüfung.
+
+Auf Nutzerauftrag vom 11.11.2026 wird dieser geprüfte Stand veröffentlicht.
+Danach wartet die Weiterentwicklung auf die Rückmeldung des Benutzers.
+Die automatische Weiterentwicklung ist pausiert. Echte HA-/Android-/Browser-Mod-Tests
+stehen aus. Die offenen Planpunkte bleiben für die Fortsetzung dokumentiert.
 Arbeitsordner: `D:\depot\pohl-solutions-notify`. Weiterentwicklung auf **develop**.
 Feste Rücksprungpunkte: **v0.3.27** (gesicherter Ausgangsstand) und **v0.3.25** (vom Benutzer
 als gelaufen gemeldete Versionsnummer). `main` bleibt auf dem 0.3.27-Ausgangsstand.
